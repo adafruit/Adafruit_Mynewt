@@ -8,7 +8,7 @@ that can be used at run time to log various levels of system information.
 The level of information included in the binary image is set at compiled time
 via the `LOG_LEVEL` compiler flag.
 
-### Add Log Dependency
+### Add `sys/log` Dependency
 
 To enable logging support in your app add the following package dependencies to
 you `pkg.yml` file:
@@ -18,7 +18,7 @@ pkg.deps:
     - "@apache-mynewt-core/sys/log"
 ```
 
-### Set the Logging Level for the compiler
+### Set the Logging Level for the Compiler
 
 Log levels are defined in `apache-mynewt-core/sys/log/include/log/log.h`:
 
