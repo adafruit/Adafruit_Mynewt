@@ -1,4 +1,4 @@
-# Logging with `log/log.h`
+# Logging Data/Messages
 
 > Mynewt Release: 0.9.0-rc1
 
