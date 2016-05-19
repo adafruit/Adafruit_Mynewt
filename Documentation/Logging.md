@@ -69,15 +69,9 @@ struct log my_log;
 void
 init_log(void)
 {
-    ...
-    /* create a default handler for this log stream */
+    log_init();
     log_console_handler_init(&log_console_handler);
-
-    /* register my log with a name to the system */
     log_register("log", &my_log, &log_console_handler);
-
-    /* set up default log level for my package */
-    my_log.log_level = LOG_LEVEL_DEBUG;
 }
 ```
 
