@@ -28,6 +28,7 @@ Log levels are defined in `apache-mynewt-core/sys/log/include/log/log.h`:
 #define LOG_LEVEL_WARN     (0x04)
 #define LOG_LEVEL_ERROR    (0x08)
 #define LOG_LEVEL_CRITICAL (0x10)
+
 /* Up to 7 custom log levels. */
 #define LOG_LEVEL_PERUSER  (0x12)
 ```
@@ -94,8 +95,8 @@ Other variants of `LOG_*` exist based on the logging level:
 - `LOG_ERROR` - Level 0x08
 - `LOG_CRITICAL` - Level 0x10
 
-If you wish to log to one of the **user log levels** you can defined a custom
-LOG macro as follows:
+If you wish to log to one of the **user log levels** (`LOG_LEVEL_PERUSER`)
+you can define a custom LOG macro as follows:
 
 ```
 #include "log/log.h"
