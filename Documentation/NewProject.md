@@ -109,7 +109,7 @@ Point the new target to the appropriate `app`:
 $ newt target set ble_app app=apps/ble_app
 ```
 
-Set the `bsp` and `build profile` for the newt target:
+Set the `bsp` and `build profile` for the new target:
 
 ```
 $ newt target set ble_app bsp=@apache-mynewt-core/hw/bsp/nrf52dk
