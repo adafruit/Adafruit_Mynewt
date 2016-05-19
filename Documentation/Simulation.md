@@ -3,7 +3,7 @@
 You can simulate HW with Mynewt by setting the BSP to `@apache-mynewt-core/hw/bsp/native`,
  building, then running the app as detailed below.
 
-### Set the BSP to `native`
+### Set the BSP to `hw/bsp/native`
 
 ```
 $ newt target set targetname bsp=@apache-mynewt-core/hw/bsp/native
