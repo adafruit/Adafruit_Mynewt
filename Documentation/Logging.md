@@ -1,5 +1,7 @@
 # Logging with `log/log.h`
 
+> Mynewt Release: 0.9.0-rc1
+
 Mynewt includes a [logging module](http://mynewt.apache.org/os/modules/logs/logs/)
 that can be used at run time to log various levels of system information.
 
