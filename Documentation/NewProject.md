@@ -103,7 +103,13 @@ Create the new target with the following command:
 $ newt target create ble_app
 ```
 
-Set the BSP and build options for the newt target:
+Point the new target to the appropriate `app`:
+
+```
+$ newt target set ble_app app=apps/ble_app
+```
+
+Set the `bsp` and `build profile` for the newt target:
 
 ```
 $ newt target set ble_app bsp=@apache-mynewt-core/hw/bsp/nrf52dk
