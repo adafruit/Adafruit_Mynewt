@@ -109,3 +109,5 @@ extern struct log bleprph_log;
 #define BLEPRPH_LOG(lvl, ...) \
     LOG_ ## lvl(&bleprph_log, BLEPRPH_LOG_MODULE, __VA_ARGS__)
 ```
+
+... then implement `bleprph_log` and register it in your init code  as you would any other `log` instance.
