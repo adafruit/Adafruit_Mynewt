@@ -9,6 +9,12 @@ You can start GDB (GNU Debugger) with newt with the following command, with a
 JLink connected to the target device:
 
 ```
+# Optionally build and flash the image
+$ newt build target_name
+$ newt create-image target_name 0.0.0
+$ newt load target_name
+
+# Start GDB
 $ newt debug target_name
 ```
 
@@ -21,6 +27,20 @@ and
 
 ```
 (gbd) monitor go
+```
+
+You can also start a fresh run of the code via:
+
+```
+(gbd) monitor reset
+(gdb) c
+```
+
+You can check if the OS is running by executing the following code, which
+will display the OS time counter:
+
+```
+(gdb) p/d g_os_time
 ```
 
 ## Displaying Values
