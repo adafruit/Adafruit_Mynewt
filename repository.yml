@@ -1,3 +1,4 @@
 repo.name: Adafruit_Mynewt
 repo.versions:
-    "0-latest": "master"
+    "0.0.0": "master"
+    "0-latest": "0.0.0"
