@@ -1,5 +1,5 @@
-### Package: targets/blink_nordic
-pkg.name: "targets/blink_nordic"
+### Package: targets/blinky
+pkg.name: "targets/blinky"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
