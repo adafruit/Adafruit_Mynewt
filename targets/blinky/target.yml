@@ -1,4 +1,4 @@
 ### Target: targets/blink_nordic
 target.app: "apps/blinky"
-target.bsp: "@apache-mynewt-core/hw/bsp/nrf52pdk"
+target.bsp: "@apache-mynewt-core/hw/bsp/nrf52dk"
 target.build_profile: "debug"
