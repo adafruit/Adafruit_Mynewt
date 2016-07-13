@@ -1,0 +1,9 @@
+### Package: targets/bletiny
+pkg.name: "targets/bletiny"
+pkg.type: "target"
+pkg.description: 
+pkg.author: 
+pkg.homepage: 
+
+pkg.cflags:
+    - "-DSTATS_NAME_ENABLE"
