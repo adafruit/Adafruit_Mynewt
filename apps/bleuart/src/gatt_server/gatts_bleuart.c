@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     gatts_gap.h
+    @file     gatts_bleuart.c
     @author   hathach
 
     @section LICENSE
@@ -34,58 +34,14 @@
 */
 /**************************************************************************/
 
-#ifndef _GATTS_GAP_H_
-#define _GATTS_GAP_H_
+#include "gatts_bleuart.h"
 
-#ifdef __cplusplus
- extern "C" {
-#endif
+int gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
+{
+  return 0;
+}
 
-#include "common_header.h"
-#include "host/ble_hs.h"
-
-#define GATTS_GAP_SERVICE \
-  {\
-    .type = BLE_GATT_SVC_TYPE_PRIMARY,\
-    .uuid128 = BLE_UUID16(BLE_GAP_SVC_UUID16),\
-    .characteristics = (struct ble_gatt_chr_def[])\
-    {\
-      { /*** Characteristic: Device Name. */\
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_DEVICE_NAME),\
-          .access_cb = gatts_gap_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      }, {\
-          /*** Characteristic: Appearance. */\
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_APPEARANCE),\
-          .access_cb = gatts_gap_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      }, {\
-          /*** Characteristic: Peripheral Privacy Flag. */\
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PRIV_FLAG),\
-          .access_cb = gatts_gap_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      }, {\
-          /*** Characteristic: Reconnection Address. */\
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_RECONNECT_ADDR),\
-          .access_cb = gatts_gap_char_access,\
-          .flags = BLE_GATT_CHR_F_WRITE,\
-      }, {\
-          /*** Characteristic: Peripheral Preferred Connection Parameters. */\
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PREF_CONN_PARAMS),\
-          .access_cb = gatts_gap_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      }, {\
-          0, /* No more characteristics in this service. */\
-      }\
-    }\
-  }\
-
-
-int   gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
-err_t gatts_gap_init(void);
-
-#ifdef __cplusplus
- }
-#endif
-
-#endif /* _GATTS_GAP_H_ */
+err_t gatts_bleuart_init(void)
+{
+  return ERROR_NONE;
+}
