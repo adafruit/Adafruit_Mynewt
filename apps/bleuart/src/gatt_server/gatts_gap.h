@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     bluefruit_gap.h
+    @file     gatts_gap.h
     @author   hathach
 
     @section LICENSE
@@ -34,8 +34,8 @@
 */
 /**************************************************************************/
 
-#ifndef _BLUEFRUIT_GAP_H_
-#define _BLUEFRUIT_GAP_H_
+#ifndef _GATTS_GAP_H_
+#define _GATTS_GAP_H_
 
 #ifdef __cplusplus
  extern "C" {
@@ -44,9 +44,9 @@
 #include "common_header.h"
 #include "host/ble_hs.h"
 
-int bluefruit_gap_svr_chr_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
+int gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
 
-err_t bluefruit_gap_init(void);
+err_t gatts_gap_init(void);
 
 #define BLUEFRUIT_GAP_SERVER_SERVICE \
   {\
@@ -56,27 +56,27 @@ err_t bluefruit_gap_init(void);
     {\
       { /*** Characteristic: Device Name. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_DEVICE_NAME),\
-          .access_cb = bluefruit_gap_svr_chr_access,\
+          .access_cb = gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           /*** Characteristic: Appearance. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_APPEARANCE),\
-          .access_cb = bluefruit_gap_svr_chr_access,\
+          .access_cb = gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           /*** Characteristic: Peripheral Privacy Flag. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PRIV_FLAG),\
-          .access_cb = bluefruit_gap_svr_chr_access,\
+          .access_cb = gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           /*** Characteristic: Reconnection Address. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_RECONNECT_ADDR),\
-          .access_cb = bluefruit_gap_svr_chr_access,\
+          .access_cb = gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_WRITE,\
       }, {\
           /*** Characteristic: Peripheral Preferred Connection Parameters. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PREF_CONN_PARAMS),\
-          .access_cb = bluefruit_gap_svr_chr_access,\
+          .access_cb = gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           0, /* No more characteristics in this service. */\
@@ -88,4 +88,4 @@ err_t bluefruit_gap_init(void);
  }
 #endif
 
-#endif /* _BLUEFRUIT_GAP_H_ */
+#endif /* _GATTS_GAP_H_ */

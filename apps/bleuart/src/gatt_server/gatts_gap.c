@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     bluefruit_gap.c
+    @file     gatts_gap.c
     @author   hathach
 
     @section LICENSE
@@ -34,69 +34,21 @@
 */
 /**************************************************************************/
 
-#include "bluefruit_gap.h"
-
-//--------------------------------------------------------------------+
-// MACRO CONSTANT TYPEDEF
-//--------------------------------------------------------------------+
-
-//--------------------------------------------------------------------+
-// FUNCTION DECLARATION
-//--------------------------------------------------------------------+
-
+#include "gatts_gap.h"
 
 //--------------------------------------------------------------------+
 // INTERNAL OBJECT
 //--------------------------------------------------------------------+
-static uint16_t bf_gap_appearance   = SWAP16(CFG_GAP_APPEARANCE);
-static uint8_t  bf_gap_privacy_flag = CFG_GAP_PRPH_PRIVACY_FLAG;
-static uint8_t bf_gap_reconnect_addr[6];
+static uint16_t gatts_gap_appearance   = SWAP16(CFG_GAP_APPEARANCE);
+static uint8_t  gatts_gap_privacy_flag = CFG_GAP_PRPH_PRIVACY_FLAG;
+static uint8_t  gatts_gap_reconnect_addr[6];
 
 static uint8_t bf_pref_conn_params[8] = { 0 };
 
 //--------------------------------------------------------------------+
 // INTERNAL IMPLEMENTATION
 //--------------------------------------------------------------------+
-#if 0
-const struct ble_gatt_svc_def bluefruit_gap_service =
-{
-    /*** Service: GAP. */
-    .type = BLE_GATT_SVC_TYPE_PRIMARY,
-    .uuid128 = BLE_UUID16(BLE_GAP_SVC_UUID16),
-    .characteristics = (struct ble_gatt_chr_def[])
-    {
-      { /*** Characteristic: Device Name. */
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_DEVICE_NAME),
-          .access_cb = bluefruit_gap_svr_chr_access,
-          .flags = BLE_GATT_CHR_F_READ,
-      }, {
-          /*** Characteristic: Appearance. */
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_APPEARANCE),
-          .access_cb = bluefruit_gap_svr_chr_access,
-          .flags = BLE_GATT_CHR_F_READ,
-      }, {
-          /*** Characteristic: Peripheral Privacy Flag. */
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PRIV_FLAG),
-          .access_cb = bluefruit_gap_svr_chr_access,
-          .flags = BLE_GATT_CHR_F_READ,
-      }, {
-          /*** Characteristic: Reconnection Address. */
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_RECONNECT_ADDR),
-          .access_cb = bluefruit_gap_svr_chr_access,
-          .flags = BLE_GATT_CHR_F_WRITE,
-      }, {
-          /*** Characteristic: Peripheral Preferred Connection Parameters. */
-          .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PREF_CONN_PARAMS),
-          .access_cb = bluefruit_gap_svr_chr_access,
-          .flags = BLE_GATT_CHR_F_READ,
-      }, {
-          0, /* No more characteristics in this service. */
-      }
-    }
-};
-#endif
-
-int bluefruit_gap_svr_chr_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
+int gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
 {
   uint16_t uuid16;
 
@@ -113,23 +65,23 @@ int bluefruit_gap_svr_chr_access(uint16_t conn_handle, uint16_t attr_handle, uin
 
     case BLE_GAP_CHR_UUID16_APPEARANCE:
       assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-      ctxt->chr_access.data = &bf_gap_appearance;
-      ctxt->chr_access.len  = sizeof(bf_gap_appearance);
+      ctxt->chr_access.data = &gatts_gap_appearance;
+      ctxt->chr_access.len  = sizeof(gatts_gap_appearance);
     break;
 
     case BLE_GAP_CHR_UUID16_PERIPH_PRIV_FLAG:
       assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-      ctxt->chr_access.data = &bf_gap_privacy_flag;
-      ctxt->chr_access.len  = sizeof(bf_gap_privacy_flag);
+      ctxt->chr_access.data = &gatts_gap_privacy_flag;
+      ctxt->chr_access.len  = sizeof(gatts_gap_privacy_flag);
     break;
 
     case BLE_GAP_CHR_UUID16_RECONNECT_ADDR:
       assert(op == BLE_GATT_ACCESS_OP_WRITE_CHR);
-      if (ctxt->chr_access.len != sizeof(bf_gap_reconnect_addr) )
+      if (ctxt->chr_access.len != sizeof(gatts_gap_reconnect_addr) )
       {
         return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
       }
-      memcpy(bf_gap_reconnect_addr, ctxt->chr_access.data, sizeof(bf_gap_reconnect_addr));
+      memcpy(gatts_gap_reconnect_addr, ctxt->chr_access.data, sizeof(gatts_gap_reconnect_addr));
     break;
 
     case BLE_GAP_CHR_UUID16_PERIPH_PREF_CONN_PARAMS:
@@ -149,7 +101,7 @@ int bluefruit_gap_svr_chr_access(uint16_t conn_handle, uint16_t attr_handle, uin
 //--------------------------------------------------------------------+
 // PUBLIC API
 //--------------------------------------------------------------------+
-err_t bluefruit_gap_init(void)
+err_t gatts_gap_init(void)
 {
 //  return ble_gatts_register_svcs(&bluefruit_gap_service, NULL, NULL);
 
