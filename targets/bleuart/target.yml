@@ -1,4 +1,4 @@
-### Target: targets/bleprph
-target.app: "@apache-mynewt-core/apps/bleprph"
+### Target: targets/bleuart
+target.app: "apps/bleuart"
 target.bsp: "@apache-mynewt-core/hw/bsp/nrf52dk"
 target.build_profile: "debug"
