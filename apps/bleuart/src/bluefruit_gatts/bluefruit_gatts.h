@@ -41,8 +41,19 @@
  extern "C" {
 #endif
 
+#include "common_header.h"
+
 #include "bluefruit_gatts_gap.h"
 #include "bluefruit_gatts_bleuart.h"
+
+err_t bf_gatts_init(void);
+
+// TODO remove later
+#include "log/log.h"
+extern struct log bleprph_log;
+#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&bleprph_log, BLEPRPH_LOG_MODULE, __VA_ARGS__)
+
 
 #ifdef __cplusplus
  }

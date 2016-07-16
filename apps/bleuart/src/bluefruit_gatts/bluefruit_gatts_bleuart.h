@@ -67,9 +67,8 @@
           .uuid128 = (uint8_t []) BLEUART_CHAR_RX_UUID,\
           .access_cb = bf_gatts_bleuart_char_access,\
           .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_WRITE_NO_RSP,\
-      }, {\
-          0, /* No more characteristics in this service. */\
-      }\
+      }, \
+      { 0 /* No more characteristics in this service. */ }\
     }\
   }\
 
