@@ -48,7 +48,7 @@ static uint8_t bf_pref_conn_params[8] = { 0 };
 //--------------------------------------------------------------------+
 // INTERNAL IMPLEMENTATION
 //--------------------------------------------------------------------+
-int gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
+int bf_gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
 {
   uint16_t uuid16;
 
@@ -101,7 +101,7 @@ int gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op
 //--------------------------------------------------------------------+
 // PUBLIC API
 //--------------------------------------------------------------------+
-err_t gatts_gap_init(void)
+err_t bf_gatts_gap_init(void)
 {
 //  return ble_gatts_register_svcs(&bluefruit_gap_service, NULL, NULL);
 

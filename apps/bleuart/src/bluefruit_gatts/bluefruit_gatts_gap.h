@@ -44,7 +44,7 @@
 #include "common_header.h"
 #include "host/ble_hs.h"
 
-#define GATTS_GAP_SERVICE \
+#define BLUEFRUIT_GATTS_GAP_SERVICE \
   {\
     .type = BLE_GATT_SVC_TYPE_PRIMARY,\
     .uuid128 = BLE_UUID16(BLE_GAP_SVC_UUID16),\
@@ -52,27 +52,27 @@
     {\
       { /*** Characteristic: Device Name. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_DEVICE_NAME),\
-          .access_cb = gatts_gap_char_access,\
+          .access_cb = bf_gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           /*** Characteristic: Appearance. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_APPEARANCE),\
-          .access_cb = gatts_gap_char_access,\
+          .access_cb = bf_gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           /*** Characteristic: Peripheral Privacy Flag. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PRIV_FLAG),\
-          .access_cb = gatts_gap_char_access,\
+          .access_cb = bf_gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           /*** Characteristic: Reconnection Address. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_RECONNECT_ADDR),\
-          .access_cb = gatts_gap_char_access,\
+          .access_cb = bf_gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_WRITE,\
       }, {\
           /*** Characteristic: Peripheral Preferred Connection Parameters. */\
           .uuid128 = BLE_UUID16(BLE_GAP_CHR_UUID16_PERIPH_PREF_CONN_PARAMS),\
-          .access_cb = gatts_gap_char_access,\
+          .access_cb = bf_gatts_gap_char_access,\
           .flags = BLE_GATT_CHR_F_READ,\
       }, {\
           0, /* No more characteristics in this service. */\
@@ -81,8 +81,8 @@
   }\
 
 
-int   gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
-err_t gatts_gap_init(void);
+int   bf_gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
+err_t bf_gatts_gap_init(void);
 
 #ifdef __cplusplus
  }
