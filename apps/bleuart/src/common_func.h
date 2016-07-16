@@ -42,6 +42,7 @@
 #endif
 
 #define memclr(buffer, size)  memset(buffer, 0, size)
+#define varclr(_var)          memclr(&_var, sizeof(_var))
 #define __swap32(x)    __REV(x)                   ///< built-in function to swap Endian of 32-bit number
 #define __swap16(u16)  ((uint16_t) __REV16(u16))  ///< built-in function to swap Endian of 16-bit number
 
@@ -76,6 +77,35 @@
 #define U32_BYTES_LE(u32)            U32_BYTE4(u32), U32_BYTE3(u32), U32_BYTE2(u32), U32_BYTE1(u32)
 
 #define SWAP16(x)                   ((uint16_t)(((x) << 8) | (((x) & 0xff00) >> 8)))
+
+//--------------------------------------------------------------------+
+// DEBUG HELPER
+//--------------------------------------------------------------------+
+
+// Pulse LED n times with interval of ms
+#define DBG_LED_PULSE(n, interval)   do{\
+    if (interval != 0) {\
+      for(uint8_t i=0; i<n; i++){\
+        board_led_on();\
+        /*delay(interval);*/ platform_delay_us(interval);\
+        board_led_off();\
+        /*delay(interval);*/ platform_delay_us(interval);\
+      }\
+    }\
+  }while(0)
+
+#define DBG_LOCATION()        fprintf(stderr, "%s: %d: \r\n", __func__, __LINE__)
+#define PRTNT_HEAP()          if (CFG_DEBUG == 3) fprintf(stderr, "\r\n%s: %d: Heap free: %d\r\n", __func__, __LINE__, util_heap_get_free_size())
+#define PRINT_INT(x)          fprintf(stderr, #x " = %ld\r\n", (uint32_t) (x) )
+#define PRINT_HEX(x)          fprintf(stderr, #x " = %08lx\r\n", (uint32_t) (x) )
+#define PRINT_STR(x)          fprintf(stderr, #x " = %s\r\n", (char*)(x) )
+#define PRINT_BUFFER(buf, n) \
+  do {\
+    uint8_t* p8 = (uint8_t*) (buf);\
+    fprintf(stderr, #buf ": ");\
+    for(uint32_t i=0; i<(n); i++) fprintf(stderr, "%02x ", p8[i]);\
+    fprintf(stderr, "\r\n");\
+  }while(0)
 
 #if 0
 int fpeekAt(FILE *stream, uint16_t index);

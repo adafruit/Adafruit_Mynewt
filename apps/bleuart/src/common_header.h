@@ -59,9 +59,9 @@
 ////------------- General Header -------------//
 #include "compiler.h"
 #include "projectconfig.h"
-//#include "assertion.h"
-//#include "binary.h"
 #include "bluefruit_errors.h"
+#include "assertion.h"
+//#include "binary.h"
 #include "common_func.h"
 //#include "utilities.h"
 //
