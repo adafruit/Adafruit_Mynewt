@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     gatts_gap.h
+    @file     bluefruit_gatts_gap.h
     @author   hathach
 
     @section LICENSE
@@ -34,8 +34,8 @@
 */
 /**************************************************************************/
 
-#ifndef _GATTS_GAP_H_
-#define _GATTS_GAP_H_
+#ifndef _BLUEFRUIT_GATTS_GAP_H_
+#define _BLUEFRUIT_GATTS_GAP_H_
 
 #ifdef __cplusplus
  extern "C" {
@@ -88,4 +88,4 @@ err_t gatts_gap_init(void);
  }
 #endif
 
-#endif /* _GATTS_GAP_H_ */
+#endif /* _BLUEFRUIT_GATTS_GAP_H_ */

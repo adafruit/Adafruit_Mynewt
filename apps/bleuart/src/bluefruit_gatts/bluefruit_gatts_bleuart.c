@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     gatts_bleuart.c
+    @file     bluefruit_gatts_bleuart.c
     @author   hathach
 
     @section LICENSE
@@ -34,7 +34,7 @@
 */
 /**************************************************************************/
 
-#include "gatts_bleuart.h"
+#include "bluefruit_gatts_bleuart.h"
 #include "fifo/fifo.h"
 
 #include "bleprph.h"
