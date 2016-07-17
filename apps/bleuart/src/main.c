@@ -151,6 +151,14 @@ bleprph_advertise(void)
         return;
     }
 
+    struct ble_hs_adv_fields rsp_fields =
+    {
+        .name = (uint8_t*) CFG_GAP_DEVICE_NAME,
+        .name_len = strlen(CFG_GAP_DEVICE_NAME),
+        .name_is_complete = 1
+    };
+    ble_gap_adv_rsp_set_fields(&rsp_fields);
+
     /* Begin advertising. */
     rc = ble_gap_adv_start(BLE_GAP_DISC_MODE_GEN, BLE_GAP_CONN_MODE_UND,
                            NULL, 0, NULL, bleprph_gap_event, NULL);
