@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     bluefruit_gatts_bleuart.h
+    @file     bluefruit_gatts_dis.h
     @author   hathach
 
     @section LICENSE
@@ -34,8 +34,8 @@
 */
 /**************************************************************************/
 
-#ifndef _BLUEFRUIT_GATTS_BLEUART_H_
-#define _BLUEFRUIT_GATTS_BLEUART_H_
+#ifndef _BLUEFRUIT_GATTS_DIS_H_
+#define _BLUEFRUIT_GATTS_DIS_H_
 
 #ifdef __cplusplus
  extern "C" {
@@ -43,44 +43,46 @@
 
 #include "common_header.h"
 
-// UART Serivce: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-// UART RXD    : 6E400002-B5A3-F393-E0A9-E50E24DCCA9E
-// UART TXD    : 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
-
-#define BLEUART_SERVICE_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x01, 0x00, 0x40, 0x6E}
-#define BLEUART_CHAR_RX_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x02, 0x00, 0x40, 0x6E}
-#define BLEUART_CHAR_TX_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x03, 0x00, 0x40, 0x6E}
-
-#define BLUEFRUIT_GATTS_BLEUART_SERVICE \
+#define BLUEFRUIT_GATTS_DIS_SERVICE \
   {\
     .type = BLE_GATT_SVC_TYPE_PRIMARY,\
-    .uuid128 = (uint8_t [])BLEUART_SERVICE_UUID,\
+    .uuid128 = BLE_UUID16(BLE_UUID16_DEVICE_INFORMATION_SERVICE),\
     .characteristics = (struct ble_gatt_chr_def[])\
     {\
-      { /*** Characteristic: TXD */\
-          .uuid128 = (uint8_t []) BLEUART_CHAR_TX_UUID,\
-          .access_cb = bf_gatts_bleuart_char_access,\
-          .flags = BLE_GATT_CHR_F_NOTIFY,\
-      }, {\
-          /*** Characteristic: RXD. */\
-          .uuid128 = (uint8_t []) BLEUART_CHAR_RX_UUID,\
-          .access_cb = bf_gatts_bleuart_char_access,\
-          .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_WRITE_NO_RSP,\
-      }, \
+      {   /* Characteristic: */\
+          .uuid128 = BLE_UUID16(BLE_UUID16_MANUFACTURER_NAME_STRING_CHAR),\
+          .access_cb = bf_gatts_dis_char_access,\
+          .flags = BLE_GATT_CHR_F_READ,\
+      },\
+      {   /* Characteristic: */\
+          .uuid128 = BLE_UUID16(BLE_UUID16_MODEL_NUMBER_STRING_CHAR),\
+          .access_cb = bf_gatts_dis_char_access,\
+          .flags = BLE_GATT_CHR_F_READ,\
+      },\
+      {   /* Characteristic: */\
+          .uuid128 = BLE_UUID16(BLE_UUID16_SOFTWARE_REVISION_STRING_CHAR),\
+          .access_cb = bf_gatts_dis_char_access,\
+          .flags = BLE_GATT_CHR_F_READ,\
+      },\
+      {   /* Characteristic: */\
+          .uuid128 = BLE_UUID16(BLE_UUID16_FIRMWARE_REVISION_STRING_CHAR),\
+          .access_cb = bf_gatts_dis_char_access,\
+          .flags = BLE_GATT_CHR_F_READ,\
+      },\
+      {   /* Characteristic: */\
+          .uuid128 = BLE_UUID16(BLE_UUID16_HARDWARE_REVISION_STRING_CHAR),\
+          .access_cb = bf_gatts_dis_char_access,\
+          .flags = BLE_GATT_CHR_F_READ,\
+      },\
       { 0 /* No more characteristics in this service. */ }\
     }\
   }\
 
-int   bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
-err_t bf_gatts_bleuart_init(void);
-void  bf_gatts_bleuart_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt);
-
-int bf_gatts_bleuart_putc(char ch);
-int bf_gatts_bleuart_getc(void);
-
+int   bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
+err_t bf_gatts_dis_init(void);
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif /* _BLUEFRUIT_GATTS_BLEUART_H_ */
+#endif /* _BLUEFRUIT_GATTS_DIS_H_ */

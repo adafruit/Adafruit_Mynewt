@@ -43,6 +43,8 @@
 
 #define memclr(buffer, size)  memset(buffer, 0, size)
 #define varclr(_var)          memclr(&_var, sizeof(_var))
+#define arrcount(_arr)       ( sizeof(_arr) / sizeof(_arr[0]) )
+
 #define __swap32(x)    __REV(x)                   ///< built-in function to swap Endian of 32-bit number
 #define __swap16(u16)  ((uint16_t) __REV16(u16))  ///< built-in function to swap Endian of 16-bit number
 

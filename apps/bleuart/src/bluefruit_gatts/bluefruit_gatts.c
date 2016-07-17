@@ -37,6 +37,24 @@
 #include "bluefruit_gatts.h"
 
 //--------------------------------------------------------------------+
+// MACRO CONSTANT TYPEDEF
+//--------------------------------------------------------------------+
+typedef struct
+{
+  err_t (* const init) (void);
+  void  (*const register_cb) (uint8_t op, union ble_gatt_register_ctxt *ctxt);
+} bf_gatts_driver_t;
+
+bf_gatts_driver_t const bf_gatts_drivers[] =
+{
+    { .init = bf_gatts_gap_init     , .register_cb = NULL },
+    { .init = bf_gatts_dis_init     , .register_cb = NULL },
+    { .init = bf_gatts_bleuart_init , .register_cb = bf_gatts_bleuart_register_cb },
+};
+
+uint8_t const bf_drivers_count = arrcount(bf_gatts_drivers);
+
+//--------------------------------------------------------------------+
 // FUNCTION PROTOTYPES
 //--------------------------------------------------------------------+
 static void gatt_svr_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt, void *arg);
@@ -69,6 +87,9 @@ static const struct ble_gatt_svc_def gatt_svr_svcs[] =
       },
   },
 
+  // Device Information Service
+  BLUEFRUIT_GATTS_DIS_SERVICE,
+
   // BLE UART
   BLUEFRUIT_GATTS_BLEUART_SERVICE,
 
@@ -82,6 +103,11 @@ static const struct ble_gatt_svc_def gatt_svr_svcs[] =
 //--------------------------------------------------------------------+
 err_t bf_gatts_init(void)
 {
+  for(uint8_t i=0; i<bf_drivers_count; i++)
+  {
+    if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init();
+  }
+
   VERIFY_STATUS( ble_gatts_register_svcs(gatt_svr_svcs, gatt_svr_register_cb, NULL) );
 
   return ERROR_NONE;
@@ -117,7 +143,10 @@ static void gatt_svr_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt,
   char buf[40];
   (void) buf;
 
-  bf_gatts_bleuart_register_cb(op, ctxt);
+  for(uint8_t i=0; i<bf_drivers_count; i++)
+  {
+    if (bf_gatts_drivers[i].register_cb) bf_gatts_drivers[i].register_cb(op, ctxt);
+  }
 
   switch (op)
   {

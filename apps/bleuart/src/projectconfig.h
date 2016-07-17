@@ -287,7 +287,7 @@
     #define CFG_BLE_UART_RX_BUFSIZE                    (1024*1)
     #define CFG_BLE_DEVICE_INFO                        1
     #define CFG_BLE_DEVICE_INFO_MANUFACTURER           "Adafruit Industries"
-    #define CFG_BLE_DEVICE_INFO_MODEL_NUMBER           BOARD_NAME
+    #define CFG_BLE_DEVICE_INFO_MODEL_NUMBER           "PCA10040"//BOARD_NAME
 
     #define CFG_BLE_HID                                1
     #define CFG_BLE_HID_KEYBOARD                       1

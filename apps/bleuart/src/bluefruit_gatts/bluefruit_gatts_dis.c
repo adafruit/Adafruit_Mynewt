@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     bluefruit_gatts_gap.c
+    @file     bluefruit_gatts_dis.c
     @author   hathach
 
     @section LICENSE
@@ -37,71 +37,55 @@
 #include "bluefruit_gatts.h"
 
 //--------------------------------------------------------------------+
-// INTERNAL OBJECT
+// MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
-static uint16_t gatts_gap_appearance   = SWAP16(CFG_GAP_APPEARANCE);
-static uint8_t  gatts_gap_privacy_flag = CFG_GAP_PRPH_PRIVACY_FLAG;
-static uint8_t  gatts_gap_reconnect_addr[6];
-
-static uint8_t bf_pref_conn_params[8] = { 0 };
 
 //--------------------------------------------------------------------+
-// INTERNAL IMPLEMENTATION
+// INTERNAL OBJECT & FUNCTION DECLARATION
 //--------------------------------------------------------------------+
-int bf_gatts_gap_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
+
+//--------------------------------------------------------------------+
+// IMPLEMENTATION
+//--------------------------------------------------------------------+
+int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
 {
-  uint16_t uuid16;
-
-  uuid16 = ble_uuid_128_to_16(ctxt->chr_access.chr->uuid128);
-  assert(uuid16 != 0);
+  assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
+  uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr_access.chr->uuid128);
 
   switch (uuid16)
   {
-    case BLE_GAP_CHR_UUID16_DEVICE_NAME:
-      assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-      ctxt->chr_access.data = CFG_GAP_DEVICE_NAME;
-      ctxt->chr_access.len  = strlen(CFG_GAP_DEVICE_NAME);
+    case BLE_UUID16_MANUFACTURER_NAME_STRING_CHAR:
+      ctxt->chr_access.data = CFG_BLE_DEVICE_INFO_MANUFACTURER;
+      ctxt->chr_access.len  = strlen(CFG_BLE_DEVICE_INFO_MANUFACTURER);
     break;
 
-    case BLE_GAP_CHR_UUID16_APPEARANCE:
-      assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-      ctxt->chr_access.data = &gatts_gap_appearance;
-      ctxt->chr_access.len  = sizeof(gatts_gap_appearance);
+    case BLE_UUID16_MODEL_NUMBER_STRING_CHAR:
+      ctxt->chr_access.data = CFG_BLE_DEVICE_INFO_MODEL_NUMBER;
+      ctxt->chr_access.len  = strlen(CFG_BLE_DEVICE_INFO_MODEL_NUMBER);
     break;
 
-    case BLE_GAP_CHR_UUID16_PERIPH_PRIV_FLAG:
-      assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-      ctxt->chr_access.data = &gatts_gap_privacy_flag;
-      ctxt->chr_access.len  = sizeof(gatts_gap_privacy_flag);
+    case BLE_UUID16_SOFTWARE_REVISION_STRING_CHAR:
+      ctxt->chr_access.data = CFG_FIRMWARE_VERSION_STRING;
+      ctxt->chr_access.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
     break;
 
-    case BLE_GAP_CHR_UUID16_RECONNECT_ADDR:
-      assert(op == BLE_GATT_ACCESS_OP_WRITE_CHR);
-      if (ctxt->chr_access.len != sizeof(gatts_gap_reconnect_addr) )
-      {
-        return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
-      }
-      memcpy(gatts_gap_reconnect_addr, ctxt->chr_access.data, sizeof(gatts_gap_reconnect_addr));
+    case BLE_UUID16_FIRMWARE_REVISION_STRING_CHAR:
+      ctxt->chr_access.data = CFG_FIRMWARE_VERSION_STRING;
+      ctxt->chr_access.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
     break;
 
-    case BLE_GAP_CHR_UUID16_PERIPH_PREF_CONN_PARAMS:
-      assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-      ctxt->chr_access.data = &bf_pref_conn_params;
-      ctxt->chr_access.len  = sizeof(bf_pref_conn_params);
+    case BLE_UUID16_HARDWARE_REVISION_STRING_CHAR:
+      ctxt->chr_access.data = CFG_MCU_STRING;
+      ctxt->chr_access.len  = strlen(CFG_MCU_STRING);
     break;
 
-    default:
-      assert(0);
-    break;
+    default: break;
   }
 
   return 0;
 }
 
-//--------------------------------------------------------------------+
-// PUBLIC API
-//--------------------------------------------------------------------+
-err_t bf_gatts_gap_init(void)
+err_t bf_gatts_dis_init(void)
 {
   return ERROR_NONE;
 }

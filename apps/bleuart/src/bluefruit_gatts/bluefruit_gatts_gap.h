@@ -42,7 +42,6 @@
 #endif
 
 #include "common_header.h"
-#include "host/ble_hs.h"
 
 #define BLUEFRUIT_GATTS_GAP_SERVICE \
   {\

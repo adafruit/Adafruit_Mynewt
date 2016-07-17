@@ -34,7 +34,7 @@
 */
 /**************************************************************************/
 
-#include "bluefruit_gatts_bleuart.h"
+#include "bluefruit_gatts.h"
 #include "fifo/fifo.h"
 
 #define BLEUART_UUID16_RXD  0x0002

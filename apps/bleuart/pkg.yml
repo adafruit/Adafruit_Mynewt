@@ -29,8 +29,9 @@ pkg.keywords:
 
 pkg.cflags:
     - "-std=gnu99"
-    #- "-DLOG_LEVEL=1"
     - "-DLOG_LEVEL=8"
+    #- "-DLOG_LEVEL=1"
+    #- "-DENABLE_SWO"
     #- "-Wno-error=unused-variable"
     
 pkg.deps: 
