@@ -1,7 +1,8 @@
 # HW Simulation
 
-You can simulate HW with Mynewt by setting the BSP to `@apache-mynewt-core/hw/bsp/native`,
- building, then running the app as detailed below.
+You can simulate HW with Mynewt by setting the BSP to
+`@apache-mynewt-core/hw/bsp/native`, building, then running the app as detailed
+below.
 
 ### Set the BSP to `hw/bsp/native`
 
@@ -48,4 +49,4 @@ If you don't already have minicom installed, you can install it via `brew instal
 
 Enter `?` for a list of commands available.
 
-To exit minicom on OS X press `esc+x`. 
+To exit minicom on OS X press `esc+x`.

@@ -17,8 +17,8 @@ In this example we'll assume `hw/bsp/boardname`.
 
 ### Rename Files
 
-You probably want to rename files to include references to `boardname`,
-including in the `pkg.yml` file.
+You probably want to rename files to include `boardname`, including in the
+`pkg.yml` file.
 
 ### Edit the BSP Package Details
 
