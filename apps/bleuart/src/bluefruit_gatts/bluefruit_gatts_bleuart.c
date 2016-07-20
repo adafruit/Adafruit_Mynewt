@@ -51,33 +51,33 @@ struct
   uint16_t txd_attr_hdl;
 }_bleuart;
 
-uint16_t uuid_extract_128_to_16(uint8_t uuid128[])
+uint16_t uuid_extract_128_to_16(uint8_t const uuid128[])
 {
   return le16toh(uuid128 + 12);
 }
 
-bool uuid_128_equal(uint8_t uuid1[], uint8_t uuid2[])
+bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
 {
   return !memcmp(uuid1, uuid2, 16);
 }
 
-int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
+int   bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-  uint16_t uuid16 = uuid_extract_128_to_16(ctxt->chr_access.chr->uuid128);
+  uint16_t uuid16 = uuid_extract_128_to_16(ctxt->chr->uuid128);
 
   switch (uuid16)
   {
     case BLEUART_UUID16_RXD:
-      assert(op == BLE_GATT_ACCESS_OP_WRITE_CHR);
-      fifo_write_n(bleuart_ffin, ctxt->chr_access.data, ctxt->chr_access.len);
+      assert(ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR);
+      fifo_write_n(bleuart_ffin, ctxt->att->write.data, ctxt->att->write.len);
     break;
 
     case BLEUART_UUID16_TXD:
-//      assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
+//      assert(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR);
 //      int len = fifo_read_n(bleuart_ffout, bleuart_xact_buf, sizeof(bleuart_xact_buf));
 //
-//      if (len > 0) ctxt->chr_access.data = bleuart_xact_buf;
-//      ctxt->chr_access.len  = len;
+//      if (len > 0) ctxt->att.read.data = bleuart_xact_buf;
+//      ctxt->att.read.len  = len;
     break;
 
     default:
@@ -88,18 +88,26 @@ int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, uin
   return 0;
 }
 
-err_t bf_gatts_bleuart_init(void)
+err_t bf_gatts_bleuart_init(struct ble_hs_cfg *cfg)
 {
   varclr(_bleuart);
+
+  (void) cfg;
 
 //  return (err_t) eventq_init(&bleuart_evq);
 //ble_gattc_notify_custom
   return ERROR_NONE;
 }
 
-void bf_gatts_bleuart_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt)
+int bf_gatts_bleuart_register(void)
 {
-  switch (op)
+  return 0;
+}
+
+
+void bf_gatts_bleuart_register_cb(struct ble_gatt_register_ctxt *ctxt)
+{
+  switch (ctxt->op)
   {
     case BLE_GATT_REGISTER_OP_SVC:
 //      ctxt->svc_reg.svc->uuid128;
@@ -107,9 +115,9 @@ void bf_gatts_bleuart_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt
     break;
 
     case BLE_GATT_REGISTER_OP_CHR:
-      if ( uuid_128_equal(ctxt->chr_reg.chr->uuid128, (uint8_t []) BLEUART_CHAR_TX_UUID) )
+      if ( uuid_128_equal(ctxt->chr.chr_def->uuid128, (uint8_t []) BLEUART_CHAR_TX_UUID) )
       {
-        _bleuart.txd_attr_hdl = ctxt->chr_reg.val_handle;
+        _bleuart.txd_attr_hdl = ctxt->chr.val_handle;
 //      ctxt->chr_reg.def_handle;
       }
     break;

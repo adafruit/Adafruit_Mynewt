@@ -41,15 +41,14 @@
 //--------------------------------------------------------------------+
 typedef struct
 {
-  err_t (* const init) (void);
-  void  (*const register_cb) (uint8_t op, union ble_gatt_register_ctxt *ctxt);
+  err_t (* const init) (struct ble_hs_cfg *cfg);
+  int   (* const register_svc) (void);
+  void  (* const register_cb) (struct ble_gatt_register_ctxt *ctxt);
 } bf_gatts_driver_t;
 
 bf_gatts_driver_t const bf_gatts_drivers[] =
 {
-    { .init = bf_gatts_gap_init     , .register_cb = NULL },
-    { .init = bf_gatts_dis_init     , .register_cb = NULL },
-    { .init = bf_gatts_bleuart_init , .register_cb = bf_gatts_bleuart_register_cb },
+    { .init = bf_gatts_bleuart_init, .register_svc = bf_gatts_bleuart_register, .register_cb = bf_gatts_bleuart_register_cb },
 };
 
 uint8_t const bf_drivers_count = arrcount(bf_gatts_drivers);
@@ -57,9 +56,7 @@ uint8_t const bf_drivers_count = arrcount(bf_gatts_drivers);
 //--------------------------------------------------------------------+
 // FUNCTION PROTOTYPES
 //--------------------------------------------------------------------+
-static void gatt_svr_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt, void *arg);
-static int  gatt_svr_chr_access_gatt(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
-
+static void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg);
 
 //--------------------------------------------------------------------+
 // VARIABLES
@@ -68,25 +65,6 @@ uint8_t bf_gatts_service_changed[4];
 
 static const struct ble_gatt_svc_def gatt_svr_svcs[] =
 {
-   /*** Service: GAP. */
-  BLUEFRUIT_GATTS_GAP_SERVICE,
-
-  /*** Service: GATT */
-  {
-      .type = BLE_GATT_SVC_TYPE_PRIMARY,
-      .uuid128 = BLE_UUID16(BLE_GATT_SVC_UUID16),
-      .characteristics = (struct ble_gatt_chr_def[])
-      {
-        {
-          .uuid128 = BLE_UUID16(BLE_GATT_CHR_SERVICE_CHANGED_UUID16),
-          .access_cb = gatt_svr_chr_access_gatt,
-          .flags = BLE_GATT_CHR_F_INDICATE,
-        },
-        /* No more characteristics in this service. */
-        { 0 }
-      },
-  },
-
   // Device Information Service
   BLUEFRUIT_GATTS_DIS_SERVICE,
 
@@ -101,26 +79,34 @@ static const struct ble_gatt_svc_def gatt_svr_svcs[] =
 //--------------------------------------------------------------------+
 // PUBLIC API
 //--------------------------------------------------------------------+
-err_t bf_gatts_init(void)
+int bf_gatts_init(struct ble_hs_cfg *cfg)
 {
   for(uint8_t i=0; i<bf_drivers_count; i++)
   {
-    if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init();
+    if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init(cfg);
   }
 
-  VERIFY_STATUS( ble_gatts_register_svcs(gatt_svr_svcs, gatt_svr_register_cb, NULL) );
+  return ble_gatts_count_cfg(gatt_svr_svcs, cfg);
+}
 
-  return ERROR_NONE;
+int bf_gatts_register(void)
+{
+  for(uint8_t i=0; i<bf_drivers_count; i++)
+  {
+    if (bf_gatts_drivers[i].register_svc) bf_gatts_drivers[i].register_svc();
+  }
+
+  return ble_gatts_register_svcs(gatt_svr_svcs, gatt_svr_register_cb, NULL);
 }
 
 
 //--------------------------------------------------------------------+
 // INTERNAL FUNCTION
 //--------------------------------------------------------------------+
-static char * gatt_svr_uuid128_to_s(void *uuid128, char *dst)
+static char * gatt_svr_uuid128_to_s(void const *uuid128, char *dst)
 {
     uint16_t uuid16;
-    uint8_t *u8p;
+    uint8_t const *u8p;
 
     uuid16 = ble_uuid_128_to_16(uuid128);
     if (uuid16 != 0) {
@@ -138,63 +124,33 @@ static char * gatt_svr_uuid128_to_s(void *uuid128, char *dst)
     return dst;
 }
 
-static void gatt_svr_register_cb(uint8_t op, union ble_gatt_register_ctxt *ctxt, void *arg)
+static void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg)
 {
   char buf[40];
   (void) buf;
 
   for(uint8_t i=0; i<bf_drivers_count; i++)
   {
-    if (bf_gatts_drivers[i].register_cb) bf_gatts_drivers[i].register_cb(op, ctxt);
+    if (bf_gatts_drivers[i].register_cb) bf_gatts_drivers[i].register_cb(ctxt);
   }
 
-  switch (op)
+  switch (ctxt->op)
   {
     case BLE_GATT_REGISTER_OP_SVC:
-      BLEPRPH_LOG(DEBUG, "registered service %s with handle=%d\n", gatt_svr_uuid128_to_s(ctxt->svc_reg.svc->uuid128, buf), ctxt->svc_reg.handle);
+      BLEPRPH_LOG(DEBUG, "registered service %s with handle=%d\n", gatt_svr_uuid128_to_s(ctxt->svc.svc_def->uuid128, buf), ctxt->svc.handle);
     break;
 
     case BLE_GATT_REGISTER_OP_CHR:
       BLEPRPH_LOG(DEBUG, "registering characteristic %s with "
                   "def_handle=%d val_handle=%d\n",
-                  gatt_svr_uuid128_to_s(ctxt->chr_reg.chr->uuid128, buf), ctxt->chr_reg.def_handle, ctxt->chr_reg.val_handle);
+                  gatt_svr_uuid128_to_s(ctxt->chr.chr_def->uuid128, buf), ctxt->chr.def_handle, ctxt->chr.val_handle);
     break;
 
     case BLE_GATT_REGISTER_OP_DSC:
-      BLEPRPH_LOG(DEBUG, "registering descriptor %s with handle=%d "
-                  "chr_handle=%d\n",
-                  gatt_svr_uuid128_to_s(ctxt->dsc_reg.dsc->uuid128, buf), ctxt->dsc_reg.dsc_handle, ctxt->dsc_reg.chr_def_handle);
+      BLEPRPH_LOG(DEBUG, "registering descriptor %s with handle=%d ",
+                  gatt_svr_uuid128_to_s(ctxt->dsc.dsc_def->uuid128, buf), ctxt->dsc.handle);
     break;
 
     default: break;
   }
 }
-
-static int gatt_svr_chr_access_gatt(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
-{
-  uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr_access.chr->uuid128);
-
-  switch (uuid16)
-  {
-    case BLE_GATT_CHR_SERVICE_CHANGED_UUID16:
-      if (op == BLE_GATT_ACCESS_OP_WRITE_CHR)
-      {
-        if (ctxt->chr_access.len != sizeof(bf_gatts_service_changed))
-        {
-          return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
-        }
-        memcpy(bf_gatts_service_changed, ctxt->chr_access.data, sizeof(bf_gatts_service_changed));
-      }
-      else if (op == BLE_GATT_ACCESS_OP_READ_CHR)
-      {
-        ctxt->chr_access.data = (void *) &bf_gatts_service_changed;
-        ctxt->chr_access.len = sizeof(bf_gatts_service_changed);
-      }
-    break;
-
-    default: break;
-  }
-
-  return 0;
-}
-

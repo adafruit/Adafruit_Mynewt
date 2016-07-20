@@ -44,7 +44,8 @@
 #include "common_header.h"
 #include "host/ble_hs.h"
 
-err_t bf_gatts_init(void);
+int bf_gatts_init(struct ble_hs_cfg *cfg);
+int bf_gatts_register(void);
 
 // TODO remove later
 #include "log/log.h"

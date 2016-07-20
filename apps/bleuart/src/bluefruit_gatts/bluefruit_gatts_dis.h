@@ -78,7 +78,7 @@
     }\
   }\
 
-int   bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg);
+int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 err_t bf_gatts_dis_init(void);
 
 #ifdef __cplusplus

@@ -47,36 +47,36 @@
 //--------------------------------------------------------------------+
 // IMPLEMENTATION
 //--------------------------------------------------------------------+
-int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, uint8_t op, union ble_gatt_access_ctxt *ctxt, void *arg)
+int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-  assert(op == BLE_GATT_ACCESS_OP_READ_CHR);
-  uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr_access.chr->uuid128);
+  assert(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR);
+  uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
 
   switch (uuid16)
   {
     case BLE_UUID16_MANUFACTURER_NAME_STRING_CHAR:
-      ctxt->chr_access.data = CFG_BLE_DEVICE_INFO_MANUFACTURER;
-      ctxt->chr_access.len  = strlen(CFG_BLE_DEVICE_INFO_MANUFACTURER);
+      ctxt->att->read.data = CFG_BLE_DEVICE_INFO_MANUFACTURER;
+      ctxt->att->read.len  = strlen(CFG_BLE_DEVICE_INFO_MANUFACTURER);
     break;
 
     case BLE_UUID16_MODEL_NUMBER_STRING_CHAR:
-      ctxt->chr_access.data = CFG_BLE_DEVICE_INFO_MODEL_NUMBER;
-      ctxt->chr_access.len  = strlen(CFG_BLE_DEVICE_INFO_MODEL_NUMBER);
+      ctxt->att->read.data = CFG_BLE_DEVICE_INFO_MODEL_NUMBER;
+      ctxt->att->read.len  = strlen(CFG_BLE_DEVICE_INFO_MODEL_NUMBER);
     break;
 
     case BLE_UUID16_SOFTWARE_REVISION_STRING_CHAR:
-      ctxt->chr_access.data = CFG_FIRMWARE_VERSION_STRING;
-      ctxt->chr_access.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
+      ctxt->att->read.data = CFG_FIRMWARE_VERSION_STRING;
+      ctxt->att->read.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
     break;
 
     case BLE_UUID16_FIRMWARE_REVISION_STRING_CHAR:
-      ctxt->chr_access.data = CFG_FIRMWARE_VERSION_STRING;
-      ctxt->chr_access.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
+      ctxt->att->read.data = CFG_FIRMWARE_VERSION_STRING;
+      ctxt->att->read.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
     break;
 
     case BLE_UUID16_HARDWARE_REVISION_STRING_CHAR:
-      ctxt->chr_access.data = CFG_MCU_STRING;
-      ctxt->chr_access.len  = strlen(CFG_MCU_STRING);
+      ctxt->att->read.data = CFG_MCU_STRING;
+      ctxt->att->read.len  = strlen(CFG_MCU_STRING);
     break;
 
     default: break;
