@@ -26,7 +26,9 @@
 #include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
 #include "hal/hal_cputime.h"
-#include "console/console.h"
+#include <console/console.h>
+#include <shell/shell.h>
+#include <log/log.h>
 #include <imgmgr/imgmgr.h>
 
 /* BLE */
@@ -69,8 +71,10 @@ struct os_mempool bleprph_mbuf_mpool;
 /** Log data. */
 static struct log_handler bleprph_log_console_handler;
 struct log bleprph_log;
-//static uint32_t cbmem_buf[MAX_CBMEM_BUF];
-//struct cbmem cbmem;
+
+#define MAX_CBMEM_BUF 600
+static uint32_t cbmem_buf[MAX_CBMEM_BUF];
+struct cbmem cbmem;
 
 /** Priority of the nimble host and controller tasks. */
 #define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
@@ -83,15 +87,35 @@ struct os_task bleprph_task;
 bssnz_t os_stack_t bleprph_stack[BLEPRPH_STACK_SIZE];
 
 // shell task
-#define SHELL_TASK_PRIO (3)
-#define SHELL_MAX_INPUT_LEN     (256)
+#define SHELL_TASK_PRIO             (3)
+#define SHELL_MAX_INPUT_LEN         (256)
 #define SHELL_TASK_STACK_SIZE (OS_STACK_ALIGN(384))
 os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
 
 // netmgr task
-#define NEWTMGR_TASK_PRIO (4)
-#define NEWTMGR_TASK_STACK_SIZE (OS_STACK_ALIGN(1024))
+#define NEWTMGR_TASK_PRIO            (4)
+#define NEWTMGR_TASK_STACK_SIZE      (OS_STACK_ALIGN(1024))
 os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
+
+static int cmd_nus_exec(int argc, char **argv);
+static struct shell_cmd cmd_nus = {
+    .sc_cmd = "nus",
+    .sc_cmd_func = cmd_nus_exec
+};
+
+static int cmd_nus_exec(int argc, char **argv)
+{
+  // skip command name "nus"
+  for(int i=1; i<argc; i++)
+  {
+    // send space as well
+    if (i > 1) bf_gatts_bleuart_putc(' ');
+
+    bf_gatts_bleuart_puts(argv[i]);
+  }
+
+  return 0;
+}
 
 
 /** Our global device address (public) */
@@ -371,6 +395,8 @@ os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
 
 void bleuart_bridge_task_handler(void* arg)
 {
+  shell_cmd_register(&cmd_nus);
+
   while(1)
   {
     int ch;
@@ -380,15 +406,6 @@ void bleuart_bridge_task_handler(void* arg)
     {
       console_write( (char*)&ch, 1);
     }
-
-//    int newline;
-//    (void) newline;
-
-    // Get data from hwuart to bleuart
-//    if ( console_read((char*)&ch, 1, &newline) )
-//    {
-//      bf_gatts_bleuart_putc( (char) ch);
-//    }
 
     os_time_delay(1);
   }
@@ -436,14 +453,14 @@ main(void)
 
     /* Initialize the logging system. */
     log_init();
-    log_console_handler_init(&bleprph_log_console_handler);
-//    cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
-//    log_cbmem_handler_init(&log_cbmem_handler, &cbmem);
+//    log_console_handler_init(&bleprph_log_console_handler);
+    cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
+    log_cbmem_handler_init(&bleprph_log_console_handler, &cbmem);
     log_register("bleprph", &bleprph_log, &bleprph_log_console_handler);
 
-//    shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE,
-//                    SHELL_MAX_INPUT_LEN);
-//    (void) console_init(shell_console_rx_cb);
+    shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
+    console_init(shell_console_rx_cb);
+//    ASSERT_STATUS( console_init(NULL) );
 
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
@@ -489,7 +506,6 @@ main(void)
     ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
 
     /* Initialize the console (for log output). */
-    ASSERT_STATUS( console_init(NULL) );
     ASSERT_STATUS( nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE) );
     ASSERT_STATUS( imgmgr_module_init() );
 

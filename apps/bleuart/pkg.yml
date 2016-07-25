@@ -29,8 +29,7 @@ pkg.keywords:
 
 pkg.cflags:
     - "-std=gnu99"
-    - "-DLOG_LEVEL=1"
-    #- "-DLOG_LEVEL=1"
+    - "-DLOG_LEVEL=1 -DCFG_DEBUG=1"
     #- "-DENABLE_SWO"
     #- "-Wno-error=unused-variable"
     
@@ -41,9 +40,10 @@ pkg.deps:
     - "@apache-mynewt-core/net/nimble/host"
     - "@apache-mynewt-core/net/nimble/host/services/mandatory"
     - "@apache-mynewt-core/net/nimble/host/store/ram"    
-    - "@apache-mynewt-core/libs/console/full"
     - "@apache-mynewt-core/libs/baselibc"
+    - "@apache-mynewt-core/libs/console/full"
+    - "@apache-mynewt-core/libs/shell"
     - "@apache-mynewt-core/libs/newtmgr"
     - "@apache-mynewt-core/libs/newtmgr/transport/ble"
-
+    - "@apache-mynewt-core/libs/util"      
     

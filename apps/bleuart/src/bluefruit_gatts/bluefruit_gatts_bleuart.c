@@ -115,6 +115,12 @@ int bf_gatts_bleuart_putc(char ch)
   return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, &ch, 1)) ? 1 : 0;
 }
 
+int bf_gatts_bleuart_puts(char* str)
+{
+  int n = strlen(str);
+  return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, str, n)) ? n : 0;
+}
+
 int bf_gatts_bleuart_getc(void)
 {
   char ch;
