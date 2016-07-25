@@ -41,7 +41,6 @@
 #define _ASSERTION_H_
 
 #include "projectconfig.h"
-#include "bluefruit_errors.h"
 
 #ifdef __cplusplus
 extern "C"

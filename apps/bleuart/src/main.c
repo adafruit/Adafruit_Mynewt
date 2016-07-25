@@ -41,6 +41,7 @@
 #include "host/ble_l2cap.h"
 #include "host/ble_sm.h"
 #include "controller/ble_ll.h"
+
 /* Newtmgr include */
 #include "newtmgr/newtmgr.h"
 #include "nmgrble/newtmgr_ble.h"
@@ -51,7 +52,6 @@
 /* Mandatory services. */
 #include "services/mandatory/ble_svc_gap.h"
 #include "services/mandatory/ble_svc_gatt.h"
-
 #include "bluefruit_gatts/bluefruit_gatts.h"
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
@@ -69,6 +69,8 @@ struct os_mempool bleprph_mbuf_mpool;
 /** Log data. */
 static struct log_handler bleprph_log_console_handler;
 struct log bleprph_log;
+//static uint32_t cbmem_buf[MAX_CBMEM_BUF];
+//struct cbmem cbmem;
 
 /** Priority of the nimble host and controller tasks. */
 #define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
@@ -76,14 +78,21 @@ struct log bleprph_log;
 /** bleprph task settings. */
 #define BLEPRPH_TASK_PRIO           1
 #define BLEPRPH_STACK_SIZE          (OS_STACK_ALIGN(336))
-
-#define NEWTMGR_TASK_PRIO (4)
-#define NEWTMGR_TASK_STACK_SIZE (OS_STACK_ALIGN(512))
-os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
-
 struct os_eventq bleprph_evq;
 struct os_task bleprph_task;
 bssnz_t os_stack_t bleprph_stack[BLEPRPH_STACK_SIZE];
+
+// shell task
+#define SHELL_TASK_PRIO (3)
+#define SHELL_MAX_INPUT_LEN     (256)
+#define SHELL_TASK_STACK_SIZE (OS_STACK_ALIGN(384))
+os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
+
+// netmgr task
+#define NEWTMGR_TASK_PRIO (4)
+#define NEWTMGR_TASK_STACK_SIZE (OS_STACK_ALIGN(1024))
+os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
+
 
 /** Our global device address (public) */
 uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
@@ -400,15 +409,13 @@ main(void)
 {
     struct ble_hs_cfg cfg;
     uint32_t seed;
-    int rc;
     int i;
 
     /* Initialize OS */
     os_init();
 
     /* Set cputime to count at 1 usec increments */
-    rc = cputime_init(1000000);
-    assert(rc == 0);
+    ASSERT_STATUS( cputime_init(1000000) );
 
     /* Seed random number generator with least significant bytes of device
      * address.
@@ -421,22 +428,22 @@ main(void)
     srand(seed);
 
     /* Initialize msys mbufs. */
-    rc = os_mempool_init(&bleprph_mbuf_mpool, MBUF_NUM_MBUFS,
-                         MBUF_MEMBLOCK_SIZE, bleprph_mbuf_mpool_data,
-                         "bleprph_mbuf_data");
-    assert(rc == 0);
-
-    rc = os_mbuf_pool_init(&bleprph_mbuf_pool, &bleprph_mbuf_mpool,
-                           MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS);
-    assert(rc == 0);
-
-    rc = os_msys_register(&bleprph_mbuf_pool);
-    assert(rc == 0);
+    ASSERT_STATUS( os_mempool_init(&bleprph_mbuf_mpool, MBUF_NUM_MBUFS,
+                                   MBUF_MEMBLOCK_SIZE, bleprph_mbuf_mpool_data,
+                                   "bleprph_mbuf_data") );
+    ASSERT_STATUS( os_mbuf_pool_init(&bleprph_mbuf_pool, &bleprph_mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
+    ASSERT_STATUS( os_msys_register(&bleprph_mbuf_pool) );
 
     /* Initialize the logging system. */
     log_init();
     log_console_handler_init(&bleprph_log_console_handler);
+//    cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
+//    log_cbmem_handler_init(&log_cbmem_handler, &cbmem);
     log_register("bleprph", &bleprph_log, &bleprph_log_console_handler);
+
+//    shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE,
+//                    SHELL_MAX_INPUT_LEN);
+//    (void) console_init(shell_console_rx_cb);
 
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
@@ -449,8 +456,7 @@ main(void)
                  bleprph_stack, BLEPRPH_STACK_SIZE);
 
     /* Initialize the BLE LL */
-    rc = ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE);
-    assert(rc == 0);
+    ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
 
     /* Initialize the BLE host. */
     cfg = ble_hs_cfg_dflt;
@@ -470,51 +476,33 @@ main(void)
     cfg.max_services = 0;
     cfg.max_client_configs = 0;
 
-    rc = ble_svc_gap_init(&cfg);
-    assert(rc == 0);
-
-    rc = ble_svc_gatt_init(&cfg);
-    assert(rc == 0);
-
-    rc = bf_gatts_init(&cfg);
-    assert(rc == 0);
+    ASSERT_STATUS( ble_svc_gap_init(&cfg) );
+    ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
 
     /* Nmgr ble GATT server initialization */
-    rc = nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg);
-    assert(rc == 0);
+    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
+    ASSERT_STATUS( bf_gatts_init(&cfg) );
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);
 
-    rc = ble_hs_init(&bleprph_evq, &cfg);
-    assert(rc == 0);
+    ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
 
     /* Initialize the console (for log output). */
-    rc = console_init(NULL);
-    assert(rc == 0);
+    ASSERT_STATUS( console_init(NULL) );
+    ASSERT_STATUS( nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE) );
+    ASSERT_STATUS( imgmgr_module_init() );
 
-    nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
-    imgmgr_module_init();
-
-    /* Register GATT attributes (services, characteristics, and
-     * descriptors).
-     */
-    rc = ble_svc_gap_register();
-    assert(rc == 0);
-
-    rc = ble_svc_gatt_register();
-    assert(rc == 0);
-
-    rc = bf_gatts_register();
-    assert(rc == 0);
+    /* Register GATT attributes (services, characteristics, and descriptors). */
+    ASSERT_STATUS( ble_svc_gap_register() );
+    ASSERT_STATUS( ble_svc_gatt_register() );
 
     /* Set the default device name. */
-    rc = ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME);
-    assert(rc == 0);
+    ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
 
     /* Nmgr ble GATT server initialization */
-    rc = nmgr_ble_svc_register();
-    assert(rc == 0);
+    ASSERT_STATUS( nmgr_ble_svc_register() );
+    ASSERT_STATUS( bf_gatts_register() );
 
     /* Start the OS */
     os_start();
