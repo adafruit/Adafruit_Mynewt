@@ -49,7 +49,6 @@ typedef struct
 {
   int  (* const init        ) (struct ble_hs_cfg *cfg);
   int  (* const register_svc) (void);
-//  void (* const register_cb ) (struct ble_gatt_register_ctxt *ctxt);
 } bf_gatts_driver_t;
 
 int bf_gatts_init(struct ble_hs_cfg *cfg);

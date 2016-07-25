@@ -51,24 +51,28 @@ int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, str
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
-static const struct ble_gatt_svc_def _gatts_bleuart =
+static const struct ble_gatt_svc_def _service_bleuart[] =
 {
-    .type            = BLE_GATT_SVC_TYPE_PRIMARY,
-    .uuid128         = (uint8_t [])BLEUART_SERVICE_UUID,
-    .characteristics = (struct ble_gatt_chr_def[])
-    {
-      { /*** Characteristic: TXD */
-        .uuid128   = (uint8_t []) BLEUART_CHAR_TX_UUID,
-        .access_cb = bf_gatts_bleuart_char_access,
-        .flags     = BLE_GATT_CHR_F_NOTIFY,
-      },
-      { /*** Characteristic: RXD. */
-        .uuid128   = (uint8_t []) BLEUART_CHAR_RX_UUID,
-        .access_cb = bf_gatts_bleuart_char_access,
-        .flags     = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_WRITE_NO_RSP,
-      },
-      { 0 } /* No more characteristics in this service. */
-    }
+  {
+      .type            = BLE_GATT_SVC_TYPE_PRIMARY,
+      .uuid128         = (uint8_t [])BLEUART_SERVICE_UUID,
+      .characteristics = (struct ble_gatt_chr_def[])
+      {
+        { /*** Characteristic: TXD */
+          .uuid128   = (uint8_t []) BLEUART_CHAR_TX_UUID,
+          .access_cb = bf_gatts_bleuart_char_access,
+          .flags     = BLE_GATT_CHR_F_NOTIFY,
+        },
+        { /*** Characteristic: RXD. */
+          .uuid128   = (uint8_t []) BLEUART_CHAR_RX_UUID,
+          .access_cb = bf_gatts_bleuart_char_access,
+          .flags     = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_WRITE_NO_RSP,
+        },
+        { 0 } /* No more characteristics in this service. */
+      }
+  }
+
+  , { 0 } /* No more services. */
 };
 
 static struct
@@ -96,14 +100,14 @@ int bf_gatts_bleuart_init(struct ble_hs_cfg *cfg)
 {
   varclr(_bleuart);
 
-  return ble_gatts_count_cfg(&_gatts_bleuart, cfg);;
+  return ble_gatts_count_cfg(_service_bleuart, cfg);;
 }
 
 int bf_gatts_bleuart_register(void)
 {
-  int result = ble_gatts_register_svcs(&_gatts_bleuart, NULL, NULL);
+  int result = ble_gatts_register_svcs(_service_bleuart, NULL, NULL);
 
-  ble_gatts_find_chr(_gatts_bleuart.uuid128, _gatts_bleuart.characteristics[0].uuid128, NULL, &_bleuart.txd_attr_hdl);
+  ble_gatts_find_chr(_service_bleuart[0].uuid128, _service_bleuart[0].characteristics[0].uuid128, NULL, &_bleuart.txd_attr_hdl);
 
   return result;
 }
