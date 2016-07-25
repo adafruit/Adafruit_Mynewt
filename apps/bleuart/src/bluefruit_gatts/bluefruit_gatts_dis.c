@@ -98,7 +98,7 @@ int bf_gatts_dis_register(void)
 
 int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-  assert(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR);
+  VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR, 0);
   uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
 
   switch (uuid16)

@@ -99,23 +99,20 @@ bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
 int bf_gatts_bleuart_init(struct ble_hs_cfg *cfg)
 {
   varclr(_bleuart);
-
   return ble_gatts_count_cfg(_service_bleuart, cfg);;
 }
 
 int bf_gatts_bleuart_register(void)
 {
-  int result = ble_gatts_register_svcs(_service_bleuart, NULL, NULL);
-
-  ble_gatts_find_chr(_service_bleuart[0].uuid128, _service_bleuart[0].characteristics[0].uuid128, NULL, &_bleuart.txd_attr_hdl);
-
-  return result;
+  ASSERT_STATUS( ble_gatts_register_svcs(_service_bleuart, NULL, NULL) );
+  ASSERT_STATUS( ble_gatts_find_chr(_service_bleuart[0].uuid128, _service_bleuart[0].characteristics[0].uuid128, NULL, &_bleuart.txd_attr_hdl) );
+  return 0;
 }
 
 extern uint16_t conn_handle;
 int bf_gatts_bleuart_putc(char ch)
 {
-  return (ERROR_NONE == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, &ch, 1)) ? 1 : 0;
+  return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, &ch, 1)) ? 1 : 0;
 }
 
 int bf_gatts_bleuart_getc(void)
@@ -134,7 +131,7 @@ int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, str
   switch (uuid16)
   {
     case BLEUART_UUID16_RXD:
-      assert(ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR);
+      VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR, 0);
       fifo_write_n(bleuart_ffin, ctxt->att->write.data, ctxt->att->write.len);
     break;
 

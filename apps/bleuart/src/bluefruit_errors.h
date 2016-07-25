@@ -46,10 +46,10 @@
     @brief  Standard error codes used throughout this codebase
 */
 /******************************************************************************/
-typedef enum
-{
-  ERROR_NONE = 0
-} err_t;
+//typedef enum
+//{
+//  ERROR_NONE = 0
+//} err_t;
 
 
 #ifdef __cplusplus
