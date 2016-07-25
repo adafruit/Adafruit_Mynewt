@@ -41,45 +41,10 @@
  extern "C" {
 #endif
 
-#include "common_header.h"
+#include "bluefruit_gatts.h"
 
-#define BLUEFRUIT_GATTS_DIS_SERVICE \
-  {\
-    .type = BLE_GATT_SVC_TYPE_PRIMARY,\
-    .uuid128 = BLE_UUID16(BLE_UUID16_DEVICE_INFORMATION_SERVICE),\
-    .characteristics = (struct ble_gatt_chr_def[])\
-    {\
-      {   /* Characteristic: */\
-          .uuid128 = BLE_UUID16(BLE_UUID16_MANUFACTURER_NAME_STRING_CHAR),\
-          .access_cb = bf_gatts_dis_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      },\
-      {   /* Characteristic: */\
-          .uuid128 = BLE_UUID16(BLE_UUID16_MODEL_NUMBER_STRING_CHAR),\
-          .access_cb = bf_gatts_dis_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      },\
-      {   /* Characteristic: */\
-          .uuid128 = BLE_UUID16(BLE_UUID16_SOFTWARE_REVISION_STRING_CHAR),\
-          .access_cb = bf_gatts_dis_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      },\
-      {   /* Characteristic: */\
-          .uuid128 = BLE_UUID16(BLE_UUID16_FIRMWARE_REVISION_STRING_CHAR),\
-          .access_cb = bf_gatts_dis_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      },\
-      {   /* Characteristic: */\
-          .uuid128 = BLE_UUID16(BLE_UUID16_HARDWARE_REVISION_STRING_CHAR),\
-          .access_cb = bf_gatts_dis_char_access,\
-          .flags = BLE_GATT_CHR_F_READ,\
-      },\
-      { 0 /* No more characteristics in this service. */ }\
-    }\
-  }\
-
-int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
-err_t bf_gatts_dis_init(void);
+int bf_gatts_dis_init(struct ble_hs_cfg *cfg);
+int bf_gatts_dis_register(void);
 
 #ifdef __cplusplus
  }

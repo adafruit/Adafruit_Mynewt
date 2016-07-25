@@ -241,7 +241,7 @@
                                               that timeframe.
     -----------------------------------------------------------------------*/
     #define CFG_GAP_APPEARANCE                         0
-    #define CFG_GAP_DEVICE_NAME                       "Adafruit Bluefruit LE"
+    #define CFG_GAP_DEVICE_NAME                       "AdafruitBluefruit"
     #define CFG_GAP_PRPH_PRIVACY_FLAG                  0
 
 

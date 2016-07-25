@@ -51,30 +51,8 @@
 #define BLEUART_CHAR_RX_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x02, 0x00, 0x40, 0x6E}
 #define BLEUART_CHAR_TX_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x03, 0x00, 0x40, 0x6E}
 
-#define BLUEFRUIT_GATTS_BLEUART_SERVICE \
-  {\
-    .type = BLE_GATT_SVC_TYPE_PRIMARY,\
-    .uuid128 = (uint8_t [])BLEUART_SERVICE_UUID,\
-    .characteristics = (struct ble_gatt_chr_def[])\
-    {\
-      { /*** Characteristic: TXD */\
-          .uuid128 = (uint8_t []) BLEUART_CHAR_TX_UUID,\
-          .access_cb = bf_gatts_bleuart_char_access,\
-          .flags = BLE_GATT_CHR_F_NOTIFY,\
-      }, {\
-          /*** Characteristic: RXD. */\
-          .uuid128 = (uint8_t []) BLEUART_CHAR_RX_UUID,\
-          .access_cb = bf_gatts_bleuart_char_access,\
-          .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_WRITE_NO_RSP,\
-      }, \
-      { 0 /* No more characteristics in this service. */ }\
-    }\
-  }\
-
-int   bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
-err_t bf_gatts_bleuart_init(struct ble_hs_cfg *cfg);
+int   bf_gatts_bleuart_init(struct ble_hs_cfg *cfg);
 int   bf_gatts_bleuart_register(void);
-void  bf_gatts_bleuart_register_cb(struct ble_gatt_register_ctxt *ctxt);
 
 int bf_gatts_bleuart_putc(char ch);
 int bf_gatts_bleuart_getc(void);

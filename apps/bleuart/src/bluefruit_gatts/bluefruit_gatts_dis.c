@@ -39,14 +39,59 @@
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
+int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
 //--------------------------------------------------------------------+
 // INTERNAL OBJECT & FUNCTION DECLARATION
 //--------------------------------------------------------------------+
+static const struct ble_gatt_svc_def _gatts_dis =
+{
+  .type            = BLE_GATT_SVC_TYPE_PRIMARY,
+  .uuid128         = BLE_UUID16(BLE_UUID16_DEVICE_INFORMATION_SERVICE),
+  .characteristics = (struct ble_gatt_chr_def[])
+  {
+    {   /* Characteristic: */
+        .uuid128   = BLE_UUID16(BLE_UUID16_MANUFACTURER_NAME_STRING_CHAR),
+        .access_cb = bf_gatts_dis_char_access,
+        .flags     = BLE_GATT_CHR_F_READ,
+    },
+    {   /* Characteristic: */
+        .uuid128   = BLE_UUID16(BLE_UUID16_MODEL_NUMBER_STRING_CHAR),
+        .access_cb = bf_gatts_dis_char_access,
+        .flags     = BLE_GATT_CHR_F_READ,
+    },
+    {   /* Characteristic: */
+        .uuid128   = BLE_UUID16(BLE_UUID16_SOFTWARE_REVISION_STRING_CHAR),
+        .access_cb = bf_gatts_dis_char_access,
+        .flags     = BLE_GATT_CHR_F_READ,
+    },
+    {   /* Characteristic: */
+        .uuid128   = BLE_UUID16(BLE_UUID16_FIRMWARE_REVISION_STRING_CHAR),
+        .access_cb = bf_gatts_dis_char_access,
+        .flags     = BLE_GATT_CHR_F_READ,
+    },
+    {   /* Characteristic: */
+        .uuid128   = BLE_UUID16(BLE_UUID16_HARDWARE_REVISION_STRING_CHAR),
+        .access_cb = bf_gatts_dis_char_access,
+        .flags     = BLE_GATT_CHR_F_READ,
+    },
+    { 0 } /* No more characteristics in this service. */
+  }
+};
 
 //--------------------------------------------------------------------+
 // IMPLEMENTATION
 //--------------------------------------------------------------------+
+int bf_gatts_dis_init(struct ble_hs_cfg *cfg)
+{
+  return ble_gatts_count_cfg(&_gatts_dis, cfg);
+}
+
+int bf_gatts_dis_register(void)
+{
+  return ble_gatts_register_svcs(&_gatts_dis, NULL, NULL);
+}
+
 int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
   assert(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR);
@@ -83,9 +128,4 @@ int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct 
   }
 
   return 0;
-}
-
-err_t bf_gatts_dis_init(void)
-{
-  return ERROR_NONE;
 }

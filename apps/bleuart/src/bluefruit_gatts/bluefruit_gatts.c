@@ -39,16 +39,10 @@
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
-typedef struct
-{
-  err_t (* const init) (struct ble_hs_cfg *cfg);
-  int   (* const register_svc) (void);
-  void  (* const register_cb) (struct ble_gatt_register_ctxt *ctxt);
-} bf_gatts_driver_t;
-
 bf_gatts_driver_t const bf_gatts_drivers[] =
 {
-    { .init = bf_gatts_bleuart_init, .register_svc = bf_gatts_bleuart_register, .register_cb = bf_gatts_bleuart_register_cb },
+    { .init = bf_gatts_dis_init    , .register_svc = bf_gatts_dis_register     },
+    { .init = bf_gatts_bleuart_init, .register_svc = bf_gatts_bleuart_register },
 };
 
 uint8_t const bf_drivers_count = arrcount(bf_gatts_drivers);
@@ -56,25 +50,11 @@ uint8_t const bf_drivers_count = arrcount(bf_gatts_drivers);
 //--------------------------------------------------------------------+
 // FUNCTION PROTOTYPES
 //--------------------------------------------------------------------+
-static void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg);
+//static void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg);
 
 //--------------------------------------------------------------------+
 // VARIABLES
 //--------------------------------------------------------------------+
-uint8_t bf_gatts_service_changed[4];
-
-static const struct ble_gatt_svc_def gatt_svr_svcs[] =
-{
-  // Device Information Service
-  BLUEFRUIT_GATTS_DIS_SERVICE,
-
-  // BLE UART
-  BLUEFRUIT_GATTS_BLEUART_SERVICE,
-
-  /* No more services. */
-  { 0 },
-};
-
 
 //--------------------------------------------------------------------+
 // PUBLIC API
@@ -86,7 +66,7 @@ int bf_gatts_init(struct ble_hs_cfg *cfg)
     if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init(cfg);
   }
 
-  return ble_gatts_count_cfg(gatt_svr_svcs, cfg);
+  return 0;
 }
 
 int bf_gatts_register(void)
@@ -96,13 +76,14 @@ int bf_gatts_register(void)
     if (bf_gatts_drivers[i].register_svc) bf_gatts_drivers[i].register_svc();
   }
 
-  return ble_gatts_register_svcs(gatt_svr_svcs, gatt_svr_register_cb, NULL);
+  return 0;
 }
 
 
 //--------------------------------------------------------------------+
 // INTERNAL FUNCTION
 //--------------------------------------------------------------------+
+#if 0
 static char * gatt_svr_uuid128_to_s(void const *uuid128, char *dst)
 {
     uint16_t uuid16;
@@ -154,3 +135,4 @@ static void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg)
     default: break;
   }
 }
+#endif
