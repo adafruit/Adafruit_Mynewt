@@ -54,6 +54,18 @@ typedef struct
 int bf_gatts_init(struct ble_hs_cfg *cfg);
 int bf_gatts_register(void);
 
+
+static inline uint16_t uuid_extract_128_to_16(uint8_t const uuid128[])
+{
+  return le16toh(uuid128 + 12);
+}
+
+static inline bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
+{
+  return !memcmp(uuid1, uuid2, 16);
+}
+
+
 // TODO remove later
 #include "log/log.h"
 extern struct log bleprph_log;

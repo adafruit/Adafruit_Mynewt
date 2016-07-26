@@ -458,9 +458,13 @@ main(void)
     log_cbmem_handler_init(&bleprph_log_console_handler, &cbmem);
     log_register("bleprph", &bleprph_log, &bleprph_log_console_handler);
 
+
+    //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
-    console_init(shell_console_rx_cb);
-//    ASSERT_STATUS( console_init(NULL) );
+    console_init(shell_console_rx_cb); // console_init(NULL);
+
+    nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
+    imgmgr_module_init();
 
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
@@ -468,9 +472,8 @@ main(void)
     os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
                  BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
 
-    os_task_init(&bleprph_task, "bleprph", bleprph_task_handler,
-                 NULL, BLEPRPH_TASK_PRIO, OS_WAIT_FOREVER,
-                 bleprph_stack, BLEPRPH_STACK_SIZE);
+    os_task_init(&bleprph_task, "bleprph", bleprph_task_handler, NULL,
+                 BLEPRPH_TASK_PRIO, OS_WAIT_FOREVER, bleprph_stack, BLEPRPH_STACK_SIZE);
 
     /* Initialize the BLE LL */
     ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
@@ -493,10 +496,9 @@ main(void)
     cfg.max_services = 0;
     cfg.max_client_configs = 0;
 
+    /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-
-    /* Nmgr ble GATT server initialization */
     ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
     ASSERT_STATUS( bf_gatts_init(&cfg) );
 
@@ -505,18 +507,12 @@ main(void)
 
     ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
 
-    /* Initialize the console (for log output). */
-    ASSERT_STATUS( nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE) );
-    ASSERT_STATUS( imgmgr_module_init() );
+    /* Set the default device name. */
+    ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
 
     /* Register GATT attributes (services, characteristics, and descriptors). */
     ASSERT_STATUS( ble_svc_gap_register() );
     ASSERT_STATUS( ble_svc_gatt_register() );
-
-    /* Set the default device name. */
-    ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
-
-    /* Nmgr ble GATT server initialization */
     ASSERT_STATUS( nmgr_ble_svc_register() );
     ASSERT_STATUS( bf_gatts_register() );
 

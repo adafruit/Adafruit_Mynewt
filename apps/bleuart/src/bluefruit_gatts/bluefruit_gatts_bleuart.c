@@ -43,8 +43,7 @@
 #define BLEUART_UUID16_RXD  0x0002
 #define BLEUART_UUID16_TXD  0x0003
 
-FIFO_DEF(bleuart_ffout, CFG_BLE_UART_TX_BUFSIZE, char, false);
-FIFO_DEF(bleuart_ffin , CFG_BLE_UART_RX_BUFSIZE, char, true );
+FIFO_DEF(bleuart_ffin , CFG_BLE_UART_BUFSIZE, char, true );
 
 int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
@@ -80,18 +79,6 @@ static struct
   uint16_t txd_attr_hdl;
 }_bleuart;
 
-//--------------------------------------------------------------------+
-//
-//--------------------------------------------------------------------+
-uint16_t uuid_extract_128_to_16(uint8_t const uuid128[])
-{
-  return le16toh(uuid128 + 12);
-}
-
-bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
-{
-  return !memcmp(uuid1, uuid2, 16);
-}
 
 //--------------------------------------------------------------------+
 //
@@ -105,7 +92,10 @@ int bf_gatts_bleuart_init(struct ble_hs_cfg *cfg)
 int bf_gatts_bleuart_register(void)
 {
   ASSERT_STATUS( ble_gatts_register_svcs(_service_bleuart, NULL, NULL) );
+
+  // Find TXD attribute handle
   ASSERT_STATUS( ble_gatts_find_chr(_service_bleuart[0].uuid128, _service_bleuart[0].characteristics[0].uuid128, NULL, &_bleuart.txd_attr_hdl) );
+
   return 0;
 }
 
@@ -156,34 +146,4 @@ int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, str
 
   return 0;
 }
-
-//--------------------------------------------------------------------+
-//
-//--------------------------------------------------------------------+
-//void bf_gatts_bleuart_register_cb(struct ble_gatt_register_ctxt *ctxt)
-//{
-//  switch (ctxt->op)
-//  {
-//    case BLE_GATT_REGISTER_OP_SVC:
-////      ctxt->svc_reg.svc->uuid128;
-////      ctxt->svc_reg.handle;
-//    break;
-//
-//    case BLE_GATT_REGISTER_OP_CHR:
-//      if ( uuid_128_equal(ctxt->chr.chr_def->uuid128, (uint8_t []) BLEUART_CHAR_TX_UUID) )
-//      {
-//        _bleuart.txd_attr_hdl = ctxt->chr.val_handle;
-////      ctxt->chr_reg.def_handle;
-//      }
-//    break;
-//
-//    case BLE_GATT_REGISTER_OP_DSC:
-////      ctxt->dsc_reg.dsc->uuid128;
-////      ctxt->dsc_reg.dsc_handle;
-////      ctxt->dsc_reg.chr_def_handle;
-//    break;
-//
-//    default: break;
-//  }
-//}
 

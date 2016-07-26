@@ -283,8 +283,7 @@
     #define CFG_BLE_SENSOR                             0
     #define CFG_BLE_DFU                                1
     #define CFG_BLE_UART                               1
-    #define CFG_BLE_UART_TX_BUFSIZE                    (1024*1)
-    #define CFG_BLE_UART_RX_BUFSIZE                    (1024*1)
+    #define CFG_BLE_UART_BUFSIZE                       (1024*1)
     #define CFG_BLE_DEVICE_INFO                        1
     #define CFG_BLE_DEVICE_INFO_MANUFACTURER           "Adafruit Industries"
     #define CFG_BLE_DEVICE_INFO_MODEL_NUMBER           "PCA10040"//BOARD_NAME
