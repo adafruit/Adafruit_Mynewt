@@ -1,5 +1,5 @@
 ### Target: targets/blinky_friend16
-#target.app: "apps/blinky"
-target.app: "@apache-mynewt-core/apps/blinky"
+#target.app: "@apache-mynewt-core/apps/blinky"
+target.app: "apps/blinky"
 target.bsp: "hw/bsp/blefriend16"
 target.build_profile: "optimized"
