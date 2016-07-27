@@ -1,0 +1,4 @@
+### Target: targets/boot_friend32
+target.app: "@apache-mynewt-core/apps/boot"
+target.bsp: "hw/bsp/blefriend32"
+target.build_profile: "optimized"

@@ -1,5 +1,5 @@
-### Package: targets/blinky_friend16
-pkg.name: "targets/blinky_friend16"
+### Package: targets/boot_friend32
+pkg.name: "targets/boot_friend32"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
