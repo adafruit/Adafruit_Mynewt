@@ -17,9 +17,9 @@
 # under the License.
 #
 
-pkg.name: hw/bsp/nrf51dk-16kbram
+pkg.name: hw/bsp/uartfriend16
 pkg.type: bsp
-pkg.description: BSP definition for a Nordic nRF51 DK SoC with 16kB RAM.
+pkg.description: BSP definition for Bluefruit a Nordic nRF51 DK SoC with 16kB RAM.
 pkg.author: "Apache Mynewt <dev@mynewt.incubator.apache.org>"
 pkg.homepage: "http://mynewt.apache.org/"
 pkg.keywords:
@@ -28,10 +28,10 @@ pkg.keywords:
 
 pkg.arch: cortex_m0
 pkg.compiler: compiler/arm-none-eabi-m0
-pkg.linkerscript: "nrf51dk-16kbram.ld"
-pkg.linkerscript.bootloader.OVERWRITE: "boot-nrf51dk-16kbram.ld"
-pkg.downloadscript: nrf51dk-16kbram_download.sh
-pkg.debugscript: nrf51dk-16kbram_debug.sh
+pkg.linkerscript: "uartfriend16.ld"
+pkg.linkerscript.bootloader.OVERWRITE: "boot-uartfriend16.ld"
+pkg.downloadscript: uartfriend16_download.sh
+pkg.debugscript: uartfriend16_debug.sh
 pkg.cflags: -DNRF51
 pkg.deps:
     - hw/mcu/nordic/nrf51xxx
