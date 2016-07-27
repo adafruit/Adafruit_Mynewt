@@ -1,4 +1,0 @@
-### Target: targets/nrf51_boot
-target.app: "@apache-mynewt-core/apps/boot"
-target.bsp: "hw/bsp/blefriend16"
-target.build_profile: "optimized"

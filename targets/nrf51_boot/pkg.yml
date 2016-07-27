@@ -1,9 +1,0 @@
-### Package: targets/nrf51_boot
-pkg.name: "targets/nrf51_boot"
-pkg.type: "target"
-pkg.description: 
-pkg.author: 
-pkg.homepage: 
-
-pkg.cflags:
-    - "-DLOG_LEVEL=255"
