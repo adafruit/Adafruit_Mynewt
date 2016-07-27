@@ -32,7 +32,8 @@ pkg.linkerscript: "blefriend32.ld"
 pkg.linkerscript.bootloader.OVERWRITE: "boot-blefriend32.ld"
 pkg.downloadscript: blefriend32_download.sh
 pkg.debugscript: blefriend32_debug.sh
-pkg.cflags: -DNRF51 -DBSP_HAS_32768_XTAL
+# Removed cflag: -DBSP_HAS_32768_XTAL
+pkg.cflags: -DNRF51
 pkg.deps:
     - "@apache-mynewt-core/hw/mcu/nordic/nrf51xxx"
     - "@apache-mynewt-core/libs/baselibc"
