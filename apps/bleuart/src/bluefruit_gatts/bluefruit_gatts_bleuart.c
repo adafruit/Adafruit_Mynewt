@@ -36,6 +36,7 @@
 
 #include "bluefruit_gatts.h"
 #include "fifo/fifo.h"
+#include <shell/shell.h>
 
 //--------------------------------------------------------------------+
 //
@@ -46,6 +47,11 @@
 FIFO_DEF(bleuart_ffin , CFG_BLE_UART_BUFSIZE, char, true );
 
 int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
+static int cmd_nus_exec(int argc, char **argv);
+static struct shell_cmd cmd_nus = {
+    .sc_cmd = "nus",
+    .sc_cmd_func = cmd_nus_exec
+};
 
 //--------------------------------------------------------------------+
 //
@@ -117,6 +123,11 @@ int bf_gatts_bleuart_getc(void)
   return fifo_read(bleuart_ffin, &ch) ? ch : EOF;
 }
 
+int bf_gatts_bleuart_shell_register(void)
+{
+  return shell_cmd_register(&cmd_nus);
+}
+
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
@@ -142,6 +153,20 @@ int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, str
     default:
       assert(0);
     break;
+  }
+
+  return 0;
+}
+
+static int cmd_nus_exec(int argc, char **argv)
+{
+  // skip command name "nus"
+  for(int i=1; i<argc; i++)
+  {
+    // send space as well
+    if (i > 1) bf_gatts_bleuart_putc(' ');
+
+    bf_gatts_bleuart_puts(argv[i]);
   }
 
   return 0;

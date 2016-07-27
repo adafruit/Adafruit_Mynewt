@@ -94,7 +94,7 @@ extern "C"
     ASSERT_DEFINE(err_t _status = (err_t)(sts),\
                   0 == _status, _status, "error = %d", _status)
 
-#define ASSERT_STATUS_RET_VOID(sts) \
+#define ASSERT_STATUS_RETVOID(sts) \
     ASSERT_DEFINE(err_t _status = (err_t)(sts),\
                   0 == _status, VOID_RETURN, "error = %d", _status)
 

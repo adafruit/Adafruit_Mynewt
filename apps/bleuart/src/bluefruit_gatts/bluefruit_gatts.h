@@ -70,7 +70,7 @@ static inline bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
 #include "log/log.h"
 extern struct log bleprph_log;
 #define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
-#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&bleprph_log, BLEPRPH_LOG_MODULE, __VA_ARGS__)
+#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
 
 #include "bluefruit_gatts_dis.h"
 #include "bluefruit_gatts_bleuart.h"

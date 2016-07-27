@@ -58,24 +58,30 @@
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
 
+//--------------------------------------------------------------------+
+//
+//--------------------------------------------------------------------+
 /** Mbuf settings. */
 #define MBUF_NUM_MBUFS      (12)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
 #define MBUF_MEMPOOL_SIZE   OS_MEMPOOL_SIZE(MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE)
 
-static os_membuf_t bleprph_mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
-struct os_mbuf_pool bleprph_mbuf_pool;
-struct os_mempool bleprph_mbuf_mpool;
+static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
+struct os_mbuf_pool mbuf_pool;
+struct os_mempool   mbuf_mpool;
 
 /** Log data. */
-static struct log_handler bleprph_log_console_handler;
-struct log bleprph_log;
+static struct log_handler log_hdlr;
+struct log mylog;
 
 #define MAX_CBMEM_BUF 600
 static uint32_t cbmem_buf[MAX_CBMEM_BUF];
 struct cbmem cbmem;
 
+//--------------------------------------------------------------------+
+// TASK Settings
+//--------------------------------------------------------------------+
 /** Priority of the nimble host and controller tasks. */
 #define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
 
@@ -97,27 +103,23 @@ os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
 #define NEWTMGR_TASK_STACK_SIZE      (OS_STACK_ALIGN(1024))
 os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
 
-static int cmd_nus_exec(int argc, char **argv);
-static struct shell_cmd cmd_nus = {
-    .sc_cmd = "nus",
-    .sc_cmd_func = cmd_nus_exec
-};
+/* Task Blinky */
+#define BLINKY_TASK_PRIO     10
+#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
 
-static int cmd_nus_exec(int argc, char **argv)
-{
-  // skip command name "nus"
-  for(int i=1; i<argc; i++)
-  {
-    // send space as well
-    if (i > 1) bf_gatts_bleuart_putc(' ');
+struct os_task blinky_task;
+os_stack_t blinky_stack[BLINKY_STACK_SIZE];
 
-    bf_gatts_bleuart_puts(argv[i]);
-  }
+// BLEUART to UART bridge task
+#define BLEUART_BRIDGE_TASK_PRIO     5
+#define BLEUART_BRIDGE_STACK_SIZE    OS_STACK_ALIGN(256)
 
-  return 0;
-}
+struct os_task bleuart_bridge_task;
+os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
 
-
+//--------------------------------------------------------------------+
+//
+//--------------------------------------------------------------------+
 /** Our global device address (public) */
 uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 
@@ -125,19 +127,6 @@ uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
 static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
-
-/**
- * Utility function to log an array of bytes.
- */
-void
-print_bytes(const uint8_t *bytes, int len)
-{
-    int i;
-
-    for (i = 0; i < len; i++) {
-        BLEPRPH_LOG(INFO, "%s0x%02x", i != 0 ? ":" : "", bytes[i]);
-    }
-}
 
 void
 print_addr(const void *addr)
@@ -155,18 +144,18 @@ print_addr(const void *addr)
 static void
 bleprph_print_conn_desc(struct ble_gap_conn_desc *desc)
 {
-    BLEPRPH_LOG(INFO, "handle=%d our_ota_addr_type=%d our_ota_addr=",
-                desc->conn_handle, desc->our_ota_addr_type);
+    BLEPRPH_LOG(INFO, "handle=%d our_ota_addr_type=%d our_ota_addr=", desc->conn_handle, desc->our_ota_addr_type);
     print_addr(desc->our_ota_addr);
-    BLEPRPH_LOG(INFO, " our_id_addr_type=%d our_id_addr=",
-                desc->our_id_addr_type);
+
+    BLEPRPH_LOG(INFO, " our_id_addr_type=%d our_id_addr=", desc->our_id_addr_type);
     print_addr(desc->our_id_addr);
-    BLEPRPH_LOG(INFO, " peer_ota_addr_type=%d peer_ota_addr=",
-                desc->peer_ota_addr_type);
+
+    BLEPRPH_LOG(INFO, " peer_ota_addr_type=%d peer_ota_addr=", desc->peer_ota_addr_type);
     print_addr(desc->peer_ota_addr);
-    BLEPRPH_LOG(INFO, " peer_id_addr_type=%d peer_id_addr=",
-                desc->peer_id_addr_type);
+
+    BLEPRPH_LOG(INFO, " peer_id_addr_type=%d peer_id_addr=", desc->peer_id_addr_type);
     print_addr(desc->peer_id_addr);
+
     BLEPRPH_LOG(INFO, " conn_itvl=%d conn_latency=%d supervision_timeout=%d "
                 "encrypted=%d authenticated=%d bonded=%d\n",
                 desc->conn_itvl, desc->conn_latency,
@@ -184,11 +173,6 @@ bleprph_print_conn_desc(struct ble_gap_conn_desc *desc)
 static void
 bleprph_advertise(void)
 {
-    struct ble_gap_adv_params adv_params;
-    struct ble_hs_adv_fields fields;
-    const char *name;
-    int rc;
-
     /**
      *  Set the advertisement data included in our advertisements:
      *     o Flags (indicates advertisement type and other general info).
@@ -196,7 +180,7 @@ bleprph_advertise(void)
      *     o Device name.
      *     o 16-bit service UUIDs (alert notifications).
      */
-
+    struct ble_hs_adv_fields fields;
     memset(&fields, 0, sizeof fields);
 
     /* Indicate that the flags field should be included; specify a value of 0
@@ -216,13 +200,10 @@ bleprph_advertise(void)
     fields.num_uuids128 = 1;
     fields.uuids128_is_complete = 0;
 
-    rc = ble_gap_adv_set_fields(&fields);
-    if (rc != 0) {
-        BLEPRPH_LOG(ERROR, "error setting advertisement data; rc=%d\n", rc);
-        return;
-    }
+    ASSERT_STATUS_RETVOID( ble_gap_adv_set_fields(&fields) );
 
-    name = ble_svc_gap_device_name();
+    //------------- Scan response data -------------//
+    const char *name = ble_svc_gap_device_name();
     struct ble_hs_adv_fields rsp_fields =
     {
         .name = (uint8_t*) name,
@@ -232,15 +213,12 @@ bleprph_advertise(void)
     ble_gap_adv_rsp_set_fields(&rsp_fields);
 
     /* Begin advertising. */
+    struct ble_gap_adv_params adv_params;
     memset(&adv_params, 0, sizeof adv_params);
     adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
     adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
-    rc = ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER,
-                           &adv_params, bleprph_gap_event, NULL);
-    if (rc != 0) {
-        BLEPRPH_LOG(ERROR, "error enabling advertisement; rc=%d\n", rc);
-        return;
-    }
+    ASSERT_STATUS_RETVOID( ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER,
+                           &adv_params, bleprph_gap_event, NULL) );
 }
 
 /**
@@ -262,7 +240,6 @@ static int
 bleprph_gap_event(struct ble_gap_event *event, void *arg)
 {
     struct ble_gap_conn_desc desc;
-    int rc;
 
     switch (event->type) {
     case BLE_GAP_EVENT_CONNECT:
@@ -271,10 +248,9 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
                        event->connect.status == 0 ? "established" : "failed",
                        event->connect.status);
         if (event->connect.status == 0) {
-            rc = ble_gap_conn_find(event->connect.conn_handle, &desc);
-            assert(rc == 0);
-            bleprph_print_conn_desc(&desc);
-            conn_handle = event->connect.conn_handle;
+          ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
+          bleprph_print_conn_desc(&desc);
+          conn_handle = event->connect.conn_handle;
         }
         BLEPRPH_LOG(INFO, "\n");
 
@@ -297,8 +273,7 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
         /* The central has updated the connection parameters. */
         BLEPRPH_LOG(INFO, "connection updated; status=%d ",
                     event->conn_update.status);
-        rc = ble_gap_conn_find(event->connect.conn_handle, &desc);
-        assert(rc == 0);
+        ASSERT_STATUS ( ble_gap_conn_find(event->connect.conn_handle, &desc) );
         bleprph_print_conn_desc(&desc);
         BLEPRPH_LOG(INFO, "\n");
         return 0;
@@ -307,8 +282,7 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
         /* Encryption has been enabled or disabled for this connection. */
         BLEPRPH_LOG(INFO, "encryption change event; status=%d ",
                     event->enc_change.status);
-        rc = ble_gap_conn_find(event->connect.conn_handle, &desc);
-        assert(rc == 0);
+        ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
         bleprph_print_conn_desc(&desc);
         BLEPRPH_LOG(INFO, "\n");
         return 0;
@@ -367,13 +341,6 @@ bleprph_task_handler(void *unused)
     }
 }
 
-/* Task Blinky */
-#define BLINKY_TASK_PRIO     10
-#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
-
-struct os_task blinky_task;
-os_stack_t blinky_stack[BLINKY_STACK_SIZE];
-
 void blinky_task_handler(void* arg)
 {
   hal_gpio_init_out(LED_BLINK_PIN, 1);
@@ -386,16 +353,10 @@ void blinky_task_handler(void* arg)
   }
 }
 
-// BLEUART to UART bridge task
-#define BLEUART_BRIDGE_TASK_PRIO     5
-#define BLEUART_BRIDGE_STACK_SIZE    OS_STACK_ALIGN(256)
-
-struct os_task bleuart_bridge_task;
-os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
-
 void bleuart_bridge_task_handler(void* arg)
 {
-  shell_cmd_register(&cmd_nus);
+  // register 'nus' command to send BLEUART
+  bf_gatts_bleuart_shell_register();
 
   while(1)
   {
@@ -421,8 +382,7 @@ void bleuart_bridge_task_handler(void* arg)
  *
  * @return int NOTE: this function should never return!
  */
-int
-main(void)
+int main(void)
 {
     struct ble_hs_cfg cfg;
     uint32_t seed;
@@ -445,18 +405,18 @@ main(void)
     srand(seed);
 
     /* Initialize msys mbufs. */
-    ASSERT_STATUS( os_mempool_init(&bleprph_mbuf_mpool, MBUF_NUM_MBUFS,
-                                   MBUF_MEMBLOCK_SIZE, bleprph_mbuf_mpool_data,
+    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS,
+                                   MBUF_MEMBLOCK_SIZE, mbuf_mpool_data,
                                    "bleprph_mbuf_data") );
-    ASSERT_STATUS( os_mbuf_pool_init(&bleprph_mbuf_pool, &bleprph_mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
-    ASSERT_STATUS( os_msys_register(&bleprph_mbuf_pool) );
+    ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
+    ASSERT_STATUS( os_msys_register(&mbuf_pool) );
 
     /* Initialize the logging system. */
     log_init();
-//    log_console_handler_init(&bleprph_log_console_handler);
+//    log_console_handler_init(&log_hdlr);
     cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
-    log_cbmem_handler_init(&bleprph_log_console_handler, &cbmem);
-    log_register("bleprph", &bleprph_log, &bleprph_log_console_handler);
+    log_cbmem_handler_init(&log_hdlr, &cbmem);
+    log_register("bleprph", &mylog, &log_hdlr);
 
 
     //------------- Task Init -------------//
