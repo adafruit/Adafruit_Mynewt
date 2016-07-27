@@ -1,4 +1,0 @@
-### Target: targets/bletiny
-target.app: "@apache-mynewt-core/apps/bletiny"
-target.bsp: "@apache-mynewt-core/hw/bsp/nrf52dk"
-target.build_profile: "debug"
