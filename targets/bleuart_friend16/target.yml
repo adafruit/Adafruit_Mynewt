@@ -1,0 +1,4 @@
+### Target: targets/bleuart_friend16
+target.app: "apps/bleuart"
+target.bsp: "hw/bsp/blefriend16"
+target.build_profile: "debug"

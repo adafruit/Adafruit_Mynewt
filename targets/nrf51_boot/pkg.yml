@@ -5,3 +5,5 @@ pkg.description:
 pkg.author: 
 pkg.homepage: 
 
+pkg.cflags:
+    - "-DLOG_LEVEL=255"
