@@ -22,17 +22,20 @@ export PATH=$PATH:/usr/local/Cellar/gcc/5.3.0/bin
 
 ### Newt and Go Paths
 
-To make `newt` available from the command line the following was added to
-`~/.bash_profile` (you'll need to restart terminal to take effect):
+To make `newt` available from the command line the following values must
+also be define on your system:
 
 ```
 # Add Go and Newt Paths (Mynewt, etc.)
 export GOPATH=$HOME/prog/go
 export PATH="$GOPATH"/bin/:$PATH
 ```
-**UPDATE:** To simplify the path issues,
+
+### Creating a `paths.bash` Script
+
+To simplify the path issues described above, simply add a
 [paths.bash](https://github.com/adafruit/Adafruit_Mynewt/blob/master/paths.bash)
-was added to the root folder of the project, with the following contents:
+file to the root folder of the project, with the following content:
 
 ```
 #!/bin/bash
@@ -46,7 +49,7 @@ export PATH=$PATH:/Users/ktown/prog/gcc-arm-none-eabi-4_9-2015q1/bin
 export PATH=$PATH:/usr/local/Cellar/gcc/5.3.0/bin
 ```
 
-To enable the required paths, simply run `source paths.bash` before you start
+To enable the required paths, just run `source paths.bash` before you start
 using `newt` and other tools.
 
 ### Error: /usr/local/bin/gcc-5: No such file or directory
