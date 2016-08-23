@@ -31,6 +31,16 @@
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
 
+#ifdef NFFS_PRESENT
+#include <hal/flash_map.h>
+#include <fs/fs.h>
+#include <nffs/nffs.h>
+//#include <config/config.h>
+//#include <config/config_file.h>
+#else
+#error "Need NFFS or FCB for config storage"
+#endif
+
 /* BLE */
 #include "nimble/ble.h"
 #include "host/host_hci.h"
@@ -57,6 +67,22 @@
 #include "bluefruit_gatts/bluefruit_gatts.h"
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
+
+//--------------------------------------------------------------------+
+//
+//--------------------------------------------------------------------+
+/** NFFS config memory settings. */
+#ifdef NFFS_PRESENT
+/* configuration file */
+#define MY_CONFIG_DIR  "/cfg"
+#define MY_CONFIG_FILE "/cfg/run"
+#define MY_CONFIG_MAX_LINES  32
+
+//static struct conf_file my_conf = {
+//    .cf_name = MY_CONFIG_FILE,
+//    .cf_maxlines = MY_CONFIG_MAX_LINES
+//};
+#endif
 
 //--------------------------------------------------------------------+
 //
@@ -127,6 +153,40 @@ uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
 static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
+
+#ifdef NFFS_PRESENT
+static void setup_for_nffs(void)
+{
+    /* NFFS_AREA_MAX is defined in the BSP-specified bsp.h header file. */
+    struct nffs_area_desc descs[NFFS_AREA_MAX + 1];
+    int cnt;
+    int rc;
+
+    /* Initialize nffs's internal state. */
+    rc = nffs_init();
+    assert(rc == 0);
+
+    /* Convert the set of flash blocks we intend to use for nffs into an array
+     * of nffs area descriptors.
+     */
+    cnt = NFFS_AREA_MAX;
+    rc = flash_area_to_nffs_desc(FLASH_AREA_NFFS, &cnt, descs);
+    assert(rc == 0);
+
+    /* Attempt to restore an existing nffs file system from flash. */
+    if (nffs_detect(descs) == FS_ECORRUPT) {
+        /* No valid nffs instance detected; format a new one. */
+        rc = nffs_format(descs);
+        assert(rc == 0);
+    }
+
+    fs_mkdir(MY_CONFIG_DIR);
+//    rc = conf_file_src(&my_conf);
+//    assert(rc == 0);
+//    rc = conf_file_dst(&my_conf);
+//    assert(rc == 0);
+}
+#endif
 
 void
 print_addr(const void *addr)
@@ -388,6 +448,12 @@ int main(void)
     uint32_t seed;
     int i;
 
+    /* Initialise config memoery */
+    #ifdef NFFS_PRESENT
+//    conf_init();
+//    assert(conf_register(&test_conf_handler) == 0);
+    #endif
+
     /* Initialize OS */
     os_init();
 
@@ -416,6 +482,11 @@ int main(void)
     cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
     log_cbmem_handler_init(&log_hdlr, &cbmem); // log_console_handler_init(&log_hdlr);
     log_register("bleprph", &mylog, &log_hdlr);
+
+    /* Initialize NFSS config memory */
+    #ifdef NFFS_PRESENT
+    setup_for_nffs();
+    #endif
 
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
