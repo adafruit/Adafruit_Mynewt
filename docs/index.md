@@ -6,8 +6,9 @@ title: Adafruit Mynewt Documentation
 # Adafruit Feather Mynewt Technical Documentation
 
 This documentation contains various notes on getting started with
-[Mynewt](http://mynewt.apache.org/). It isn't exhaustive and the
-[official documentation](http://mynewt.apache.org/latest/os/introduction/)
+[Mynewt](http://mynewt.apache.org/).
+
+It isn't exhaustive and the [official documentation](http://mynewt.apache.org/latest/os/introduction/)
 should be consulted at the same time.
 
 ## Table of Contents
