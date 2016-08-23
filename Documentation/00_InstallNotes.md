@@ -1,5 +1,10 @@
 # Mynewt
 
+This guide fills in some details from the
+[Installing Native Mynewt Tools](http://mynewt.apache.org/os/get_started/native_tools/)
+page in the official documentation. Consult that page to get starting setting
+Mynewt and related tools up on your system.
+
 ## Installation Notes
 
 The following problems were encountered when trying to setup Mynewt on an OS X
@@ -25,6 +30,24 @@ To make `newt` available from the command line the following was added to
 export GOPATH=$HOME/prog/go
 export PATH="$GOPATH"/bin/:$PATH
 ```
+**UPDATE:** To simplify the path issues,
+[paths.bash](https://github.com/adafruit/Adafruit_Mynewt/blob/master/paths.bash)
+was added to the root folder of the project, with the following contents:
+
+```
+#!/bin/bash
+
+# Add Go and Newt Paths (Mynewt, etc.)
+export GOPATH=$HOME/prog/go
+export PATH="$GOPATH"/bin/:$PATH
+
+# GCC paths
+export PATH=$PATH:/Users/ktown/prog/gcc-arm-none-eabi-4_9-2015q1/bin
+export PATH=$PATH:/usr/local/Cellar/gcc/5.3.0/bin
+```
+
+To enable the required paths, simply run `source paths.bash` before you start
+using `newt` and other tools.
 
 ### Error: /usr/local/bin/gcc-5: No such file or directory
 
