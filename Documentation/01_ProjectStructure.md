@@ -1,6 +1,8 @@
 # Mynewt Project Structure
 
-Mynewt projects are made up of the following components:
+Mynewt projects are made up of the following components.
+
+This information is provided purely as a reference, no action is required here.
 
 ## Project(s)
 
