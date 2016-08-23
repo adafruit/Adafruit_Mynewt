@@ -1,4 +1,4 @@
-# Mynewt
+# Mynewt Installation Notes
 
 This guide fills in some details from the
 [Installing Native Mynewt Tools](http://mynewt.apache.org/os/get_started/native_tools/)
