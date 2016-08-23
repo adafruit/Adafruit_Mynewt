@@ -52,6 +52,13 @@ export PATH=$PATH:/usr/local/Cellar/gcc/5.3.0/bin
 To enable the required paths, just run `source paths.bash` before you start
 using `newt` and other tools.
 
+If everything is setup correctly, you should be able to run `newt version`:
+
+```
+$ newt version
+Apache Newt (incubating) version: 0.9.0
+```
+
 ### Error: /usr/local/bin/gcc-5: No such file or directory
 
 Following the guide here: http://mynewt.apache.org/os/get_started/native_tools/
