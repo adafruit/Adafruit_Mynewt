@@ -2,7 +2,7 @@
 
 This guide fills in some details from the
 [Installing Native Mynewt Tools](http://mynewt.apache.org/os/get_started/native_tools/)
-page in the official documentation. Consult that page to get starting setting
+page in the official documentation. Consult that page to get started setting
 Mynewt and related tools up on your system.
 
 ## Installation Notes
