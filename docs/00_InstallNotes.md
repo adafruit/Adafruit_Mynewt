@@ -5,25 +5,25 @@ This guide fills in some details from the
 page in the official documentation. Consult that page to get started setting
 Mynewt and related tools up on your system.
 
-## Installation Notes
+## Path Requirements
 
-The following problems were encountered when trying to setup Mynewt on an OS X
-10.11 based system. A local installation was used rather than the Docker VM
-option.
+The following paths and values must be available from the command-line:
 
-### GCC Paths
+#### GCC Paths
 
-The following paths must be available from the command-line:
+An ARM cross compiler is required for firmware builds, as well as a native
+GCC compiler when building tools, unit tests and simulating hardware. Both
+of these toolchains can be added to the `$PATH` variable as shown below:
 
 ```
 export PATH=$PATH:/Users/ktown/prog/gcc-arm-none-eabi-4_9-2015q1/bin
 export PATH=$PATH:/usr/local/Cellar/gcc/5.3.0/bin
 ```
 
-### Newt and Go Paths
+#### Newt and Go Paths
 
-To make `newt` available from the command line the following values must
-also be define on your system:
+To build the native tools, and make `newt` available from the command
+line the following values must also be define on your system:
 
 ```
 # Add Go and Newt Paths (Mynewt, etc.)
@@ -58,6 +58,12 @@ If everything is setup correctly, you should be able to run `newt version`:
 $ newt version
 Apache Newt (incubating) version: 0.9.0
 ```
+
+## Installation Issues
+
+The following problems were encountered when trying to setup Mynewt on an OS X
+10.11 based system. A local installation was used rather than the Docker VM
+option:
 
 ### Error: /usr/local/bin/gcc-5: No such file or directory
 
