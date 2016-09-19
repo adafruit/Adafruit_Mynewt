@@ -43,7 +43,6 @@
 
 /* BLE */
 #include "nimble/ble.h"
-#include "host/host_hci.h"
 #include "host/ble_hs.h"
 #include "host/ble_hs_adv.h"
 #include "host/ble_uuid.h"
@@ -62,8 +61,8 @@
 #include "store/ram/ble_store_ram.h"
 
 /* Mandatory services. */
-#include "services/mandatory/ble_svc_gap.h"
-#include "services/mandatory/ble_svc_gatt.h"
+#include "services/gap/ble_svc_gap.h"
+#include "services/gatt/ble_svc_gatt.h"
 #include "bluefruit_gatts/bluefruit_gatts.h"
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
@@ -98,7 +97,6 @@ struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
 /** Log data. */
-static struct log_handler log_hdlr;
 struct log mylog;
 
 #define MAX_CBMEM_BUF 600
@@ -480,8 +478,7 @@ int main(void)
     /* Initialize the logging system. */
     log_init();
     cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
-    log_cbmem_handler_init(&log_hdlr, &cbmem); // log_console_handler_init(&log_hdlr);
-    log_register("bleprph", &mylog, &log_hdlr);
+    log_register("bleprph", &mylog, &log_cbmem_handler, &cbmem);
 
     /* Initialize NFSS config memory */
     #ifdef NFFS_PRESENT
@@ -529,7 +526,9 @@ int main(void)
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
     ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
+
     ASSERT_STATUS( bf_gatts_init(&cfg) );
+    ASSERT_STATUS( bf_gatts_register() ); // move to init()
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);
@@ -538,12 +537,6 @@ int main(void)
 
     /* Set the default device name. */
     ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
-
-    /* Register GATT attributes (services, characteristics, and descriptors). */
-    ASSERT_STATUS( ble_svc_gap_register() );
-    ASSERT_STATUS( ble_svc_gatt_register() );
-    ASSERT_STATUS( nmgr_ble_svc_register() );
-    ASSERT_STATUS( bf_gatts_register() );
 
     /* Start the OS */
     os_start();

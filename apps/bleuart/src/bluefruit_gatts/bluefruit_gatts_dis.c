@@ -100,32 +100,28 @@ int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct 
 {
   VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR, 0);
   uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
+  struct os_mbuf *om = ctxt->om;
 
   switch (uuid16)
   {
     case BLE_UUID16_MANUFACTURER_NAME_STRING_CHAR:
-      ctxt->att->read.data = CFG_BLE_DEVICE_INFO_MANUFACTURER;
-      ctxt->att->read.len  = strlen(CFG_BLE_DEVICE_INFO_MANUFACTURER);
+      os_mbuf_append(om, CFG_BLE_DEVICE_INFO_MANUFACTURER, strlen(CFG_BLE_DEVICE_INFO_MANUFACTURER));
     break;
 
     case BLE_UUID16_MODEL_NUMBER_STRING_CHAR:
-      ctxt->att->read.data = CFG_BLE_DEVICE_INFO_MODEL_NUMBER;
-      ctxt->att->read.len  = strlen(CFG_BLE_DEVICE_INFO_MODEL_NUMBER);
+      os_mbuf_append(om, CFG_BLE_DEVICE_INFO_MODEL_NUMBER, strlen(CFG_BLE_DEVICE_INFO_MODEL_NUMBER));
     break;
 
     case BLE_UUID16_SOFTWARE_REVISION_STRING_CHAR:
-      ctxt->att->read.data = CFG_FIRMWARE_VERSION_STRING;
-      ctxt->att->read.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
+      os_mbuf_append(om, CFG_FIRMWARE_VERSION_STRING, strlen(CFG_FIRMWARE_VERSION_STRING));
     break;
 
     case BLE_UUID16_FIRMWARE_REVISION_STRING_CHAR:
-      ctxt->att->read.data = CFG_FIRMWARE_VERSION_STRING;
-      ctxt->att->read.len  = strlen(CFG_FIRMWARE_VERSION_STRING);
+      os_mbuf_append(om, CFG_FIRMWARE_VERSION_STRING, strlen(CFG_FIRMWARE_VERSION_STRING));
     break;
 
     case BLE_UUID16_HARDWARE_REVISION_STRING_CHAR:
-      ctxt->att->read.data = CFG_MCU_STRING;
-      ctxt->att->read.len  = strlen(CFG_MCU_STRING);
+      os_mbuf_append(om, CFG_MCU_STRING, strlen(CFG_MCU_STRING));
     break;
 
     default: break;

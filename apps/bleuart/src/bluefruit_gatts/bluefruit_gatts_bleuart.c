@@ -45,6 +45,8 @@
 #define BLEUART_UUID16_TXD  0x0003
 
 FIFO_DEF(bleuart_ffin , CFG_BLE_UART_BUFSIZE, char, true );
+//FIFO_DEF(bleuart_ffout, CFG_BLE_UART_BUFSIZE, char, true );
+//uint8_t bleuart_xact_buf[64];
 
 int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 static int cmd_nus_exec(int argc, char **argv);
@@ -108,13 +110,15 @@ int bf_gatts_bleuart_register(void)
 extern uint16_t conn_handle;
 int bf_gatts_bleuart_putc(char ch)
 {
-  return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, &ch, 1)) ? 1 : 0;
+  struct os_mbuf *om = ble_hs_mbuf_from_flat(&ch, 1);
+  return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, om)) ? 1 : 0;
 }
 
 int bf_gatts_bleuart_puts(char* str)
 {
   int n = strlen(str);
-  return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, str, n)) ? n : 0;
+  struct os_mbuf *om = ble_hs_mbuf_from_flat(str, n);
+  return (0 == ble_gattc_notify_custom(conn_handle, _bleuart.txd_attr_hdl, om)) ? n : 0;
 }
 
 int bf_gatts_bleuart_getc(void)
@@ -134,12 +138,13 @@ int bf_gatts_bleuart_shell_register(void)
 int bf_gatts_bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
   uint16_t uuid16 = uuid_extract_128_to_16(ctxt->chr->uuid128);
+  struct os_mbuf *om = ctxt->om;
 
   switch (uuid16)
   {
     case BLEUART_UUID16_RXD:
       VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR, 0);
-      fifo_write_n(bleuart_ffin, ctxt->att->write.data, ctxt->att->write.len);
+      fifo_write_n(bleuart_ffin, om->om_data, om->om_len);
     break;
 
     case BLEUART_UUID16_TXD:
