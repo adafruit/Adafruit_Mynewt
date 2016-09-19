@@ -86,3 +86,28 @@ brew install gcc
 ```
 
 And make sure that gcc-5 is available in the $PATH variable (see above).
+
+### gcc-5 vs. gcc-6
+
+If you wish to use GCC 6.x (which brew will now select by default) you will
+need to edit the following file:
+
+<mynewt-src-directory>/repos/apache-mynewt-core/compiler/sim/compiler.yml
+
+Change the `gcc-5` references to `gcc-6`, for example:
+
+```
+# OS X.
+compiler.path.cc.DARWIN.OVERWRITE: "/usr/local/bin/gcc-5"
+compiler.path.as.DARWIN.OVERWRITE: "/usr/local/bin/gcc-5 -x assembler-with-cpp"
+compiler.path.objdump.DARWIN.OVERWRITE: "gobjdump"
+compiler.path.objsize.DARWIN.OVERWRITE: "objsize"
+compiler.path.objcopy.DARWIN.OVERWRITE: "gobjcopy"
+```
+
+Should be changed to ...
+
+```
+compiler.path.cc.DARWIN.OVERWRITE: "/usr/local/bin/gcc-6"
+compiler.path.as.DARWIN.OVERWRITE: "/usr/local/bin/gcc-6 -x assembler-with-cpp”
+```
