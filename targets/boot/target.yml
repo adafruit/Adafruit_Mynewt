@@ -1,4 +1,4 @@
-### Target: targets/boot_friend16
+### Target: targets/boot
 target.app: "@apache-mynewt-core/apps/boot"
-target.bsp: "hw/bsp/blefriend16"
+target.bsp: "hw/bsp/feather52"
 target.build_profile: "optimized"
