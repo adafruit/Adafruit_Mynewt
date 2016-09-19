@@ -1,4 +1,4 @@
-### Target: targets/boot
+### Target: targets/bootloader
 target.app: "@apache-mynewt-core/apps/boot"
 target.bsp: "hw/bsp/feather52"
 target.build_profile: "optimized"

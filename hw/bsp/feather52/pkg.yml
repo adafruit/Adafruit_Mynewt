@@ -30,8 +30,9 @@ pkg.arch: cortex_m4
 pkg.compiler: "@apache-mynewt-core/compiler/arm-none-eabi-m4"
 pkg.linkerscript: "feather52.ld"
 pkg.linkerscript.bootloader.OVERWRITE: "boot-feather52.ld"
-pkg.downloadscript: feather52_download.sh
-pkg.debugscript: feather52_debug.sh
+pkg.part2linkerscript: "split-feather52.ld"
+pkg.downloadscript: "feather52_download.sh"
+pkg.debugscript: "feather52_debug.sh"
 pkg.cflags: -DNRF52
 # Removed cflag: -DBSP_HAS_32768_XTAL
 pkg.deps:
