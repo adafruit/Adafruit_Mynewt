@@ -1,0 +1,4 @@
+#target.app: "@apache-mynewt-core/apps/blinky"
+target.app: "apps/blinky"
+target.bsp: "hw/bsp/feather52"
+target.build_profile: "debug"

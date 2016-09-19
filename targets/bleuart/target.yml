@@ -1,4 +1,3 @@
-### Target: targets/bleuart
 target.app: "apps/bleuart"
 target.bsp: "@apache-mynewt-core/hw/bsp/nrf52dk"
 target.build_profile: "debug"
