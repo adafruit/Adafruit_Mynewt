@@ -58,6 +58,7 @@ int bf_gatts_bleuart_putc(char ch);
 int bf_gatts_bleuart_puts(char* str);
 int bf_gatts_bleuart_getc(void);
 int bf_gatts_bleuart_shell_register(void);
+int bf_gatts_bleurat_find_tx_hdl(void);
 
 #ifdef __cplusplus
  }

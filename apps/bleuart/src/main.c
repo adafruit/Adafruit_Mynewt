@@ -53,6 +53,9 @@
 #include "host/ble_sm.h"
 #include "controller/ble_ll.h"
 
+/* RAM HCI transport. */
+#include "transport/ram/ble_hci_ram.h"
+
 /* Newtmgr include */
 #include "newtmgr/newtmgr.h"
 #include "nmgrble/newtmgr_ble.h"
@@ -442,6 +445,7 @@ void bleuart_bridge_task_handler(void* arg)
  */
 int main(void)
 {
+    struct ble_hci_ram_cfg hci_cfg;
     struct ble_hs_cfg cfg;
     uint32_t seed;
     int i;
@@ -504,12 +508,16 @@ int main(void)
     /* Initialize the BLE LL */
     ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
 
+    /* Initialize the RAM HCI transport. */
+    hci_cfg = ble_hci_ram_cfg_dflt;
+    ASSERT_STATUS( ble_hci_ram_init(&hci_cfg) );
+
     /* Initialize the BLE host. */
     cfg = ble_hs_cfg_dflt;
-    cfg.max_hci_bufs        = 3;
-    cfg.max_connections     = 1;
-    cfg.max_gattc_procs     = 2;
-    cfg.max_l2cap_chans     = 3;
+    cfg.max_hci_bufs = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
+    cfg.max_connections = 1;
+    cfg.max_gattc_procs = 2;
+    cfg.max_l2cap_chans = 3;
     cfg.max_l2cap_sig_procs = 1;
     cfg.sm_bonding          = 1;
     cfg.sm_our_key_dist     = BLE_SM_PAIR_KEY_DIST_ENC;
@@ -525,15 +533,16 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
+    ASSERT_STATUS( bf_gatts_init(&cfg) );
     ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
 
-    ASSERT_STATUS( bf_gatts_init(&cfg) );
-    ASSERT_STATUS( bf_gatts_register() ); // move to init()
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);
 
     ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
+
+    bf_gatts_bleurat_find_tx_hdl();
 
     /* Set the default device name. */
     ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );

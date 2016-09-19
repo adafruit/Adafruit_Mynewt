@@ -99,8 +99,15 @@ int bf_gatts_bleuart_init(struct ble_hs_cfg *cfg)
 
 int bf_gatts_bleuart_register(void)
 {
-  ASSERT_STATUS( ble_gatts_register_svcs(_service_bleuart, NULL, NULL) );
+//  ASSERT_STATUS( ble_gatts_register_svcs(_service_bleuart, NULL, NULL) );
 
+  ASSERT_STATUS( ble_gatts_add_svcs(_service_bleuart) );
+
+  return 0;
+}
+
+int bf_gatts_bleurat_find_tx_hdl(void)
+{
   // Find TXD attribute handle
   ASSERT_STATUS( ble_gatts_find_chr(_service_bleuart[0].uuid128, _service_bleuart[0].characteristics[0].uuid128, NULL, &_bleuart.txd_attr_hdl) );
 

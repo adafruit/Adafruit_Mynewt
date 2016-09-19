@@ -93,7 +93,8 @@ int bf_gatts_dis_init(struct ble_hs_cfg *cfg)
 
 int bf_gatts_dis_register(void)
 {
-  return ble_gatts_register_svcs(_service_dis, NULL, NULL);
+//  return ble_gatts_register_svcs(_service_dis, NULL, NULL);
+  return ble_gatts_add_svcs(_service_dis);
 }
 
 int bf_gatts_dis_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)

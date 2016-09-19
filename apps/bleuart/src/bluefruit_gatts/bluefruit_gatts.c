@@ -61,20 +61,39 @@ uint8_t const bf_drivers_count = arrcount(bf_gatts_drivers);
 //--------------------------------------------------------------------+
 int bf_gatts_init(struct ble_hs_cfg *cfg)
 {
-  for(uint8_t i=0; i<bf_drivers_count; i++)
-  {
-    if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init(cfg);
-  }
+//  for(uint8_t i=0; i<bf_drivers_count; i++)
+//  {
+//    if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init(cfg);
+//  }
+
+
+  PRINT_INT(cfg->max_services);
+  PRINT_INT(cfg->max_attrs);
+
+  bf_gatts_dis_init(cfg);
+
+  PRINT_INT(cfg->max_services);
+  PRINT_INT(cfg->max_attrs);
+  bf_gatts_dis_register();
+
+  bf_gatts_bleuart_init(cfg);
+
+  PRINT_INT(cfg->max_services);
+  PRINT_INT(cfg->max_attrs);
+  bf_gatts_bleuart_register();
+
 
   return 0;
 }
 
 int bf_gatts_register(void)
 {
-  for(uint8_t i=0; i<bf_drivers_count; i++)
-  {
-    if (bf_gatts_drivers[i].register_svc) bf_gatts_drivers[i].register_svc();
-  }
+//  for(uint8_t i=0; i<bf_drivers_count; i++)
+//  {
+//    if (bf_gatts_drivers[i].register_svc) bf_gatts_drivers[i].register_svc();
+//  }
+
+
 
   return 0;
 }
