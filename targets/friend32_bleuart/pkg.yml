@@ -1,5 +1,4 @@
-### Package: targets/bleprph
-pkg.name: "targets/bleprph"
+pkg.name: "targets/friend32_bleuart"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
