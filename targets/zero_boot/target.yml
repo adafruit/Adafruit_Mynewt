@@ -1,0 +1,3 @@
+target.app: "@apache-mynewt-core/apps/boot"
+target.bsp: "@mynewt_arduino_zero/hw/bsp/arduino_zero"
+target.build_profile: "optimized"
