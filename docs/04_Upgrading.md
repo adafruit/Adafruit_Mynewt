@@ -8,6 +8,13 @@
 right version number for your core library and save (ex. 'vers: 0-dev').
 - Upgrade your project via `newt upgrade`
 
+If this doesn't work you may need to delete the `project.state` file before
+running `newt upgrade`.
+
+As a last resort, you can also manually update the apache-mynewt-core
+repo by hand by going into the `repos/apache-mynewt-core` folder and running
+`git pull` yourself.
+
 # Updating `newt` and `newtmgr`
 
 To update the `newt` and `newtmgr` tools:
