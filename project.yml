@@ -24,12 +24,16 @@ project.name: "Adafruit_Mynewt"
 
 project.repositories:
     - apache-mynewt-core
+    - mynewt_arduino_zero
 
-# Use github's distribution mechanism for core ASF libraries.
-# This provides mirroring automatically for us.
-#
 repository.apache-mynewt-core:
     type: github
     vers: 0-dev
     user: apache
     repo: incubator-mynewt-core
+
+repository.mynewt_arduino_zero:
+    type: github
+    vers: 0-dev
+    user: runtimeinc
+    repo: mynewt_arduino_zero    
