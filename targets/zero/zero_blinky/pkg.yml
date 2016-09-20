@@ -4,3 +4,5 @@ pkg.description:
 pkg.author: 
 pkg.homepage: 
 
+pkg.features:
+    - "arduino_zero"

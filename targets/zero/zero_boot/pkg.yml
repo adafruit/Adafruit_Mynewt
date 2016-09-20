@@ -1,6 +1,9 @@
+### Package: targets/zero_boot
 pkg.name: "targets/zero_boot"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
 pkg.homepage: 
 
+pkg.features:
+    - "arduino_zero"
