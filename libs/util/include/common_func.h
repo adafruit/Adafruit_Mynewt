@@ -84,19 +84,7 @@
 // DEBUG HELPER
 //--------------------------------------------------------------------+
 
-// Pulse LED n times with interval of ms
-#define DBG_LED_PULSE(n, interval)   do{\
-    if (interval != 0) {\
-      for(uint8_t i=0; i<n; i++){\
-        board_led_on();\
-        /*delay(interval);*/ platform_delay_us(interval);\
-        board_led_off();\
-        /*delay(interval);*/ platform_delay_us(interval);\
-      }\
-    }\
-  }while(0)
-
-#define DBG_LOCATION()        fprintf(stderr, "%s: %d: \r\n", __func__, __LINE__)
+#define PRINT_LOCATION()      fprintf(stderr, "%s: %d: \r\n", __func__, __LINE__)
 #define PRTNT_HEAP()          if (CFG_DEBUG == 3) fprintf(stderr, "\r\n%s: %d: Heap free: %d\r\n", __func__, __LINE__, util_heap_get_free_size())
 #define PRINT_INT(x)          fprintf(stderr, #x " = %ld\r\n", (uint32_t) (x) )
 #define PRINT_HEX(x)          fprintf(stderr, #x " = %08lx\r\n", (uint32_t) (x) )
@@ -108,29 +96,6 @@
     for(uint32_t i=0; i<(n); i++) fprintf(stderr, "%02x ", p8[i]);\
     fprintf(stderr, "\r\n");\
   }while(0)
-
-#if 0
-int fpeekAt(FILE *stream, uint16_t index);
-
-static inline int fpeek(FILE *stream) ATTR_ALWAYS_INLINE;
-static inline int fpeek(FILE *stream)
-{
-  return fpeekAt(stream, 0);
-}
-
-static inline uint64_t get_millis(void) ATTR_ALWAYS_INLINE ATTR_PURE;
-static inline uint64_t get_millis(void)
-{
-  // from app_timer.c
-  extern volatile uint64_t systick_total_ticks;
-
-  // 32768 is 2^15
-  return (( systick_total_ticks*1000*(CFG_TIMER_PRESCALER+1) ) >> 15);
-
-//  return ((systick_total_ticks*APP_TIMER_CLOCK_FREQ) / (1000*(CFG_TIMER_PRESCALER+1)));
-//  return (uint64_t) ((((uint64_t) NRF_RTC1->COUNTER) * APP_TIMER_CLOCK_FREQ) / (1000*(CFG_TIMER_PRESCALER+1))) ;
-}
-#endif
 
 /// Checks is all values in the supplied array are zero
 static inline bool mem_test_zero(void const* buffer, uint32_t size) ATTR_ALWAYS_INLINE ATTR_PURE;
@@ -177,44 +142,6 @@ static inline uint8_t u16_low_u8(uint16_t u16) ATTR_CONST ATTR_ALWAYS_INLINE;
 static inline uint8_t u16_low_u8(uint16_t u16)
 {
   return (uint8_t) (u16 & 0x00ff);
-}
-
-//------------- Min -------------//
-static inline uint8_t min8_of(uint8_t x, uint8_t y) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline uint8_t min8_of(uint8_t x, uint8_t y)
-{
-  return (x < y) ? x : y;
-}
-
-static inline uint16_t min16_of(uint16_t x, uint16_t y) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline uint16_t min16_of(uint16_t x, uint16_t y)
-{
-  return (x < y) ? x : y;
-}
-
-static inline uint32_t min32_of(uint32_t x, uint32_t y) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline uint32_t min32_of(uint32_t x, uint32_t y)
-{
-  return (x < y) ? x : y;
-}
-
-//------------- Max -------------//
-static inline uint8_t max8_of(uint8_t x, uint8_t y) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline uint8_t max8_of(uint8_t x, uint8_t y)
-{
-  return (x > y) ? x : y;
-}
-
-static inline uint16_t max16_of(uint16_t x, uint16_t y) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline uint16_t max16_of(uint16_t x, uint16_t y)
-{
-  return (x > y) ? x : y;
-}
-
-static inline uint32_t max32_of(uint32_t x, uint32_t y) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline uint32_t max32_of(uint32_t x, uint32_t y)
-{
-  return (x > y) ? x : y;
 }
 
 //------------- Align -------------//

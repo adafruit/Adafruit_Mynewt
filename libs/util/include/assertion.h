@@ -40,8 +40,6 @@
 #ifndef _ASSERTION_H_
 #define _ASSERTION_H_
 
-#include "projectconfig.h"
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -90,6 +88,7 @@ extern "C"
 // Status Assert
 //--------------------------------------------------------------------+
 #define err_t int
+
 #define ASSERT_STATUS(sts) \
     ASSERT_DEFINE(err_t _status = (err_t)(sts),\
                   0 == _status, _status, "error = %d", _status)
@@ -110,11 +109,6 @@ extern "C"
 #define ASSERT(_condition, _error)       ASSERT_DEFINE( , _condition, _error, "%s", "false")
 #define VERIFY(_condition, _error)       VERIFY_DEFINE( , _condition, _error)
 
-//--------------------------------------------------------------------+
-// Pointer Assert
-//--------------------------------------------------------------------+
-#define ASSERT_PTR(_ptr, _error )        ASSERT_DEFINE( , NULL != (_ptr), _error, "%s", "pointer is NULL")
-#define VERIY_PTR(_ptr, _error )         VERIFY_DEFINE( , NULL != (_ptr), _error)
 
 #ifdef __cplusplus
 }

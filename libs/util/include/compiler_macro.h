@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*!
-    @file     compiler.h
+    @file     compiler_macro.h
     @author   hathach
 
     @section LICENSE
@@ -36,37 +36,16 @@
 */
 /******************************************************************************/
 
-/** \file
- *  \brief GCC Header
- */
-
 /** \ingroup Group_Compiler
  *  \defgroup Group_GCC GNU GCC
  *  @{
  */
 
-#ifndef _COMPILER_GCC_H_
-#define _COMPILER_GCC_H_
-
-#ifndef __GNUC__
-  #error GNU compatible is required to build. Please enable it in Keil by using "--gnu"
-#endif
+#ifndef _COMPILER_MACRO_H_
+#define _COMPILER_MACRO_H_
 
 #ifdef __cplusplus
  extern "C" {
-#endif
-
-#ifdef _TEST_
-  #define ATTR_ALWAYS_INLINE
-  #define STATIC_
-  #define INLINE_
-#else
-  #define STATIC_ static
-  #define INLINE_ inline
-
-  #if CFG_DEBUG == 3
-    #define ATTR_ALWAYS_INLINE  // no inline for debug = 3
-  #endif
 #endif
 
 #define STRING_(x)                  #x                   // stringify without expand
@@ -106,10 +85,8 @@
  *  @{
  */
 
-#ifndef ATTR_ALWAYS_INLINE
 /// Generally, functions are not inlined unless optimization is specified. For functions declared inline, this attribute inlines the function even if no optimization level is specified
 #define ATTR_ALWAYS_INLINE         __attribute__ ((always_inline))
-#endif
 
 /// The nonnull attribute specifies that some function parameters should be non-null pointers. f the compiler determines that a null pointer is passed in an argument slot marked as non-null, and the -Wnonnull option is enabled, a warning is issued. All pointer arguments are marked as non-null
 #define ATTR_NON_NULL              __attribute__ ((nonull))
@@ -154,6 +131,6 @@
  }
 #endif
 
-#endif /* _COMPILER_GCC_H_ */
+#endif /* _COMPILER_MACRO_H_ */
 
 /// @}

@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*!
-    @file     common_header.h
+    @file     adafruit_util.h
     @author   hathach
 
     @section LICENSE
@@ -36,8 +36,8 @@
 */
 /******************************************************************************/
 
-#ifndef _COMMON_H_
-#define _COMMON_H_
+#ifndef _ADAFRUIT_UTIL_H_
+#define _ADAFRUIT_UTIL_H_
 
 #ifdef __cplusplus
  extern "C" {
@@ -57,33 +57,10 @@
 #include <assert.h>
 
 ////------------- General Header -------------//
-#include "compiler.h"
-#include "projectconfig.h"
-//#include "bluefruit_errors.h"
+#include "compiler_macro.h"
 #include "assertion.h"
 //#include "binary.h"
 #include "common_func.h"
-//#include "utilities.h"
-//
-////#include "nvm.h"
-//
-////------------- MCU header -------------//
-//#include "nrf.h"
-//#include "nrf_sdm.h"
-//#include "nrf_delay.h"
-//#include "app_timer.h"
-
-//--------------------------------------------------------------------+
-// Crossworks for ARM _file declaration
-//--------------------------------------------------------------------+
-#ifdef __CROSSWORKS_ARM
-#include <__cross_studio_io.h>
-
-struct __RAL_FILE
-{
-  int _file;
-};
-#endif
 
 //--------------------------------------------------------------------+
 // TYPEDEFS
@@ -98,4 +75,4 @@ struct __RAL_FILE
  }
 #endif
 
-#endif /* _COMMON_HEADER_H_ */
+#endif /* _ADAFRUIT_UTIL_H_ */

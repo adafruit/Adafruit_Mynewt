@@ -41,7 +41,8 @@
  extern "C" {
 #endif
 
-#include "common_header.h"
+#include "./projectconfig.h"
+#include "adafruit_util.h"
 #include "host/ble_hs.h"
 #include "bluefruit_uuid.h"
 

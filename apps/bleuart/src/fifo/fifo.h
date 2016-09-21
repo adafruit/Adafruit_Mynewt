@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-#include "common_header.h"
+#include "adafruit_util.h"
 
 #if 0
 #include "wiced_rtos.h"
