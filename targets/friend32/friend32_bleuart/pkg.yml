@@ -1,5 +1,5 @@
 pkg.name: "targets/friend32_bleuart"
 pkg.type: "target"
 pkg.description: 
-pkg.author: 
-pkg.homepage: 
+pkg.author: "Adafruit <support@adafruit.com>"
+pkg.homepage: "http://www.adafruit.com"

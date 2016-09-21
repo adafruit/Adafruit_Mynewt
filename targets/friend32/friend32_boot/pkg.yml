@@ -1,8 +1,8 @@
 pkg.name: "targets/friend32_boot"
 pkg.type: "target"
 pkg.description: 
-pkg.author: 
-pkg.homepage: 
+pkg.author: "Adafruit <support@adafruit.com>"
+pkg.homepage: "http://www.adafruit.com"
 
 pkg.cflags:
     - "-DLOG_LEVEL=255"
