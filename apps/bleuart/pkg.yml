@@ -35,6 +35,7 @@ pkg.cflags:
     - "-DNFFS_PRESENT"
 
 pkg.deps:
+    - "libs/util"
     - "@apache-mynewt-core/libs/os"
     - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/net/nimble/controller"

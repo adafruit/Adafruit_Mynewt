@@ -20,20 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-project.name: "Adafruit_Mynewt"
+pkg.name: libs/util
+pkg.description: Library containing miscellaneous utilities.
+pkg.author: "Adafruit <support@adafruit.com>"
+pkg.homepage: "http://www.adafruit.com/"
+pkg.keywords:
+  - adafruit
+  - util
 
-project.repositories:
-    - apache-mynewt-core
-    - mynewt_arduino_zero
-
-repository.apache-mynewt-core:
-    type: github
-    vers: 0-dev
-    user: apache
-    repo: incubator-mynewt-core
-
-repository.mynewt_arduino_zero:
-    type: github
-    vers: 0-dev
-    user: runtimeinc
-    repo: mynewt_arduino_zero    
+pkg.deps:
