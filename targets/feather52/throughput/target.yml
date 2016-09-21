@@ -1,0 +1,3 @@
+target.app: "apps/throughput"
+target.bsp: "hw/bsp/feather52"
+target.build_profile: "debug"

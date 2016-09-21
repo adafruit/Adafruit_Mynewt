@@ -1,0 +1,5 @@
+pkg.name: "targets/throughput"
+pkg.type: "target"
+pkg.description: "Test the BLE throughput"
+pkg.author: "Adafruit <support@adafruit.com>"
+pkg.homepage: "http://www.adafruit.com"
