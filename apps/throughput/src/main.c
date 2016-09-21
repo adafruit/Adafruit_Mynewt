@@ -46,17 +46,6 @@
 #include <shell/shell.h>
 #include <log/log.h>
 
-
-#ifdef NFFS_PRESENT
-#include <hal/flash_map.h>
-#include <fs/fs.h>
-#include <nffs/nffs.h>
-//#include <config/config.h>
-//#include <config/config_file.h>
-#else
-#error "Need NFFS or FCB for config storage"
-#endif
-
 /* BLE */
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
@@ -78,6 +67,8 @@
 /* Mandatory services. */
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
+
+#include "adafruit_util.h"
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
 
@@ -404,7 +395,7 @@ int main(void)
 {
     struct ble_hci_ram_cfg hci_cfg;
     struct ble_hs_cfg cfg;
-    uint32_t seed;
+
     int i;
 
     /* Initialize OS */
@@ -413,10 +404,8 @@ int main(void)
     /* Set cputime to count at 1 usec increments */
     ASSERT_STATUS( cputime_init(1000000) );
 
-    /* Seed random number generator with least significant bytes of device
-     * address.
-     */
-    seed = 0;
+    /* Seed random number generator with least significant bytes of device address. */
+    uint32_t seed = 0;
     for (i = 0; i < 4; ++i) {
         seed |= g_dev_addr[i];
         seed <<= 8;
@@ -424,9 +413,7 @@ int main(void)
     srand(seed);
 
     /* Initialize msys mbufs. */
-    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS,
-                                   MBUF_MEMBLOCK_SIZE, mbuf_mpool_data,
-                                   "bleprph_mbuf_data") );
+    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
     ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
     ASSERT_STATUS( os_msys_register(&mbuf_pool) );
 
@@ -436,17 +423,9 @@ int main(void)
     log_cbmem_handler_init(&log_hdlr, &cbmem); // log_console_handler_init(&log_hdlr);
     log_register("bleprph", &mylog, &log_hdlr);
 
-    /* Initialize NFSS config memory */
-    #ifdef NFFS_PRESENT
-    setup_for_nffs();
-    #endif
-
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
-    console_init(shell_console_rx_cb); // console_init(NULL);
-
-    nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
-    imgmgr_module_init();
+    console_init(shell_console_rx_cb);
 
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
