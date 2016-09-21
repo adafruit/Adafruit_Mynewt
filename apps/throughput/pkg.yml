@@ -35,7 +35,12 @@ pkg.cflags:
 
 pkg.deps:
     - "libs/util"
+    - "@apache-mynewt-core/libs/bleuart"
     - "@apache-mynewt-core/libs/os"
+    - "@apache-mynewt-core/libs/baselibc"
+    - "@apache-mynewt-core/libs/console/full"
+    - "@apache-mynewt-core/libs/shell"
+    - "@apache-mynewt-core/libs/util"
     - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/net/nimble/controller"
     - "@apache-mynewt-core/net/nimble/host"
@@ -43,7 +48,3 @@ pkg.deps:
     - "@apache-mynewt-core/net/nimble/host/services/gatt"
     - "@apache-mynewt-core/net/nimble/host/store/ram"
     - "@apache-mynewt-core/net/nimble/transport/ram"
-    - "@apache-mynewt-core/libs/baselibc"
-    - "@apache-mynewt-core/libs/console/full"
-    - "@apache-mynewt-core/libs/shell"
-    - "@apache-mynewt-core/libs/util"
