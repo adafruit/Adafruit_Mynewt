@@ -66,22 +66,11 @@ int bf_gatts_init(struct ble_hs_cfg *cfg)
 //    if (bf_gatts_drivers[i].init) bf_gatts_drivers[i].init(cfg);
 //  }
 
-
-  PRINT_INT(cfg->max_services);
-  PRINT_INT(cfg->max_attrs);
-
   bf_gatts_dis_init(cfg);
-
-  PRINT_INT(cfg->max_services);
-  PRINT_INT(cfg->max_attrs);
   bf_gatts_dis_register();
 
   bf_gatts_bleuart_init(cfg);
-
-  PRINT_INT(cfg->max_services);
-  PRINT_INT(cfg->max_attrs);
   bf_gatts_bleuart_register();
-
 
   return 0;
 }

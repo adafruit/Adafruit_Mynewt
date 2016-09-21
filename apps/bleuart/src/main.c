@@ -100,6 +100,7 @@ struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
 /** Log data. */
+static struct log_handler log_hdlr;
 struct log mylog;
 
 #define MAX_CBMEM_BUF 600
@@ -482,7 +483,8 @@ int main(void)
     /* Initialize the logging system. */
     log_init();
     cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
-    log_register("bleprph", &mylog, &log_cbmem_handler, &cbmem);
+    log_cbmem_handler_init(&log_hdlr, &cbmem); // log_console_handler_init(&log_hdlr);
+    log_register("bleprph", &mylog, &log_hdlr);
 
     /* Initialize NFSS config memory */
     #ifdef NFFS_PRESENT
