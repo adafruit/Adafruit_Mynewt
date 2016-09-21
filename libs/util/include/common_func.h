@@ -148,31 +148,31 @@ static inline uint8_t u16_low_u8(uint16_t u16)
 static inline uint32_t align32 (uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align32 (uint32_t value)
 {
-        return (value & 0xFFFFFFE0UL);
+  return (value & 0xFFFFFFE0UL);
 }
 
 static inline uint32_t align16 (uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align16 (uint32_t value)
 {
-        return (value & 0xFFFFFFF0UL);
+  return (value & 0xFFFFFFF0UL);
 }
 
 static inline uint32_t align_n (uint32_t alignment, uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align_n (uint32_t alignment, uint32_t value)
 {
-        return value & (~(alignment-1));
+  return value & (~(alignment-1));
 }
 
 static inline uint32_t align4k (uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align4k (uint32_t value)
 {
-        return (value & 0xFFFFF000UL);
+  return (value & 0xFFFFF000UL);
 }
 
 static inline uint32_t offset4k(uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t offset4k(uint32_t value)
 {
-        return (value & 0xFFFUL);
+  return (value & 0xFFFUL);
 }
 
 //------------- Mathematics -------------//
@@ -183,22 +183,12 @@ static inline bool is_within(uint32_t lower, uint32_t value, uint32_t upper)
   return (lower <= value) && (value <= upper);
 }
 
-/// exclusive range checking
-static inline bool is_in_range_exclusive(uint32_t lower, uint32_t value, uint32_t upper) ATTR_ALWAYS_INLINE ATTR_CONST;
-static inline bool is_in_range_exclusive(uint32_t lower, uint32_t value, uint32_t upper)
-{
-  return (lower < value) && (value < upper);
-}
-
 static inline uint8_t log2_of(uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint8_t log2_of(uint32_t value)
 {
   uint8_t result = 0; // log2 of a value is its MSB's position
+  while (value >>= 1) result++;
 
-  while (value >>= 1)
-  {
-    result++;
-  }
   return result;
 }
 

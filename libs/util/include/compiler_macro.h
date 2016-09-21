@@ -125,6 +125,7 @@
 #define ATTR_UNUSED                __attribute__ ((unused))
 
 #define ATTR_OPTIMIZE(n)          __attribute__ ((optimize(XSTRING_(O##n))))
+
 /** @} */
 
 #ifdef __cplusplus
