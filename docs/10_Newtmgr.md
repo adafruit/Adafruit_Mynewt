@@ -19,5 +19,5 @@ $ newtmgr conn show
 ### Connect Using a Serial Profile
 
 ```
-$ newtmgr -c serial1 taskstats
+$ newtmgr -c serial image list
 ```
