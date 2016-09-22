@@ -92,6 +92,9 @@ static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
 struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
+#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
+
 /** Log data. */
 static struct log_handler log_hdlr;
 struct log mylog;
@@ -131,16 +134,6 @@ os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
 struct os_task blinky_task;
 os_stack_t blinky_stack[BLINKY_STACK_SIZE];
 
-// BLEUART to UART bridge task
-#define BLEUART_BRIDGE_TASK_PRIO     5
-#define BLEUART_BRIDGE_STACK_SIZE    OS_STACK_ALIGN(256)
-
-struct os_task bleuart_bridge_task;
-os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
-
-#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
-#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
-
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
@@ -150,17 +143,27 @@ uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 /** Our random address (in case we need it) */
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
-static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
+//--------------------------------------------------------------------+
+//
+//--------------------------------------------------------------------+
+static int cmd_nustest_exec(int argc, char **argv);
+static struct shell_cmd cmd_nustest = {
+    .sc_cmd = "nustest",
+    .sc_cmd_func = cmd_nustest_exec
+};
 
-void
-print_addr(const void *addr)
+static int cmd_nustest_exec(int argc, char **argv)
 {
-    const uint8_t *u8p;
+  /* default is 100 packets */
+  uint32_t count = (argc > 1) ? strtoul(argv[1], NULL, 10) : 100;
 
-    u8p = addr;
-    BLEPRPH_LOG(INFO, "%02x:%02x:%02x:%02x:%02x:%02x",
-                u8p[5], u8p[4], u8p[3], u8p[2], u8p[1], u8p[0]);
+  printf("count = %lu\r\n", count);
+
+  return 0;
 }
+
+
+static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
 
 /**
  * Enables advertising with the following parameters:
@@ -274,6 +277,8 @@ bleprph_task_handler(void *unused)
     struct os_callout_func *cf;
     int rc;
 
+    shell_cmd_register(&cmd_nustest);
+
     rc = ble_hs_start();
     assert(rc == 0);
 
@@ -385,10 +390,7 @@ int main(void)
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
 
-//    os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
-//                 BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
-
-    os_task_init(&bleprph_task, "bleprph", bleprph_task_handler, NULL,
+   os_task_init(&bleprph_task, "bleprph", bleprph_task_handler, NULL,
                  BLEPRPH_TASK_PRIO, OS_WAIT_FOREVER, bleprph_stack, BLEPRPH_STACK_SIZE);
 
     /* Initialize the BLE LL */

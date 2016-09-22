@@ -89,11 +89,11 @@
   #define malloc_named( name, size )            malloc ( size )
 #endif
 
-#define PRINT_LOCATION()      fprintf(stderr, "%s: %d: \r\n", __func__, __LINE__)
-#define PRTNT_HEAP()          if (CFG_DEBUG == 3) fprintf(stderr, "\r\n%s: %d: Heap free: %d\r\n", __func__, __LINE__, util_heap_get_free_size())
-#define PRINT_INT(x)          fprintf(stderr, #x " = %ld\r\n", (uint32_t) (x) )
-#define PRINT_HEX(x)          fprintf(stderr, #x " = %08lx\r\n", (uint32_t) (x) )
-#define PRINT_STR(x)          fprintf(stderr, #x " = %s\r\n", (char*)(x) )
+#define PRINT_LOCATION()      printf("%s: %d: \r\n", __func__, __LINE__)
+#define PRTNT_HEAP()          if (CFG_DEBUG == 3) printf("\r\n%s: %d: Heap free: %d\r\n", __func__, __LINE__, util_heap_get_free_size())
+#define PRINT_INT(x)          printf(#x " = %ld\r\n", (uint32_t) (x) )
+#define PRINT_HEX(x)          printf(#x " = %08lx\r\n", (uint32_t) (x) )
+#define PRINT_STR(x)          printf(#x " = %s\r\n", (char*)(x) )
 #define PRINT_BUFFER(buf, n) \
   do {\
     uint8_t* p8 = (uint8_t*) (buf);\

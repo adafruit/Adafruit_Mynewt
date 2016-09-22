@@ -61,6 +61,7 @@ const uint8_t _dis_uuid128[][16] =
     BLE_UUID16_ARR(UUID16_CHR_SOFTWARE_REVISION_STRING),
     BLE_UUID16_ARR(UUID16_CHR_MANUFACTURER_NAME_STRING)
 };
+
 static struct ble_gatt_chr_def _dis_chars[BLEDIS_MAX_CHAR+1];
 
 static const struct ble_gatt_svc_def _dis_service[] =

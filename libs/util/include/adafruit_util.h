@@ -54,7 +54,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <assert.h>
 
 ////------------- General Header -------------//
 #include "compiler_macro.h"
@@ -62,14 +61,6 @@
 //#include "binary.h"
 #include "common_func.h"
 #include "adafruit_uuid.h"
-
-//--------------------------------------------------------------------+
-// TYPEDEFS
-//--------------------------------------------------------------------+
-//typedef unsigned char byte_t;
-//typedef float  float32_t;
-//typedef double float64_t;
-
 
 
 #ifdef __cplusplus
