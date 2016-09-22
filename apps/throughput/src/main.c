@@ -381,7 +381,6 @@ int main(void)
     console_init(shell_console_rx_cb);
 
     nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
-//    imgmgr_module_init();
 
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
@@ -420,18 +419,18 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-	ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
+    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
 
-//    bledis_cfg_t dis_cfg =
-//    {
-//        .model        = "Feather52" ,
-//        .serial       = NULL        ,
-//        .firmware_rev = "0.9.0"     ,
-//        .hardware_rev = "nRF52832"  ,
-//        .software_rev = "0.9.0"     ,
-//        .manufacturer = "Adafruit Industries"
-//    };
-//    bledis_init(&cfg, &dis_cfg);
+    bledis_cfg_t dis_cfg =
+    {
+        .model        = "Feather52" ,
+        .serial       = NULL        ,
+        .firmware_rev = "0.9.0"     ,
+        .hardware_rev = "nRF52832"  ,
+        .software_rev = "0.9.0"     ,
+        .manufacturer = "Adafruit Industries"
+    };
+    bledis_init(&cfg, &dis_cfg);
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);

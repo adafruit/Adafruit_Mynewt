@@ -52,6 +52,15 @@ static union
   const char * arrptr[BLEDIS_MAX_CHAR];
 }_dis_cfg;
 
+const uint8_t _dis_uuid128[][16] =
+{
+    BLE_UUID16_ARR(UUID16_CHR_MODEL_NUMBER_STRING),
+    BLE_UUID16_ARR(UUID16_CHR_SERIAL_NUMBER_STRING),
+    BLE_UUID16_ARR(UUID16_CHR_FIRMWARE_REVISION_STRING),
+    BLE_UUID16_ARR(UUID16_CHR_HARDWARE_REVISION_STRING),
+    BLE_UUID16_ARR(UUID16_CHR_SOFTWARE_REVISION_STRING),
+    BLE_UUID16_ARR(UUID16_CHR_MANUFACTURER_NAME_STRING)
+};
 static struct ble_gatt_chr_def _dis_chars[BLEDIS_MAX_CHAR+1];
 
 static const struct ble_gatt_svc_def _dis_service[] =
@@ -82,7 +91,7 @@ int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
   {
     if ( _dis_cfg.arrptr[i] != NULL )
     {
-      _dis_chars[count].uuid128   = BLE_UUID16(UUID16_CHR_MODEL_NUMBER_STRING + i);
+      _dis_chars[count].uuid128   = _dis_uuid128[i];
       _dis_chars[count].access_cb = bledis_access_cb;
       _dis_chars[count].flags     = BLE_GATT_CHR_F_READ;
 
@@ -102,6 +111,7 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
 {
   VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR, -1);
 
+  PRINT_BUFFER(_dis_chars[0].uuid128, 16);
   uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
   VERIFY( is_within(UUID16_CHR_MODEL_NUMBER_STRING, uuid16, UUID16_CHR_MANUFACTURER_NAME_STRING), -1);
 
