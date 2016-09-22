@@ -47,9 +47,14 @@ Set the `build_profile` flag to `optimized` for the bootloader target:
 $ newt target set nrf52_boot build_profile=optimized
 ```
 
-## Create an Application
+## Create an application
 
 ### Option 1: Copy an existing demo app as a target
+
+> **Note:** When the project is created via `newt new projectname` a bare bones
+> blinky app will be created in `apps/blinky`. You can use this as a starting
+> point for your project instead of manually creating a new one, which is
+> described 'Option 2' below.
 
 Import the standard blinky demo as a working example:
 
@@ -61,11 +66,6 @@ $ newt target set blink_nordic build_profile=debug
 ```
 
 ### Option 2: Create an entirely new application as a target
-
-> **Note:** When the project is created via `newt new projectname` a bare bones
-> blinky app will be created in `apps/blinky`. You can also use this as a
-> starting point for your project instead of creating a new one, as described
-> in 'Option 1' aobve.
 
 A mynewt app requires at least a `main()` function and a `pkg.yml` file.
 
