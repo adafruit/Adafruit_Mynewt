@@ -3,7 +3,7 @@
 To create a new project with the `newt` tool perform the following steps. The
 nRF52 DK is used as a sample platform in this example.
 
-### Create the skeleton project
+## Create a project skeleton
 
 ```
 $ newt new projectname
@@ -20,7 +20,7 @@ Since this is a new project, only `apache-mynewt-core` will be downloaded:
 $ newt install -v
 ```
 
-### Setup the bootloader target
+## Setup a bootloader target
 
 Create a new `nrf52_boot` target for the bootloader image:
 
@@ -47,7 +47,14 @@ Set the `build_profile` flag to `optimized` for the bootloader target:
 $ newt target set nrf52_boot build_profile=optimized
 ```
 
+## Create an application
+
 ### Option 1: Copy an existing demo app as a target
+
+> **Note:** When the project is created via `newt new projectname` a bare bones
+> blinky app will be created in `apps/blinky`. You can use this as a starting
+> point for your project instead of manually creating a new one, which is
+> described 'Option 2' below.
 
 Import the standard blinky demo as a working example:
 
@@ -59,11 +66,6 @@ $ newt target set blink_nordic build_profile=debug
 ```
 
 ### Option 2: Create an entirely new application as a target
-
-> **Note:** When the project is created via `newt new projectname` a bare bones
-> blinky app will be created in `apps/blinky`. You can also use this as a
-> starting point for your project instead of creating a new one, as described
-> in 'Option 1' aobve.
 
 A mynewt app requires at least a `main()` function and a `pkg.yml` file.
 
@@ -127,7 +129,11 @@ $ newt target set ble_app bsp=@apache-mynewt-core/hw/bsp/nrf52dk
 $ newt target set ble_app build_profile=debug
 ```
 
-### Review the target(s)
+## Review the target(s)
+
+At this point you should have two targets setup, one for the bootloader and one for the app you created.
+
+To display a list of targets in your project enter:
 
 ```
 $ newt target show
@@ -146,7 +152,7 @@ targets/nrf52_boot
     build_profile=optimized
 ```
 
-# Building the Project
+## Building the Project
 
 To build the targets created above, run the `newt build` command once for
 each target required:
@@ -156,17 +162,17 @@ $ newt build nrf52_boot
 $ newt build blink_nordic
 ```
 
-# Sign the Build
+### Sign the Build
 
-You then need to **sign the build** so that we have some basic version
-information and so that the bootloader will accept the firmware image(s), which
-is done via the `newt create-image` command:
+You then need to **sign the build** for any app(s) so that we have some basic
+version information and so that the bootloader will accept the firmware image(s),
+which is done via the `newt create-image` command:
 
 ```
 $ newt create-image blink_nordic 1.0.0
 ```
 
-# Flashing the Device
+## Flashing the Device
 
 You can now flash the device via newt with the following command(s):
 
@@ -174,5 +180,6 @@ You can now flash the device via newt with the following command(s):
 $ newt -v load nrf52_boot
 $ newt -v load blink_nordic
 ```
+
 You may need to reset of power cycle the target device for the changes to take
-effect.
+effect, depending on the HW platform used.
