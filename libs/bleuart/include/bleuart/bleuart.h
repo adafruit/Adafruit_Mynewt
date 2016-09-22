@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     bluefruit_gatts_bleuart.h
+    @file     bleuart.h
     @author   hathach
 
     @section LICENSE
@@ -34,34 +34,45 @@
 */
 /**************************************************************************/
 
-#ifndef _BLUEFRUIT_GATTS_BLEUART_H_
-#define _BLUEFRUIT_GATTS_BLEUART_H_
+#ifndef _ADAFRUIT_BLEUART_H_
+#define _ADAFRUIT_BLEUART_H_
 
 #ifdef __cplusplus
  extern "C" {
 #endif
 
 #include "adafruit_util.h"
+#include "host/ble_hs.h"
 
-// UART Serivce: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-// UART RXD    : 6E400002-B5A3-F393-E0A9-E50E24DCCA9E
-// UART TXD    : 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
+#ifndef CFG_BLE_UART_BUFSIZE
+#define CFG_BLE_UART_BUFSIZE 128
+#endif
 
-#define BLEUART_SERVICE_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x01, 0x00, 0x40, 0x6E}
-#define BLEUART_CHAR_RX_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x02, 0x00, 0x40, 0x6E}
-#define BLEUART_CHAR_TX_UUID  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x03, 0x00, 0x40, 0x6E}
+extern const uint8_t BLEUART_UUID_SERVICE[16];
+extern const uint8_t BLEUART_UUID_CHR_RXD[16];
+extern const uint8_t BLEUART_UUID_CHR_TXD[16];
 
-int   bf_gatts_bleuart_init(struct ble_hs_cfg *cfg);
-int   bf_gatts_bleuart_register(void);
+int  bleuart_init(struct ble_hs_cfg *cfg);
+void bleuart_set_conn_handle(uint16_t conn_handle);
+int  bleuart_shell_register(void);
 
-int bf_gatts_bleuart_putc(char ch);
-int bf_gatts_bleuart_puts(char* str);
-int bf_gatts_bleuart_getc(void);
-int bf_gatts_bleuart_shell_register(void);
-int bf_gatts_bleurat_find_tx_hdl(void);
+int bleuart_write(void const* buffer, uint32_t size);
+
+static inline int bleuart_putc(char ch)
+{
+  return bleuart_write(&ch, 1);
+}
+
+static inline int bleuart_puts(char* str)
+{
+  return bleuart_write(str, strlen(str));
+}
+
+int bleuart_read(uint8_t* buffer, uint32_t size);
+int bleuart_getc(void);
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif /* _BLUEFRUIT_GATTS_BLEUART_H_ */
+#endif /* _ADAFRUIT_BLEUART_H_ */

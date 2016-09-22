@@ -1,4 +1,4 @@
-pkg.name: "targets/feather52_bleuart"
+pkg.name: "targets/bleuart"
 pkg.type: "target"
 pkg.description: 
 pkg.author: "Adafruit <support@adafruit.com>"

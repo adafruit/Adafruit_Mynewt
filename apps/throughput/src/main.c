@@ -74,8 +74,8 @@
 
 #include "adafruit_util.h"
 #include "bledis/bledis.h"
+#include "bleuart/bleuart.h"
 
-uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
 
 #define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
 
@@ -92,12 +92,12 @@ static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
 struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
-#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
-#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
-
 /** Log data. */
 static struct log_handler log_hdlr;
 struct log mylog;
+
+#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
 
 #define MAX_CBMEM_BUF 600
 static uint32_t cbmem_buf[MAX_CBMEM_BUF];
@@ -196,11 +196,9 @@ bleprph_advertise(void)
     fields.tx_pwr_lvl_is_present = 1;
     fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-    //fields.uuids128 = &((uint8_t[])BLEUART_SERVICE_UUID ) ;
-    //fields.num_uuids128 = 1;
-//    fields.uuids128_is_complete = 0;
-    fields.uuids16 =  (uint16_t []){ UUID16_SVC_DEVICE_INFORMATION };
-    fields.num_uuids16 = 1;
+    fields.uuids128 = gatt_svr_svc_uart;
+    fields.num_uuids128 = 1;
+    fields.uuids128_is_complete = 0;
 
     ASSERT_STATUS_RETVOID( ble_gap_adv_set_fields(&fields) );
 
@@ -247,11 +245,8 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
     case BLE_GAP_EVENT_CONNECT:
         /* A new connection was established or a connection attempt failed. */
         if (event->connect.status == 0) {
-          ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-          conn_handle = event->connect.conn_handle;
-        }
-
-        if (event->connect.status != 0) {
+          bleuart_set_conn_handle(event->connect.conn_handle);
+        }else {
             /* Connection failed; resume advertising. */
             bleprph_advertise();
         }
@@ -433,6 +428,9 @@ int main(void)
         .manufacturer = "Adafruit Industries"
     };
     bledis_init(&cfg, &dis_cfg);
+
+    bleuart_gatt_svr_init(&cfg);
+    bleuart_init(128);
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);

@@ -30,3 +30,7 @@ pkg.keywords:
 pkg.deps:
   - libs/util
   - libs/fifo
+  - "@apache-mynewt-core/libs/console/full"
+  - "@apache-mynewt-core/libs/shell" 
+  - "@apache-mynewt-core/libs/os"
+  - "@apache-mynewt-core/net/nimble/host"

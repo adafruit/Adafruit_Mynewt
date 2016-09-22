@@ -66,9 +66,12 @@
 /* Mandatory services. */
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
-#include "bluefruit_gatts/bluefruit_gatts.h"
 
-uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
+#include "adafruit_util.h"
+#include "bledis/bledis.h"
+#include "bleuart/bleuart.h"
+
+#define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
 
 //--------------------------------------------------------------------+
 //
@@ -102,6 +105,9 @@ struct os_mempool   mbuf_mpool;
 /** Log data. */
 static struct log_handler log_hdlr;
 struct log mylog;
+
+#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
 
 #define MAX_CBMEM_BUF 600
 static uint32_t cbmem_buf[MAX_CBMEM_BUF];
@@ -190,43 +196,6 @@ static void setup_for_nffs(void)
 }
 #endif
 
-void
-print_addr(const void *addr)
-{
-    const uint8_t *u8p;
-
-    u8p = addr;
-    BLEPRPH_LOG(INFO, "%02x:%02x:%02x:%02x:%02x:%02x",
-                u8p[5], u8p[4], u8p[3], u8p[2], u8p[1], u8p[0]);
-}
-
-/**
- * Logs information about a connection to the console.
- */
-static void
-bleprph_print_conn_desc(struct ble_gap_conn_desc *desc)
-{
-    BLEPRPH_LOG(INFO, "handle=%d our_ota_addr_type=%d our_ota_addr=", desc->conn_handle, desc->our_ota_addr_type);
-    print_addr(desc->our_ota_addr);
-
-    BLEPRPH_LOG(INFO, " our_id_addr_type=%d our_id_addr=", desc->our_id_addr_type);
-    print_addr(desc->our_id_addr);
-
-    BLEPRPH_LOG(INFO, " peer_ota_addr_type=%d peer_ota_addr=", desc->peer_ota_addr_type);
-    print_addr(desc->peer_ota_addr);
-
-    BLEPRPH_LOG(INFO, " peer_id_addr_type=%d peer_id_addr=", desc->peer_id_addr_type);
-    print_addr(desc->peer_id_addr);
-
-    BLEPRPH_LOG(INFO, " conn_itvl=%d conn_latency=%d supervision_timeout=%d "
-                "encrypted=%d authenticated=%d bonded=%d\n",
-                desc->conn_itvl, desc->conn_latency,
-                desc->supervision_timeout,
-                desc->sec_state.encrypted,
-                desc->sec_state.authenticated,
-                desc->sec_state.bonded);
-}
-
 /**
  * Enables advertising with the following parameters:
  *     o General discoverable mode.
@@ -248,19 +217,19 @@ bleprph_advertise(void)
     /* Indicate that the flags field should be included; specify a value of 0
      * to instruct the stack to fill the value in for us.
      */
-    fields.flags_is_present = 1;
-    fields.flags = 0;
+    fields.flags_is_present      = 1;
+    fields.flags                 = 0;
 
     /* Indicate that the TX power level field should be included; have the
      * stack fill this one automatically as well.  This is done by assiging the
      * special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
      */
     fields.tx_pwr_lvl_is_present = 1;
-    fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+    fields.tx_pwr_lvl            = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-    fields.uuids128 = &((uint8_t[])BLEUART_SERVICE_UUID ) ;
-    fields.num_uuids128 = 1;
-    fields.uuids128_is_complete = 0;
+    fields.uuids128              = (void*) BLEUART_UUID_SERVICE ;
+    fields.num_uuids128          = 1;
+    fields.uuids128_is_complete  = 0;
 
     ASSERT_STATUS_RETVOID( ble_gap_adv_set_fields(&fields) );
 
@@ -301,65 +270,22 @@ bleprph_advertise(void)
 static int
 bleprph_gap_event(struct ble_gap_event *event, void *arg)
 {
-    struct ble_gap_conn_desc desc;
-
     switch (event->type) {
     case BLE_GAP_EVENT_CONNECT:
         /* A new connection was established or a connection attempt failed. */
-        BLEPRPH_LOG(INFO, "connection %s; status=%d ",
-                       event->connect.status == 0 ? "established" : "failed",
-                       event->connect.status);
         if (event->connect.status == 0) {
-          ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-          bleprph_print_conn_desc(&desc);
-          conn_handle = event->connect.conn_handle;
-        }
-        BLEPRPH_LOG(INFO, "\n");
-
-        if (event->connect.status != 0) {
+          bleuart_set_conn_handle(event->connect.conn_handle);
+        }else {
             /* Connection failed; resume advertising. */
             bleprph_advertise();
         }
         return 0;
 
     case BLE_GAP_EVENT_DISCONNECT:
-        BLEPRPH_LOG(INFO, "disconnect; reason=%d ", event->disconnect.reason);
-        bleprph_print_conn_desc(&event->disconnect.conn);
-        BLEPRPH_LOG(INFO, "\n");
-
         /* Connection terminated; resume advertising. */
         bleprph_advertise();
         return 0;
 
-    case BLE_GAP_EVENT_CONN_UPDATE:
-        /* The central has updated the connection parameters. */
-        BLEPRPH_LOG(INFO, "connection updated; status=%d ",
-                    event->conn_update.status);
-        ASSERT_STATUS ( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-        bleprph_print_conn_desc(&desc);
-        BLEPRPH_LOG(INFO, "\n");
-        return 0;
-
-    case BLE_GAP_EVENT_ENC_CHANGE:
-        /* Encryption has been enabled or disabled for this connection. */
-        BLEPRPH_LOG(INFO, "encryption change event; status=%d ",
-                    event->enc_change.status);
-        ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-        bleprph_print_conn_desc(&desc);
-        BLEPRPH_LOG(INFO, "\n");
-        return 0;
-
-    case BLE_GAP_EVENT_SUBSCRIBE:
-        BLEPRPH_LOG(INFO, "subscribe event; conn_handle=%d attr_handle=%d "
-                          "reason=%d prevn=%d curn=%d previ=%d curi=%d\n",
-                    event->subscribe.conn_handle,
-                    event->subscribe.attr_handle,
-                    event->subscribe.reason,
-                    event->subscribe.prev_notify,
-                    event->subscribe.cur_notify,
-                    event->subscribe.prev_indicate,
-                    event->subscribe.cur_indicate);
-        return 0;
     }
 
     return 0;
@@ -418,14 +344,14 @@ void blinky_task_handler(void* arg)
 void bleuart_bridge_task_handler(void* arg)
 {
   // register 'nus' command to send BLEUART
-  bf_gatts_bleuart_shell_register();
+  bleuart_shell_register();
 
   while(1)
   {
     int ch;
 
     // Get data from bleuart to hwuart
-    if ( (ch = bf_gatts_bleuart_getc()) != EOF )
+    if ( (ch = bleuart_getc()) != EOF )
     {
       console_write( (char*)&ch, 1);
     }
@@ -474,9 +400,7 @@ int main(void)
     srand(seed);
 
     /* Initialize msys mbufs. */
-    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS,
-                                   MBUF_MEMBLOCK_SIZE, mbuf_mpool_data,
-                                   "bleprph_mbuf_data") );
+    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
     ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
     ASSERT_STATUS( os_msys_register(&mbuf_pool) );
 
@@ -493,7 +417,7 @@ int main(void)
 
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
-    console_init(shell_console_rx_cb); // console_init(NULL);
+    console_init(shell_console_rx_cb);
 
     nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
     imgmgr_module_init();
@@ -535,16 +459,24 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-    ASSERT_STATUS( bf_gatts_init(&cfg) );
     ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
 
+    bledis_cfg_t dis_cfg =
+    {
+        .model        = "Feather52" ,
+        .serial       = NULL        ,
+        .firmware_rev = "0.9.0"     ,
+        .hardware_rev = "nRF52832"  ,
+        .software_rev = "0.9.0"     ,
+        .manufacturer = "Adafruit Industries"
+    };
+    bledis_init(&cfg, &dis_cfg);
+
+    bleuart_init(&cfg);
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);
-
     ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
-
-    bf_gatts_bleurat_find_tx_hdl();
 
     /* Set the default device name. */
     ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );

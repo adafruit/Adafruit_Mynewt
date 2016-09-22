@@ -111,6 +111,16 @@ static inline bool mem_test_zero(void const* buffer, uint32_t size)
   return true;
 }
 
+static inline uint16_t uuid_extract_128_to_16(uint8_t const uuid128[])
+{
+  return (uuid128[13] << 8) | uuid128[12];
+}
+
+static inline bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
+{
+  return !memcmp(uuid1, uuid2, 16);
+}
+
 //------------- Conversion -------------//
 /// form an uint32_t from 4 x uint8_t
 static inline uint32_t u32_from_u8(uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4) ATTR_ALWAYS_INLINE ATTR_CONST;

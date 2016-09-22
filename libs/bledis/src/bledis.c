@@ -112,7 +112,6 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
 {
   VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR, -1);
 
-  PRINT_BUFFER(_dis_chars[0].uuid128, 16);
   uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
   VERIFY( is_within(UUID16_CHR_MODEL_NUMBER_STRING, uuid16, UUID16_CHR_MANUFACTURER_NAME_STRING), -1);
 
