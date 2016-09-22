@@ -47,12 +47,23 @@ Set the `build_profile` flag to `optimized` for the bootloader target:
 $ newt target set nrf52_boot build_profile=optimized
 ```
 
-### Option 1: Create an entirely new application as a target
+### Option 1: Copy an existing demo app as a target
+
+Import the standard blinky demo as a working example:
+
+```
+$ newt target create blink_nordic
+$ newt target set blink_nordic app=apps/blinky
+$ newt target set blink_nordic bsp=@apache-mynewt-core/hw/bsp/nrf52dk
+$ newt target set blink_nordic build_profile=debug
+```
+
+### Option 2: Create an entirely new application as a target
 
 > **Note:** When the project is created via `newt new projectname` a bare bones
 > blinky app will be created in `apps/blinky`. You can also use this as a
 > starting point for your project instead of creating a new one, as described
-> in 'Option 2' further down.
+> in 'Option 1' aobve.
 
 A mynewt app requires at least a `main()` function and a `pkg.yml` file.
 
@@ -116,24 +127,13 @@ $ newt target set ble_app bsp=@apache-mynewt-core/hw/bsp/nrf52dk
 $ newt target set ble_app build_profile=debug
 ```
 
-### Option 2: Copy an existing demo app as a target
-
-Import the standard blinky demo as a working example:
-
-```
-$ newt target create blink_nordic
-$ newt target set blink_nordic app=apps/blinky
-$ newt target set blink_nordic bsp=@apache-mynewt-core/hw/bsp/nrf52dk
-$ newt target set blink_nordic build_profile=debug
-```
-
 ### Review the target(s)
 
 ```
 $ newt target show
 ```
 
-This should give you a list resembling the following (assuming option 2 above):
+This should give you a list resembling the following (assuming option 1 above):
 
 ```
 targets/blink_nordic
