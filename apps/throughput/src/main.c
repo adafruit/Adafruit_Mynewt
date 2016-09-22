@@ -69,8 +69,11 @@
 #include "services/gatt/ble_svc_gatt.h"
 
 #include "adafruit_util.h"
+#include "bledis/bledis.h"
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
+
+#define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
 
 //--------------------------------------------------------------------+
 //
@@ -125,6 +128,9 @@ os_stack_t blinky_stack[BLINKY_STACK_SIZE];
 
 struct os_task bleuart_bridge_task;
 os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
+
+#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
+#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
 
 //--------------------------------------------------------------------+
 //
@@ -205,7 +211,7 @@ bleprph_advertise(void)
     fields.tx_pwr_lvl_is_present = 1;
     fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-    fields.uuids128 = &((uint8_t[])BLEUART_SERVICE_UUID ) ;
+//    fields.uuids128 = &((uint8_t[])BLEUART_SERVICE_UUID ) ;
     fields.num_uuids128 = 1;
     fields.uuids128_is_complete = 0;
 
@@ -332,7 +338,6 @@ bleprph_task_handler(void *unused)
         ev = os_eventq_get(&bleprph_evq);
 
         /* Check if the event is a nmgr ble mqueue event */
-        rc = nmgr_ble_proc_mq_evt(ev);
         if (!rc) {
             continue;
         }
@@ -362,6 +367,7 @@ void blinky_task_handler(void* arg)
   }
 }
 
+#if 0
 void bleuart_bridge_task_handler(void* arg)
 {
   // register 'nus' command to send BLEUART
@@ -380,7 +386,7 @@ void bleuart_bridge_task_handler(void* arg)
     os_time_delay(1);
   }
 }
-
+#endif
 
 /**
  * main
@@ -430,8 +436,8 @@ int main(void)
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
 
-    os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
-                 BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
+//    os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
+//                 BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
 
     os_task_init(&bleprph_task, "bleprph", bleprph_task_handler, NULL,
                  BLEPRPH_TASK_PRIO, OS_WAIT_FOREVER, bleprph_stack, BLEPRPH_STACK_SIZE);
@@ -464,16 +470,14 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-    ASSERT_STATUS( bf_gatts_init(&cfg) );
-    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
 
+    bledis_cfg_t dis_cfg;
+    bledis_init(&cfg, &dis_cfg);
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);
 
     ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
-
-    bf_gatts_bleurat_find_tx_hdl();
 
     /* Set the default device name. */
     ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );

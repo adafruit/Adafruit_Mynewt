@@ -83,6 +83,11 @@
 //--------------------------------------------------------------------+
 // DEBUG HELPER
 //--------------------------------------------------------------------+
+#if CFG_DEBUG == 3
+  #define malloc_named( name, size )            ({ printf("[malloc] %s : %d\r\n", name, size); malloc(size); })
+#else
+  #define malloc_named( name, size )            malloc ( size )
+#endif
 
 #define PRINT_LOCATION()      fprintf(stderr, "%s: %d: \r\n", __func__, __LINE__)
 #define PRTNT_HEAP()          if (CFG_DEBUG == 3) fprintf(stderr, "\r\n%s: %d: Heap free: %d\r\n", __func__, __LINE__, util_heap_get_free_size())

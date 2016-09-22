@@ -61,6 +61,7 @@
 #include "assertion.h"
 //#include "binary.h"
 #include "common_func.h"
+#include "adafruit_uuid.h"
 
 //--------------------------------------------------------------------+
 // TYPEDEFS

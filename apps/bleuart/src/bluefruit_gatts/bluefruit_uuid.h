@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     bluefruit_uuid.h
+    @file     adafruit_uuid.h
     @author   hathach
 
     @section LICENSE
@@ -34,8 +34,8 @@
 */
 /**************************************************************************/
 
-#ifndef _BLUEFRUIT_UUID_H_
-#define _BLUEFRUIT_UUID_H_
+#ifndef _ADAFRUIT_UUID_H_
+#define _ADAFRUIT_UUID_H_
 
 #ifdef __cplusplus
  extern "C" {
@@ -158,4 +158,4 @@
  }
 #endif
 
-#endif /* _BLUEFRUIT_UUID_H_ */
+#endif /* _ADAFRUIT_UUID_H_ */
