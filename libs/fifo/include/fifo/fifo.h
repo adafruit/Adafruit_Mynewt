@@ -91,14 +91,14 @@ static inline bool fifo_peek(fifo_t* f, void * p_buffer)
 uint16_t fifo_read_n (fifo_t* f, void * p_buffer, uint16_t count);
 uint16_t fifo_write_n(fifo_t* f, void const * p_data, uint16_t count);
 
-static inline bool fifo_is_empty(fifo_t* f) ATTR_ALWAYS_INLINE;
-static inline bool fifo_is_empty(fifo_t* f)
+static inline bool fifo_empty(fifo_t* f) ATTR_ALWAYS_INLINE;
+static inline bool fifo_empty(fifo_t* f)
 {
   return (f->count == 0);
 }
 
-static inline bool fifo_is_full(fifo_t* f) ATTR_ALWAYS_INLINE;
-static inline bool fifo_is_full(fifo_t* f)
+static inline bool fifo_full(fifo_t* f) ATTR_ALWAYS_INLINE;
+static inline bool fifo_full(fifo_t* f)
 {
   return (f->count == f->depth);
 }

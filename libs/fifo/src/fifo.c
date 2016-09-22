@@ -37,6 +37,7 @@
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /******************************************************************************/
+
 #include "fifo.h"
 
 static inline bool is_fifo_initalized(fifo_t* f) ATTR_ALWAYS_INLINE;
@@ -59,7 +60,7 @@ static inline bool is_fifo_initalized(fifo_t* f) ATTR_ALWAYS_INLINE;
 /******************************************************************************/
 bool fifo_read(fifo_t* f, void * p_buffer)
 {
-  if( !is_fifo_initalized(f) || fifo_is_empty(f) ) return false;
+  if( !is_fifo_initalized(f) || fifo_empty(f) ) return false;
 
   ff_mutex_lock(f);
 
@@ -122,7 +123,7 @@ uint16_t fifo_read_n (fifo_t* f, void * p_buffer, uint16_t count)
 /******************************************************************************/
 bool fifo_peek_at(fifo_t* f, uint16_t position, void * p_buffer)
 {
-  if( !is_fifo_initalized(f) || fifo_is_empty(f) || (position >= f->count) ) return false;
+  if( !is_fifo_initalized(f) || fifo_empty(f) || (position >= f->count) ) return false;
 
   uint16_t index = (f->rd_idx + position) % f->depth; // rd_idx is position=0
   memcpy(p_buffer,
@@ -151,7 +152,7 @@ bool fifo_peek_at(fifo_t* f, uint16_t position, void * p_buffer)
 /******************************************************************************/
 bool fifo_write(fifo_t* f, void const * p_data)
 {
-  if ( !is_fifo_initalized(f) || (fifo_is_full(f) && !f->overwritable) ) return false;
+  if ( !is_fifo_initalized(f) || (fifo_full(f) && !f->overwritable) ) return false;
 
   ff_mutex_lock(f);
 
@@ -161,7 +162,7 @@ bool fifo_write(fifo_t* f, void const * p_data)
 
   f->wr_idx = (f->wr_idx + 1) % f->depth;
 
-  if (fifo_is_full(f))
+  if (fifo_full(f))
   {
     f->rd_idx = f->wr_idx; // keep the full state (rd == wr && len = size)
   }
