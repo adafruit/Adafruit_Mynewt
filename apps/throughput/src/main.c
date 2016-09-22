@@ -61,6 +61,10 @@
 /* RAM HCI transport. */
 #include "transport/ram/ble_hci_ram.h"
 
+/* Newtmgr include */
+#include "newtmgr/newtmgr.h"
+#include "nmgrble/newtmgr_ble.h"
+
 /* RAM persistence layer. */
 #include "store/ram/ble_store_ram.h"
 
@@ -115,6 +119,11 @@ bssnz_t os_stack_t bleprph_stack[BLEPRPH_STACK_SIZE];
 #define SHELL_TASK_STACK_SIZE (OS_STACK_ALIGN(384))
 os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
 
+// netmgr task
+#define NEWTMGR_TASK_PRIO            (4)
+#define NEWTMGR_TASK_STACK_SIZE      (OS_STACK_ALIGN(512))
+os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
+
 /* Task Blinky */
 #define BLINKY_TASK_PRIO     10
 #define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
@@ -154,33 +163,6 @@ print_addr(const void *addr)
 }
 
 /**
- * Logs information about a connection to the console.
- */
-static void
-bleprph_print_conn_desc(struct ble_gap_conn_desc *desc)
-{
-    BLEPRPH_LOG(INFO, "handle=%d our_ota_addr_type=%d our_ota_addr=", desc->conn_handle, desc->our_ota_addr_type);
-    print_addr(desc->our_ota_addr);
-
-    BLEPRPH_LOG(INFO, " our_id_addr_type=%d our_id_addr=", desc->our_id_addr_type);
-    print_addr(desc->our_id_addr);
-
-    BLEPRPH_LOG(INFO, " peer_ota_addr_type=%d peer_ota_addr=", desc->peer_ota_addr_type);
-    print_addr(desc->peer_ota_addr);
-
-    BLEPRPH_LOG(INFO, " peer_id_addr_type=%d peer_id_addr=", desc->peer_id_addr_type);
-    print_addr(desc->peer_id_addr);
-
-    BLEPRPH_LOG(INFO, " conn_itvl=%d conn_latency=%d supervision_timeout=%d "
-                "encrypted=%d authenticated=%d bonded=%d\n",
-                desc->conn_itvl, desc->conn_latency,
-                desc->supervision_timeout,
-                desc->sec_state.encrypted,
-                desc->sec_state.authenticated,
-                desc->sec_state.bonded);
-}
-
-/**
  * Enables advertising with the following parameters:
  *     o General discoverable mode.
  *     o Undirected connectable mode.
@@ -211,9 +193,11 @@ bleprph_advertise(void)
     fields.tx_pwr_lvl_is_present = 1;
     fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-//    fields.uuids128 = &((uint8_t[])BLEUART_SERVICE_UUID ) ;
-    fields.num_uuids128 = 1;
-    fields.uuids128_is_complete = 0;
+    //fields.uuids128 = &((uint8_t[])BLEUART_SERVICE_UUID ) ;
+    //fields.num_uuids128 = 1;
+//    fields.uuids128_is_complete = 0;
+    fields.uuids16 =  (uint16_t []){ UUID16_SVC_DEVICE_INFORMATION };
+    fields.num_uuids16 = 1;
 
     ASSERT_STATUS_RETVOID( ble_gap_adv_set_fields(&fields) );
 
@@ -259,15 +243,10 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
     switch (event->type) {
     case BLE_GAP_EVENT_CONNECT:
         /* A new connection was established or a connection attempt failed. */
-        BLEPRPH_LOG(INFO, "connection %s; status=%d ",
-                       event->connect.status == 0 ? "established" : "failed",
-                       event->connect.status);
         if (event->connect.status == 0) {
           ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-          bleprph_print_conn_desc(&desc);
           conn_handle = event->connect.conn_handle;
         }
-        BLEPRPH_LOG(INFO, "\n");
 
         if (event->connect.status != 0) {
             /* Connection failed; resume advertising. */
@@ -276,43 +255,10 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
         return 0;
 
     case BLE_GAP_EVENT_DISCONNECT:
-        BLEPRPH_LOG(INFO, "disconnect; reason=%d ", event->disconnect.reason);
-        bleprph_print_conn_desc(&event->disconnect.conn);
-        BLEPRPH_LOG(INFO, "\n");
-
         /* Connection terminated; resume advertising. */
         bleprph_advertise();
         return 0;
 
-    case BLE_GAP_EVENT_CONN_UPDATE:
-        /* The central has updated the connection parameters. */
-        BLEPRPH_LOG(INFO, "connection updated; status=%d ",
-                    event->conn_update.status);
-        ASSERT_STATUS ( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-        bleprph_print_conn_desc(&desc);
-        BLEPRPH_LOG(INFO, "\n");
-        return 0;
-
-    case BLE_GAP_EVENT_ENC_CHANGE:
-        /* Encryption has been enabled or disabled for this connection. */
-        BLEPRPH_LOG(INFO, "encryption change event; status=%d ",
-                    event->enc_change.status);
-        ASSERT_STATUS( ble_gap_conn_find(event->connect.conn_handle, &desc) );
-        bleprph_print_conn_desc(&desc);
-        BLEPRPH_LOG(INFO, "\n");
-        return 0;
-
-    case BLE_GAP_EVENT_SUBSCRIBE:
-        BLEPRPH_LOG(INFO, "subscribe event; conn_handle=%d attr_handle=%d "
-                          "reason=%d prevn=%d curn=%d previ=%d curi=%d\n",
-                    event->subscribe.conn_handle,
-                    event->subscribe.attr_handle,
-                    event->subscribe.reason,
-                    event->subscribe.prev_notify,
-                    event->subscribe.cur_notify,
-                    event->subscribe.prev_indicate,
-                    event->subscribe.cur_indicate);
-        return 0;
     }
 
     return 0;
@@ -338,6 +284,7 @@ bleprph_task_handler(void *unused)
         ev = os_eventq_get(&bleprph_evq);
 
         /* Check if the event is a nmgr ble mqueue event */
+        rc = nmgr_ble_proc_mq_evt(ev);
         if (!rc) {
             continue;
         }
@@ -433,6 +380,9 @@ int main(void)
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
     console_init(shell_console_rx_cb);
 
+    nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
+//    imgmgr_module_init();
+
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
 
@@ -470,13 +420,21 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
+	ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
 
-    bledis_cfg_t dis_cfg;
-    bledis_init(&cfg, &dis_cfg);
+//    bledis_cfg_t dis_cfg =
+//    {
+//        .model        = "Feather52" ,
+//        .serial       = NULL        ,
+//        .firmware_rev = "0.9.0"     ,
+//        .hardware_rev = "nRF52832"  ,
+//        .software_rev = "0.9.0"     ,
+//        .manufacturer = "Adafruit Industries"
+//    };
+//    bledis_init(&cfg, &dis_cfg);
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);
-
     ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
 
     /* Set the default device name. */

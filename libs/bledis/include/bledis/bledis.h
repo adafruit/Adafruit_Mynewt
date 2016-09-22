@@ -43,12 +43,13 @@
 
 typedef struct
 {
-  const char* model;
-  const char* serial;
-  const char* firmware_rev;
-  const char* hardware_rev;
-  const char* software_rev;
-  const char* manufacturer;
+  // system ID
+  const char* model;        // UUID 0x2A24
+  const char* serial;       // UUID 0x2A25
+  const char* firmware_rev; // UUID 0x2A26
+  const char* hardware_rev; // UUID 0x2A27
+  const char* software_rev; // UUID 0x2A28
+  const char* manufacturer; // UUID 0x2A29
 
 } bledis_cfg_t;
 
