@@ -62,6 +62,8 @@
 #include "common_func.h"
 #include "adafruit_uuid.h"
 
+#include "adafruit_log.h"
+
 
 #ifdef __cplusplus
  }
