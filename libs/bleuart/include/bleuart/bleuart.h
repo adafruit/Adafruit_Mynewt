@@ -41,7 +41,7 @@
  extern "C" {
 #endif
 
-#include "adafruit_util.h"
+#include "adafruit/adafruit_util.h"
 #include "host/ble_hs.h"
 
 #ifndef CFG_BLE_UART_BUFSIZE

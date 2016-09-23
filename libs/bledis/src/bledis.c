@@ -34,7 +34,7 @@
 */
 /**************************************************************************/
 
-#include "adafruit_util.h"
+#include "adafruit/adafruit_util.h"
 #include "host/ble_hs.h"
 #include "bledis/bledis.h"
 
@@ -75,6 +75,7 @@ static const struct ble_gatt_svc_def _dis_service[] =
   , { 0 } /* No more services. */
 };
 
+
 //--------------------------------------------------------------------+
 // FUNCTION DECLARATION
 //--------------------------------------------------------------------+
@@ -83,6 +84,8 @@ static int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct b
 
 int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
 {
+  // adalog_init();
+
   memclr(_dis_chars, sizeof(_dis_chars));
   _dis_cfg.named = *dis_cfg;
 
@@ -92,6 +95,8 @@ int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
   {
     if ( _dis_cfg.arrptr[i] != NULL )
     {
+//      LOG_INFO();
+
       _dis_chars[count].uuid128   = _dis_uuid128[i];
       _dis_chars[count].access_cb = bledis_access_cb;
       _dis_chars[count].flags     = BLE_GATT_CHR_F_READ;

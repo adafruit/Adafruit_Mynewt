@@ -67,7 +67,7 @@
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
 
-#include "adafruit_util.h"
+#include "adafruit/adafruit_util.h"
 #include "bledis/bledis.h"
 #include "bleuart/bleuart.h"
 
