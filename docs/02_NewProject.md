@@ -152,6 +152,23 @@ targets/nrf52_boot
     build_profile=optimized
 ```
 
+## Adding optional flags
+
+You can add option flags and values to the target at this point as well, such
+as the following command which will enable stand-alone serial support for
+the bootloader:
+
+```
+$ newt target set nrf52_boot cflags=-DBOOT_SERIAL
+```
+
+This adds the following entry to the pkg.yml file for the nrf52_boot target:
+
+```
+pkg.cflags:
+    - "-DBOOT_SERIAL"
+```
+
 ## Building the Project
 
 To build the targets created above, run the `newt build` command once for
