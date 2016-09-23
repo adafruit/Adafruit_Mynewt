@@ -28,4 +28,4 @@ pkg.keywords:
   - adafruit
 
 pkg.deps:
-  - libs/util
+  - libs/adautil

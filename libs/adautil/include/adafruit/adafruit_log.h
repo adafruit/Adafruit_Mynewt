@@ -41,7 +41,6 @@
  extern "C" {
 #endif
 
-#if 0
 #include "log/log.h"
 
 #define LOG_MODULE_ADA    0xAD
@@ -51,7 +50,6 @@
 void adalog_init(void);
 
 extern struct log adalog;
-#endif
 
 #ifdef __cplusplus
  }

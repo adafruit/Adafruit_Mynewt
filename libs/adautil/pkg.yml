@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-pkg.name: libs/util
+pkg.name: libs/adautil
 pkg.description: Library containing miscellaneous utilities.
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"

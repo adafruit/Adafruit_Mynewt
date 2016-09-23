@@ -36,7 +36,7 @@ pkg.cflags:
     #- "-Wno-error=unused-variable"
 
 pkg.deps:
-    - "libs/util"
+    - "libs/adautil"
     - "libs/fifo"
     - "libs/bleuart"
     - "libs/bledis"
