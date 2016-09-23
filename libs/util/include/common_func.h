@@ -102,8 +102,10 @@
     fprintf(stderr, "\r\n");\
   }while(0)
 
+//--------------------------------------------------------------------+
+// INLINE FUNCTION
+//--------------------------------------------------------------------+
 /// Checks is all values in the supplied array are zero
-static inline bool mem_test_zero(void const* buffer, uint32_t size) ATTR_ALWAYS_INLINE ATTR_PURE;
 static inline bool mem_test_zero(void const* buffer, uint32_t size)
 {
   uint8_t const* p_mem = (uint8_t const*) buffer;
@@ -123,82 +125,68 @@ static inline bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
 
 //------------- Conversion -------------//
 /// form an uint32_t from 4 x uint8_t
-static inline uint32_t u32_from_u8(uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t u32_from_u8(uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4)
 {
   return (b1 << 24) + (b2 << 16) + (b3 << 8) + b4;
 }
 
-static inline uint16_t u32_high_u16(uint32_t u32) ATTR_CONST ATTR_ALWAYS_INLINE;
 static inline uint16_t u32_high_u16(uint32_t u32)
 {
   return (uint16_t) ((u32 >> 16) & 0xffff);
 }
 
-static inline uint16_t u32_low_u16(uint32_t u32) ATTR_CONST ATTR_ALWAYS_INLINE;
 static inline uint16_t u32_low_u16(uint32_t u32)
 {
   return (uint16_t) (u32 & 0xffff);
 }
 
-static inline uint16_t u16_from_u8(uint8_t b1, uint8_t b2) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint16_t u16_from_u8(uint8_t b1, uint8_t b2)
 {
   return (b1 << 8) + b2;
 }
 
-static inline uint8_t u16_high_u8(uint16_t u16) ATTR_CONST ATTR_ALWAYS_INLINE;
 static inline uint8_t u16_high_u8(uint16_t u16)
 {
   return (uint8_t) ((u16 >> 8) & 0x00ff);
 }
 
-static inline uint8_t u16_low_u8(uint16_t u16) ATTR_CONST ATTR_ALWAYS_INLINE;
 static inline uint8_t u16_low_u8(uint16_t u16)
 {
   return (uint8_t) (u16 & 0x00ff);
 }
 
 //------------- Align -------------//
-static inline uint32_t align32 (uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align32 (uint32_t value)
 {
   return (value & 0xFFFFFFE0UL);
 }
 
-static inline uint32_t align16 (uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align16 (uint32_t value)
 {
   return (value & 0xFFFFFFF0UL);
 }
 
-static inline uint32_t align_n (uint32_t alignment, uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align_n (uint32_t alignment, uint32_t value)
 {
   return value & (~(alignment-1));
 }
 
-static inline uint32_t align4k (uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t align4k (uint32_t value)
 {
   return (value & 0xFFFFF000UL);
 }
 
-static inline uint32_t offset4k(uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint32_t offset4k(uint32_t value)
 {
   return (value & 0xFFFUL);
 }
 
 //------------- Mathematics -------------//
-/// inclusive range checking
-static inline bool is_within(uint32_t lower, uint32_t value, uint32_t upper) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline bool is_within(uint32_t lower, uint32_t value, uint32_t upper)
 {
   return (lower <= value) && (value <= upper);
 }
 
-static inline uint8_t log2_of(uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint8_t log2_of(uint32_t value)
 {
   uint8_t result = 0; // log2 of a value is its MSB's position
@@ -208,7 +196,6 @@ static inline uint8_t log2_of(uint32_t value)
 }
 
 // return the number of set bits in value
-static inline uint8_t cardinality_of(uint32_t value) ATTR_ALWAYS_INLINE ATTR_CONST;
 static inline uint8_t cardinality_of(uint32_t value)
 {
   // Brian Kernighan's method goes through as many iterations as there are set bits. So if we have a 32-bit word with only

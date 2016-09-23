@@ -146,6 +146,12 @@ uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
+static inline uint32_t tick2ms(os_time_t tick)
+{
+  return ((uint64_t) (tick*1000)) / OS_TICKS_PER_SEC;
+}
+
+
 static int cmd_nustest_exec(int argc, char **argv);
 static struct shell_cmd cmd_nustest = {
     .sc_cmd = "nustest",
@@ -154,10 +160,40 @@ static struct shell_cmd cmd_nustest = {
 
 static int cmd_nustest_exec(int argc, char **argv)
 {
-  /* default is 100 packets */
-  uint32_t count = (argc > 1) ? strtoul(argv[1], NULL, 10) : 100;
+  /* 1st arg is number of packet (default 100)
+   * 2nd arg is size of each packet (deault 20)
+   */
 
-  printf("count = %lu\r\n", count);
+  uint32_t count = (argc > 1) ? strtoul(argv[1], NULL, 10) : 100;
+  uint32_t size  = (argc > 2) ? strtoul(argv[2], NULL, 10) : 20;
+
+  uint32_t total = count * size;
+
+  printf("count = %lu, size = %lu\r\n", count, size);
+  char *data = malloc(size);
+  VERIFY(data, -1);
+
+  for(uint8_t i=0; i<size; i++)
+  {
+    data[i] = i%10 + '0';
+  }
+
+  os_time_t tick = os_time_get();
+
+
+  for(uint8_t i=0; i<count; i++)
+  {
+    bleuart_write(data, size);
+  }
+
+  tick = os_time_get() -  tick;
+  uint32_t ms = tick2ms(tick);
+
+  free(data);
+
+  /* Print result */
+  printf("Sent %lu bytes in %lu milliseconds \r\n", total, ms);
+  printf("Speed: %lu.%lu KB/s\r\n", total/ms, 100*(total%ms)/ms );
 
   return 0;
 }
