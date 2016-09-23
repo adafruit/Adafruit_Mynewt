@@ -83,7 +83,7 @@
 //
 //--------------------------------------------------------------------+
 /** Mbuf settings. */
-#define MBUF_NUM_MBUFS      (100)
+#define MBUF_NUM_MBUFS      (110)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
 #define MBUF_MEMPOOL_SIZE   OS_MEMPOOL_SIZE(MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE)
@@ -132,6 +132,8 @@ uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 /** Our random address (in case we need it) */
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
+uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
+
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
@@ -156,9 +158,20 @@ static int cmd_nustest_exec(int argc, char **argv)
   uint32_t count = (argc > 1) ? strtoul(argv[1], NULL, 10) : 100;
   uint32_t size  = (argc > 2) ? strtoul(argv[2], NULL, 10) : 20;
 
+  if ( count > 100 )
+  {
+    printf("count must not exceed 100\n");
+    return -1;
+  }
+
+  if ( size > 240 )
+  {
+    printf("size must not exceed 240\n");
+    return -1;
+  }
+
   uint32_t total = count * size;
 
-  printf("count = %lu, size = %lu\r\n", count, size);
   char *data = malloc(size);
   VERIFY(data, -1);
 
@@ -167,16 +180,21 @@ static int cmd_nustest_exec(int argc, char **argv)
     data[i] = i%10 + '0';
   }
 
-  os_time_t tick = os_time_get();
+  // Negotiate a larger MTU if size > 20
+  if ( size > 20 )
+  {
+    ble_gattc_exchange_mtu(conn_handle, NULL, NULL);
+    // wait for the MTU procedure to complete, could use complete callback
+    // but just delay 500 ms now
+    os_time_delay(500);
+  }
 
+  os_time_t tick = os_time_get();
 
   for(uint8_t i=0; i<count; i++)
   {
     // delay a bit if out of memory (cannot send)
-    while ( 0 == bleuart_write(data, size) )
-    {
-      os_time_delay(1);
-    }
+    bleuart_write(data, size);
   }
 
   tick = os_time_get() -  tick;
@@ -185,8 +203,8 @@ static int cmd_nustest_exec(int argc, char **argv)
   free(data);
 
   /* Print result */
-  printf("Sent %lu bytes in %lu milliseconds \r\n", total, ms);
-  printf("Speed: %lu.%lu KB/s\r\n", total/ms, 100*(total%ms)/ms );
+  printf("Sent %lu bytes (%lu packets of %lu size) in %lu milliseconds\n", total, count, size, ms);
+  printf("Speed: %lu.%lu KB/s\n", total/ms, 100*(total%ms)/ms );
 
   return 0;
 }
@@ -272,10 +290,13 @@ btle_gap_event(struct ble_gap_event *event, void *arg)
     case BLE_GAP_EVENT_CONNECT:
         /* A new connection was established or a connection attempt failed. */
         if (event->connect.status == 0) {
-          bleuart_set_conn_handle(event->connect.conn_handle);
+          conn_handle = event->connect.conn_handle;
+          bleuart_set_conn_handle(conn_handle);
         }else {
-            /* Connection failed; resume advertising. */
-            btle_advertise();
+          /* Connection failed; resume advertising. */
+          btle_advertise();
+
+          conn_handle = BLE_HS_CONN_HANDLE_NONE;
         }
         return 0;
 
@@ -300,6 +321,7 @@ btle_task_handler(void *unused)
     int rc;
 
     shell_cmd_register(&cmd_nustest);
+    printf("nustest <count> <packetsize>\r\n");
 
     rc = ble_hs_start();
     assert(rc == 0);
