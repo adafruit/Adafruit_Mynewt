@@ -6,7 +6,7 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
@@ -44,6 +44,14 @@ extern uint8_t _ram_start;
 #define CONSOLE_UART    0
 
 #define NFFS_AREA_MAX   (8)
+
+/* BOOT_SERIAL pins */
+/* DFU pin is set to 0.07 on the BLEFRIEND32 */
+#define BOOT_SERIAL_DETECT_PIN      (7)
+/* 0 = No pullup, 1 = Pull Up, 2 = Pull Down */
+#define BOOT_SERIAL_DETECT_PIN_CFG  (0)
+/* Board has external pullup and the tact switch sets the pin to GND */
+#define BOOT_SERIAL_DETECT_PIN_VAL  (0)
 
 #ifdef __cplusplus
 }
