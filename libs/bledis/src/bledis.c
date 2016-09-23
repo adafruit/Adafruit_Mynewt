@@ -62,6 +62,16 @@ const uint8_t _dis_uuid128[][16] =
     BLE_UUID16_ARR(UUID16_CHR_MANUFACTURER_NAME_STRING)
 };
 
+const char * _dis_chr_text[] =
+{
+    "Model Number",
+    "Serial Number",
+    "Firmware Revision",
+    "Hardware Revision",
+    "Software Revision",
+    "Manufacturer",
+};
+
 static struct ble_gatt_chr_def _dis_chars[BLEDIS_MAX_CHAR+1];
 
 static const struct ble_gatt_svc_def _dis_service[] =
@@ -84,7 +94,7 @@ static int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct b
 
 int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
 {
-  // adalog_init();
+   adalog_init();
 
   memclr(_dis_chars, sizeof(_dis_chars));
   _dis_cfg.named = *dis_cfg;
@@ -95,7 +105,7 @@ int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
   {
     if ( _dis_cfg.arrptr[i] != NULL )
     {
-//      LOG_INFO();
+      ADALOG_INFO("%s added\r\n", _dis_chr_text[i]);
 
       _dis_chars[count].uuid128   = _dis_uuid128[i];
       _dis_chars[count].access_cb = bledis_access_cb;

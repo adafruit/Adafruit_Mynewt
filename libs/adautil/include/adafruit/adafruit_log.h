@@ -43,9 +43,11 @@
 
 #include "log/log.h"
 
-#define LOG_MODULE_ADA    0xAD
+#define LOG_MODULE_ADA      0xAD
 
-#define ADALOG(lvl, ...)  LOG_##lvl(&adalog, LOG_MODULE_ADA, __VA_ARGS__)
+#define ADALOG(lvl, ...)    LOG_##lvl(&adalog, LOG_MODULE_ADA, __VA_ARGS__)
+#define ADALOG_INFO(...)    ADALOG(INFO, __VA_ARGS__)
+#define ADALOG_DEBUG(...)   ADALOG(DEBUG, __VA_ARGS__)
 
 void adalog_init(void);
 
