@@ -38,7 +38,7 @@
 */
 /******************************************************************************/
 
-#include "fifo/fifo.h"
+#include "adafruit/fifo.h"
 
 static inline bool is_fifo_initalized(fifo_t* f) ATTR_ALWAYS_INLINE;
 

@@ -35,8 +35,8 @@
 /**************************************************************************/
 
 #include <shell/shell.h>
-#include "bleuart/bleuart.h"
-#include "fifo/fifo.h"
+#include "adafruit/bleuart.h"
+#include "adafruit/fifo.h"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF

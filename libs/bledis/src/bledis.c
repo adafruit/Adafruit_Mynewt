@@ -36,7 +36,7 @@
 
 #include "adafruit/adafruit_util.h"
 #include "host/ble_hs.h"
-#include "bledis/bledis.h"
+#include "adafruit/bledis.h"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF

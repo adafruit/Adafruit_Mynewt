@@ -73,8 +73,8 @@
 #include "services/gatt/ble_svc_gatt.h"
 
 #include "adafruit/adafruit_util.h"
-#include "bledis/bledis.h"
-#include "bleuart/bleuart.h"
+#include "adafruit/bledis.h"
+#include "adafruit/bleuart.h"
 
 
 #define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
