@@ -186,19 +186,19 @@ bleprph_advertise(void)
     /* Indicate that the flags field should be included; specify a value of 0
      * to instruct the stack to fill the value in for us.
      */
-    fields.flags_is_present = 1;
-    fields.flags = 0;
+    fields.flags_is_present      = 1;
+    fields.flags                 = 0;
 
     /* Indicate that the TX power level field should be included; have the
      * stack fill this one automatically as well.  This is done by assiging the
      * special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
      */
     fields.tx_pwr_lvl_is_present = 1;
-    fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+    fields.tx_pwr_lvl            = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-    fields.uuids128 = gatt_svr_svc_uart;
-    fields.num_uuids128 = 1;
-    fields.uuids128_is_complete = 0;
+    fields.uuids128              = (void*) BLEUART_UUID_SERVICE ;
+    fields.num_uuids128          = 1;
+    fields.uuids128_is_complete  = 0;
 
     ASSERT_STATUS_RETVOID( ble_gap_adv_set_fields(&fields) );
 
@@ -239,8 +239,6 @@ bleprph_advertise(void)
 static int
 bleprph_gap_event(struct ble_gap_event *event, void *arg)
 {
-    struct ble_gap_conn_desc desc;
-
     switch (event->type) {
     case BLE_GAP_EVENT_CONNECT:
         /* A new connection was established or a connection attempt failed. */
@@ -314,26 +312,6 @@ void blinky_task_handler(void* arg)
   }
 }
 
-#if 0
-void bleuart_bridge_task_handler(void* arg)
-{
-  // register 'nus' command to send BLEUART
-  bf_gatts_bleuart_shell_register();
-
-  while(1)
-  {
-    int ch;
-
-    // Get data from bleuart to hwuart
-    if ( (ch = bf_gatts_bleuart_getc()) != EOF )
-    {
-      console_write( (char*)&ch, 1);
-    }
-
-    os_time_delay(1);
-  }
-}
-#endif
 
 /**
  * main
@@ -429,8 +407,12 @@ int main(void)
     };
     bledis_init(&cfg, &dis_cfg);
 
+#if 0
     bleuart_gatt_svr_init(&cfg);
     bleuart_init(128);
+#else
+	bleuart_init(&cfg);
+#endif
 
     /* Initialize eventq */
     os_eventq_init(&bleprph_evq);

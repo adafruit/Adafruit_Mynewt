@@ -35,8 +35,10 @@ pkg.cflags:
 
 pkg.deps:
     - "libs/util"
+    - "libs/fifo"
+    - "libs/bleuart"
     - "libs/bledis"
-    - "@apache-mynewt-core/libs/bleuart"
+    #- "@apache-mynewt-core/libs/bleuart"
     - "@apache-mynewt-core/libs/os"
     - "@apache-mynewt-core/libs/baselibc"
     - "@apache-mynewt-core/libs/console/full"
