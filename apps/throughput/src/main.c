@@ -398,10 +398,10 @@ int main(void)
 
     /* Initialize the BLE host. */
     cfg = ble_hs_cfg_dflt;
-    cfg.max_hci_bufs = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
-    cfg.max_connections = 1;
-    cfg.max_gattc_procs = 2;
-    cfg.max_l2cap_chans = 3;
+    cfg.max_hci_bufs        = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
+    cfg.max_connections     = 1;
+    cfg.max_gattc_procs     = 2;
+    cfg.max_l2cap_chans     = 3;
     cfg.max_l2cap_sig_procs = 1;
     cfg.sm_bonding          = 1;
     cfg.sm_our_key_dist     = BLE_SM_PAIR_KEY_DIST_ENC;
