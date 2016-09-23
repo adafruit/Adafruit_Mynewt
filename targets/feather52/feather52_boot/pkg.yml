@@ -1,6 +1,0 @@
-pkg.name: "targets/feather52_boot"
-pkg.type: "target"
-pkg.description: 
-pkg.author: "Adafruit <support@adafruit.com>"
-pkg.homepage: "http://www.adafruit.com"
-
