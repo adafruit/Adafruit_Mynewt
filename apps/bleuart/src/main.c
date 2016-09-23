@@ -109,11 +109,11 @@ struct os_mempool   mbuf_mpool;
 #define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
 
 /** bleprph task settings. */
-#define BLEPRPH_TASK_PRIO           1
-#define BLEPRPH_STACK_SIZE          (OS_STACK_ALIGN(336))
-struct os_eventq bleprph_evq;
-struct os_task bleprph_task;
-bssnz_t os_stack_t bleprph_stack[BLEPRPH_STACK_SIZE];
+#define BLE_TASK_PRIO           1
+#define BLE_STACK_SIZE          (OS_STACK_ALIGN(336))
+struct os_eventq btle_evq;
+struct os_task btle_task;
+bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
 
 // shell task
 #define SHELL_TASK_PRIO             (3)
@@ -149,7 +149,7 @@ uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 /** Our random address (in case we need it) */
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
-static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
+static int btle_gap_event(struct ble_gap_event *event, void *arg);
 
 #ifdef NFFS_PRESENT
 static void setup_for_nffs(void)
@@ -191,7 +191,7 @@ static void setup_for_nffs(void)
  *     o Undirected connectable mode.
  */
 static void
-bleprph_advertise(void)
+btle_advertise(void)
 {
     /**
      *  Set the advertisement data included in our advertisements:
@@ -238,7 +238,7 @@ bleprph_advertise(void)
     adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
     adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
     ASSERT_STATUS_RETVOID( ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER,
-                           &adv_params, bleprph_gap_event, NULL) );
+                           &adv_params, btle_gap_event, NULL) );
 }
 
 /**
@@ -257,7 +257,7 @@ bleprph_advertise(void)
  *                                  particular GAP event being signalled.
  */
 static int
-bleprph_gap_event(struct ble_gap_event *event, void *arg)
+btle_gap_event(struct ble_gap_event *event, void *arg)
 {
     switch (event->type) {
     case BLE_GAP_EVENT_CONNECT:
@@ -266,13 +266,13 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
           bleuart_set_conn_handle(event->connect.conn_handle);
         }else {
             /* Connection failed; resume advertising. */
-            bleprph_advertise();
+            btle_advertise();
         }
         return 0;
 
     case BLE_GAP_EVENT_DISCONNECT:
         /* Connection terminated; resume advertising. */
-        bleprph_advertise();
+        btle_advertise();
         return 0;
 
     }
@@ -284,7 +284,7 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
  * Event loop for the main bleprph task.
  */
 static void
-bleprph_task_handler(void *unused)
+btle_task_handler(void *unused)
 {
     struct os_event *ev;
     struct os_callout_func *cf;
@@ -294,10 +294,10 @@ bleprph_task_handler(void *unused)
     assert(rc == 0);
 
     /* Begin advertising. */
-    bleprph_advertise();
+    btle_advertise();
 
     while (1) {
-        ev = os_eventq_get(&bleprph_evq);
+        ev = os_eventq_get(&btle_evq);
 
         /* Check if the event is a nmgr ble mqueue event */
         rc = nmgr_ble_proc_mq_evt(ev);
@@ -411,8 +411,8 @@ int main(void)
     os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
                  BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
 
-    os_task_init(&bleprph_task, "bleprph", bleprph_task_handler, NULL,
-                 BLEPRPH_TASK_PRIO, OS_WAIT_FOREVER, bleprph_stack, BLEPRPH_STACK_SIZE);
+    os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
+                 BLE_TASK_PRIO, OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
 
     /* Initialize the BLE LL */
     ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
@@ -442,7 +442,7 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
+    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
 
     bledis_cfg_t dis_cfg =
     {
@@ -458,8 +458,8 @@ int main(void)
     bleuart_init(&cfg);
 
     /* Initialize eventq */
-    os_eventq_init(&bleprph_evq);
-    ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
+    os_eventq_init(&btle_evq);
+    ASSERT_STATUS( ble_hs_init(&btle_evq, &cfg) );
 
     /* Set the default device name. */
     ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
