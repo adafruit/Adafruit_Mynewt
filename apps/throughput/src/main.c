@@ -83,7 +83,7 @@
 //
 //--------------------------------------------------------------------+
 /** Mbuf settings. */
-#define MBUF_NUM_MBUFS      (100)
+#define MBUF_NUM_MBUFS      (110)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
 #define MBUF_MEMPOOL_SIZE   OS_MEMPOOL_SIZE(MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE)
@@ -92,17 +92,6 @@ static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
 struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
-/** Log data. */
-static struct log_handler log_hdlr;
-struct log mylog;
-
-#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
-#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
-
-#define MAX_CBMEM_BUF 600
-static uint32_t cbmem_buf[MAX_CBMEM_BUF];
-struct cbmem cbmem;
-
 //--------------------------------------------------------------------+
 // TASK Settings
 //--------------------------------------------------------------------+
@@ -110,11 +99,11 @@ struct cbmem cbmem;
 #define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
 
 /** bleprph task settings. */
-#define BLEPRPH_TASK_PRIO           1
-#define BLEPRPH_STACK_SIZE          (OS_STACK_ALIGN(336))
-struct os_eventq bleprph_evq;
-struct os_task bleprph_task;
-bssnz_t os_stack_t bleprph_stack[BLEPRPH_STACK_SIZE];
+#define BLE_TASK_PRIO           1
+#define BLE_STACK_SIZE          (OS_STACK_ALIGN(336))
+struct os_eventq btle_evq;
+struct os_task btle_task;
+bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
 
 // shell task
 #define SHELL_TASK_PRIO             (3)
@@ -143,6 +132,8 @@ uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 /** Our random address (in case we need it) */
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
+uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
+
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
@@ -167,9 +158,20 @@ static int cmd_nustest_exec(int argc, char **argv)
   uint32_t count = (argc > 1) ? strtoul(argv[1], NULL, 10) : 100;
   uint32_t size  = (argc > 2) ? strtoul(argv[2], NULL, 10) : 20;
 
+  if ( count > 100 )
+  {
+    printf("count must not exceed 100\n");
+    return -1;
+  }
+
+  if ( size > 240 )
+  {
+    printf("size must not exceed 240\n");
+    return -1;
+  }
+
   uint32_t total = count * size;
 
-  printf("count = %lu, size = %lu\r\n", count, size);
   char *data = malloc(size);
   VERIFY(data, -1);
 
@@ -178,16 +180,21 @@ static int cmd_nustest_exec(int argc, char **argv)
     data[i] = i%10 + '0';
   }
 
-  os_time_t tick = os_time_get();
+  // Negotiate a larger MTU if size > 20
+  if ( size > 20 )
+  {
+    ble_gattc_exchange_mtu(conn_handle, NULL, NULL);
+    // wait for the MTU procedure to complete, could use complete callback
+    // but just delay 500 ms now
+    os_time_delay(500);
+  }
 
+  os_time_t tick = os_time_get();
 
   for(uint8_t i=0; i<count; i++)
   {
     // delay a bit if out of memory (cannot send)
-    while ( 0 == bleuart_write(data, size) )
-    {
-      os_time_delay(1);
-    }
+    bleuart_write(data, size);
   }
 
   tick = os_time_get() -  tick;
@@ -196,14 +203,14 @@ static int cmd_nustest_exec(int argc, char **argv)
   free(data);
 
   /* Print result */
-  printf("Sent %lu bytes in %lu milliseconds \r\n", total, ms);
-  printf("Speed: %lu.%lu KB/s\r\n", total/ms, 100*(total%ms)/ms );
+  printf("Sent %lu bytes (%lu packets of %lu size) in %lu milliseconds\n", total, count, size, ms);
+  printf("Speed: %lu.%lu KB/s\n", total/ms, 100*(total%ms)/ms );
 
   return 0;
 }
 
 
-static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
+static int btle_gap_event(struct ble_gap_event *event, void *arg);
 
 /**
  * Enables advertising with the following parameters:
@@ -211,7 +218,7 @@ static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
  *     o Undirected connectable mode.
  */
 static void
-bleprph_advertise(void)
+btle_advertise(void)
 {
     /**
      *  Set the advertisement data included in our advertisements:
@@ -258,7 +265,7 @@ bleprph_advertise(void)
     adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
     adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
     ASSERT_STATUS_RETVOID( ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER,
-                           &adv_params, bleprph_gap_event, NULL) );
+                           &adv_params, btle_gap_event, NULL) );
 }
 
 /**
@@ -277,22 +284,25 @@ bleprph_advertise(void)
  *                                  particular GAP event being signalled.
  */
 static int
-bleprph_gap_event(struct ble_gap_event *event, void *arg)
+btle_gap_event(struct ble_gap_event *event, void *arg)
 {
     switch (event->type) {
     case BLE_GAP_EVENT_CONNECT:
         /* A new connection was established or a connection attempt failed. */
         if (event->connect.status == 0) {
-          bleuart_set_conn_handle(event->connect.conn_handle);
+          conn_handle = event->connect.conn_handle;
+          bleuart_set_conn_handle(conn_handle);
         }else {
-            /* Connection failed; resume advertising. */
-            bleprph_advertise();
+          /* Connection failed; resume advertising. */
+          btle_advertise();
+
+          conn_handle = BLE_HS_CONN_HANDLE_NONE;
         }
         return 0;
 
     case BLE_GAP_EVENT_DISCONNECT:
         /* Connection terminated; resume advertising. */
-        bleprph_advertise();
+        btle_advertise();
         return 0;
 
     }
@@ -304,22 +314,23 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
  * Event loop for the main bleprph task.
  */
 static void
-bleprph_task_handler(void *unused)
+btle_task_handler(void *unused)
 {
     struct os_event *ev;
     struct os_callout_func *cf;
     int rc;
 
     shell_cmd_register(&cmd_nustest);
+    printf("nustest <count> <packetsize>\r\n");
 
     rc = ble_hs_start();
     assert(rc == 0);
 
     /* Begin advertising. */
-    bleprph_advertise();
+    btle_advertise();
 
     while (1) {
-        ev = os_eventq_get(&bleprph_evq);
+        ev = os_eventq_get(&btle_evq);
 
         /* Check if the event is a nmgr ble mqueue event */
         rc = nmgr_ble_proc_mq_evt(ev);
@@ -388,12 +399,6 @@ int main(void)
     ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
     ASSERT_STATUS( os_msys_register(&mbuf_pool) );
 
-    /* Initialize the logging system. */
-    log_init();
-    cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
-    log_cbmem_handler_init(&log_hdlr, &cbmem); // log_console_handler_init(&log_hdlr);
-    log_register("bleprph", &mylog, &log_hdlr);
-
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
     console_init(shell_console_rx_cb);
@@ -403,8 +408,8 @@ int main(void)
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
 
-   os_task_init(&bleprph_task, "bleprph", bleprph_task_handler, NULL,
-                 BLEPRPH_TASK_PRIO, OS_WAIT_FOREVER, bleprph_stack, BLEPRPH_STACK_SIZE);
+    os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
+                 BLE_TASK_PRIO, OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
 
     /* Initialize the BLE LL */
     ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
@@ -415,10 +420,10 @@ int main(void)
 
     /* Initialize the BLE host. */
     cfg = ble_hs_cfg_dflt;
-    cfg.max_hci_bufs = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
-    cfg.max_connections = 1;
-    cfg.max_gattc_procs = 2;
-    cfg.max_l2cap_chans = 3;
+    cfg.max_hci_bufs        = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
+    cfg.max_connections     = 1;
+    cfg.max_gattc_procs     = 2;
+    cfg.max_l2cap_chans     = 3;
     cfg.max_l2cap_sig_procs = 1;
     cfg.sm_bonding          = 1;
     cfg.sm_our_key_dist     = BLE_SM_PAIR_KEY_DIST_ENC;
@@ -434,7 +439,7 @@ int main(void)
     /* GATT server initialization */
     ASSERT_STATUS( ble_svc_gap_init(&cfg) );
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&bleprph_evq, &cfg) );
+    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
 
     bledis_cfg_t dis_cfg =
     {
@@ -455,8 +460,8 @@ int main(void)
 #endif
 
     /* Initialize eventq */
-    os_eventq_init(&bleprph_evq);
-    ASSERT_STATUS( ble_hs_init(&bleprph_evq, &cfg) );
+    os_eventq_init(&btle_evq);
+    ASSERT_STATUS( ble_hs_init(&btle_evq, &cfg) );
 
     /* Set the default device name. */
     ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );

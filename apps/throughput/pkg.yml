@@ -29,7 +29,7 @@ pkg.keywords:
 
 pkg.cflags:
     - "-std=gnu99"
-    - "-DLOG_LEVEL=1"
+    - "-DLOG_LEVEL=0xAD"
     - "-DCFG_DEBUG=1"
     #- "-Wno-error=unused-variable"
 
