@@ -105,7 +105,7 @@ int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
   {
     if ( _dis_cfg.arrptr[i] != NULL )
     {
-      ADALOG_INFO("%s added\r\n", _dis_chr_text[i]);
+      ADALOG_INFO("[BLEDIS] %s added\r\n", _dis_chr_text[i]);
 
       _dis_chars[count].uuid128   = _dis_uuid128[i];
       _dis_chars[count].access_cb = bledis_access_cb;
