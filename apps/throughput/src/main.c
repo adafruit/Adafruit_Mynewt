@@ -83,7 +83,7 @@
 //
 //--------------------------------------------------------------------+
 /** Mbuf settings. */
-#define MBUF_NUM_MBUFS      (12)
+#define MBUF_NUM_MBUFS      (50)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
 #define MBUF_MEMPOOL_SIZE   OS_MEMPOOL_SIZE(MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE)
