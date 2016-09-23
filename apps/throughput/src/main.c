@@ -92,17 +92,6 @@ static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
 struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
-/** Log data. */
-static struct log_handler log_hdlr;
-struct log mylog;
-
-#define BLEPRPH_LOG_MODULE  (LOG_MODULE_PERUSER + 0)
-#define BLEPRPH_LOG(lvl, ...) LOG_ ## lvl(&mylog, BLEPRPH_LOG_MODULE, __VA_ARGS__)
-
-#define MAX_CBMEM_BUF 600
-static uint32_t cbmem_buf[MAX_CBMEM_BUF];
-struct cbmem cbmem;
-
 //--------------------------------------------------------------------+
 // TASK Settings
 //--------------------------------------------------------------------+
@@ -387,12 +376,6 @@ int main(void)
     ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
     ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
     ASSERT_STATUS( os_msys_register(&mbuf_pool) );
-
-    /* Initialize the logging system. */
-    log_init();
-    cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
-    log_cbmem_handler_init(&log_hdlr, &cbmem); // log_console_handler_init(&log_hdlr);
-    log_register("bleprph", &mylog, &log_hdlr);
 
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
