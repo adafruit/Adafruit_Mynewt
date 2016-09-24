@@ -159,7 +159,11 @@ as the following command which will enable stand-alone serial support for
 the bootloader:
 
 ```
-$ newt target set nrf52_boot cflags=-DBOOT_SERIAL
+# clear cflags
+$ newt target set nrf52_boot cflags=
+
+# set feature
+$ newt target set nrf52_boot features=BOOT_SERIAL
 ```
 
 This adds the following entry to the pkg.yml file for the nrf52_boot target:
