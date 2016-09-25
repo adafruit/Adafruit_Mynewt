@@ -132,6 +132,12 @@ if(rc == ERR) {
 }
 ```
 
+To increment the value a specific number use `STATIS_INCN`:
+
+```
+STATS_INCN(g_mystat, attempt_stat, 5);
+```
+
 ## Accessing Stats with the Console or `newtmgr`
 
 ### Console Access
