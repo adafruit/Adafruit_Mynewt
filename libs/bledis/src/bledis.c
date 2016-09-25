@@ -51,22 +51,22 @@ enum { BLEDIS_MAX_CHAR = sizeof(bledis_cfg_t)/4 };
 //--------------------------------------------------------------------+
 /* Define the core stats structure */
 STATS_SECT_START(bledis_stat_section)
-    STATS_SECT_ENTRY(model_reads_stat)
-    STATS_SECT_ENTRY(serial_reads_stat)
-    STATS_SECT_ENTRY(firmware_rev_reads_stat)
-    STATS_SECT_ENTRY(hardware_rev_reads_stat)
-    STATS_SECT_ENTRY(software_rev_reads_stat)
-    STATS_SECT_ENTRY(manufacturer_reads_stat)
+    STATS_SECT_ENTRY(model_reads)
+    STATS_SECT_ENTRY(serial_reads)
+    STATS_SECT_ENTRY(firmware_rev_reads)
+    STATS_SECT_ENTRY(hardware_rev_reads)
+    STATS_SECT_ENTRY(software_rev_reads)
+    STATS_SECT_ENTRY(manufacturer_reads)
 STATS_SECT_END
 
 /* Define the stat names for querying */
 STATS_NAME_START(bledis_stat_section)
-    STATS_NAME(bledis_stat_section, model_reads_stat)
-    STATS_NAME(bledis_stat_section, serial_reads_stat)
-    STATS_NAME(bledis_stat_section, firmware_rev_reads_stat)
-    STATS_NAME(bledis_stat_section, hardware_rev_reads_stat)
-    STATS_NAME(bledis_stat_section, software_rev_reads_stat)
-    STATS_NAME(bledis_stat_section, manufacturer_reads_stat)
+    STATS_NAME(bledis_stat_section, model_reads)
+    STATS_NAME(bledis_stat_section, serial_reads)
+    STATS_NAME(bledis_stat_section, firmware_rev_reads)
+    STATS_NAME(bledis_stat_section, hardware_rev_reads)
+    STATS_NAME(bledis_stat_section, software_rev_reads)
+    STATS_NAME(bledis_stat_section, manufacturer_reads)
 STATS_NAME_END(bledis_stat_section)
 
 STATS_SECT_DECL(bledis_stat_section) g_bledis_stats;
@@ -176,22 +176,22 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
   switch (uuid16)
   {
     case 0x2A24:  /* Model Number */
-      STATS_INC(g_bledis_stats, model_reads_stat);
+      STATS_INC(g_bledis_stats, model_reads);
       break;
     case 0x2A25:  /* Serial Number */
-      STATS_INC(g_bledis_stats, serial_reads_stat);
+      STATS_INC(g_bledis_stats, serial_reads);
       break;
     case 0x2A26:  /* Firmware Revision */
-      STATS_INC(g_bledis_stats, firmware_rev_reads_stat);
+      STATS_INC(g_bledis_stats, firmware_rev_reads);
       break;
     case 0x2A27:  /* Hardware Revision */
-      STATS_INC(g_bledis_stats, hardware_rev_reads_stat);
+      STATS_INC(g_bledis_stats, hardware_rev_reads);
       break;
     case 0x2A28:  /* Software Revision */
-      STATS_INC(g_bledis_stats, software_rev_reads_stat);
+      STATS_INC(g_bledis_stats, software_rev_reads);
       break;
     case 0x2A29:  /* Manufacturer */
-      STATS_INC(g_bledis_stats, manufacturer_reads_stat);
+      STATS_INC(g_bledis_stats, manufacturer_reads);
       break;
   }
 
