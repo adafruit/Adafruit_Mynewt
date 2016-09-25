@@ -34,6 +34,8 @@
 */
 /**************************************************************************/
 
+#include <stats/stats.h>
+
 #include <shell/shell.h>
 #include "adafruit/bleuart.h"
 #include "adafruit/fifo.h"
@@ -66,6 +68,25 @@ const uint8_t BLEUART_UUID_CHR_TXD[] =
 
 #define UUID16_RXD  0x0002
 #define UUID16_TXD  0x0003
+
+
+//--------------------------------------------------------------------+
+// STATISTICS STRUCT DEFINITION
+//--------------------------------------------------------------------+
+/* Define the core stats structure */
+STATS_SECT_START(bleuart_stat_section)
+    STATS_SECT_ENTRY(txd_bytes)
+    STATS_SECT_ENTRY(rxd_bytes)
+STATS_SECT_END
+
+/* Define the stat names for querying */
+STATS_NAME_START(bleuart_stat_section)
+    STATS_NAME(bleuart_stat_section, txd_bytes)
+    STATS_NAME(bleuart_stat_section, rxd_bytes)
+STATS_NAME_END(bleuart_stat_section)
+
+STATS_SECT_DECL(bleuart_stat_section) g_bleuart_stats;
+
 
 //--------------------------------------------------------------------+
 // VARIABLE DECLARATION
@@ -122,6 +143,15 @@ int bleuart_init(struct ble_hs_cfg *cfg)
 {
   varclr(_bleuart);
 
+  /* Initialise the stats section */
+  stats_init(
+      STATS_HDR(g_bleuart_stats),
+      STATS_SIZE_INIT_PARMS(g_bleuart_stats, STATS_SIZE_32),
+      STATS_NAME_INIT_PARMS(bleuart_stat_section));
+
+  /* Register the stats section */
+  stats_register("ble_svc_nus", STATS_HDR(g_bleuart_stats));
+
   ASSERT_STATUS( ble_gatts_count_cfg(_service_bleuart, cfg) );
   return ble_gatts_add_svcs(_service_bleuart);
 }
@@ -134,6 +164,7 @@ void bleuart_set_conn_handle(uint16_t conn_handle)
 int bleuart_write(void const* buffer, uint32_t size)
 {
   struct os_mbuf *om = ble_hs_mbuf_from_flat(buffer, size);
+  STATS_INCN(g_bleuart_stats, txd_bytes, size);
   return (0 == ble_gattc_notify_custom(_bleuart.conn_hdl, _bleuart.txd_hdl, om)) ? size : 0;
 }
 
@@ -169,6 +200,7 @@ int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
     case UUID16_RXD:
       VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR, 0);
       fifo_write_n(bleuart_ffin, om->om_data, om->om_len);
+      STATS_INCN(g_bleuart_stats, rxd_bytes, om->om_len);
     break;
 
     case UUID16_TXD:
@@ -213,5 +245,3 @@ static int bleuart_rx_exec(int argc, char **argv)
 
   return 0;
 }
-
-
