@@ -34,6 +34,8 @@
 */
 /**************************************************************************/
 
+#include <stats/stats.h>
+
 #include "adafruit/adafruit_util.h"
 #include "host/ble_hs.h"
 #include "adafruit/bledis.h"
@@ -42,6 +44,33 @@
 // MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
 enum { BLEDIS_MAX_CHAR = sizeof(bledis_cfg_t)/4 };
+
+
+//--------------------------------------------------------------------+
+// STATISTICS STRUCT DEFINITION
+//--------------------------------------------------------------------+
+/* Define the core stats structure */
+STATS_SECT_START(bledis_stat_section)
+    STATS_SECT_ENTRY(model_reads_stat)
+    STATS_SECT_ENTRY(serial_reads_stat)
+    STATS_SECT_ENTRY(firmware_rev_reads_stat)
+    STATS_SECT_ENTRY(hardware_rev_reads_stat)
+    STATS_SECT_ENTRY(software_rev_reads_stat)
+    STATS_SECT_ENTRY(manufacturer_reads_stat)
+STATS_SECT_END
+
+/* Define the stat names for querying */
+STATS_NAME_START(bledis_stat_section)
+    STATS_NAME(bledis_stat_section, model_reads_stat)
+    STATS_NAME(bledis_stat_section, serial_reads_stat)
+    STATS_NAME(bledis_stat_section, firmware_rev_reads_stat)
+    STATS_NAME(bledis_stat_section, hardware_rev_reads_stat)
+    STATS_NAME(bledis_stat_section, software_rev_reads_stat)
+    STATS_NAME(bledis_stat_section, manufacturer_reads_stat)
+STATS_NAME_END(bledis_stat_section)
+
+STATS_SECT_DECL(bledis_stat_section) g_bledis_stats;
+
 
 //--------------------------------------------------------------------+
 // VARIABLE DECLARATION
@@ -94,10 +123,19 @@ static int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct b
 
 int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
 {
-   adalog_init();
+  adalog_init();
 
   memclr(_dis_chars, sizeof(_dis_chars));
   _dis_cfg.named = *dis_cfg;
+
+  /* Initialise the stats section */
+  stats_init(
+      STATS_HDR(g_bledis_stats),
+      STATS_SIZE_INIT_PARMS(g_bledis_stats, STATS_SIZE_32),
+      STATS_NAME_INIT_PARMS(bledis_stat_section));
+
+  /* Register the stats section */
+  stats_register("ble_svc_dis", STATS_HDR(g_bledis_stats));
 
   // Include only configured characteristics
   int count = 0;
@@ -133,6 +171,29 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
   const char* str = _dis_cfg.arrptr[uuid16 - UUID16_CHR_MODEL_NUMBER_STRING];
 
   os_mbuf_append(ctxt->om, str, strlen(str));
+
+  /* Increment the stats counter */
+  switch (uuid16)
+  {
+    case 0x2A24:  /* Model Number */
+      STATS_INC(g_bledis_stats, model_reads_stat);
+      break;
+    case 0x2A25:  /* Serial Number */
+      STATS_INC(g_bledis_stats, serial_reads_stat);
+      break;
+    case 0x2A26:  /* Firmware Revision */
+      STATS_INC(g_bledis_stats, firmware_rev_reads_stat);
+      break;
+    case 0x2A27:  /* Hardware Revision */
+      STATS_INC(g_bledis_stats, hardware_rev_reads_stat);
+      break;
+    case 0x2A28:  /* Software Revision */
+      STATS_INC(g_bledis_stats, software_rev_reads_stat);
+      break;
+    case 0x2A29:  /* Manufacturer */
+      STATS_INC(g_bledis_stats, manufacturer_reads_stat);
+      break;
+  }
 
   return 0;
 }
