@@ -1,10 +1,8 @@
-# Unit Testing with libs/testutil
-
-Notes on creating and running unit tests with `libs/testutil`.
+# Unit testing with `libs/testutil`
 
 See http://mynewt.apache.org/os/tutorials/unit_test/ for further details.
 
-## Add testutil reference
+## Add `testutil` reference
 
 Before any tests can be run, you will need to add `libs/testutil` to your
 `pkg.yml` file as follows:
@@ -14,9 +12,9 @@ pkg.deps.TEST:
    - libs/testutil
 ```
 
-## Create test folder
+## Create a test folder
 
-Then you need to create the correct folder structure by adding a `test`
+You then need to create the correct folder structure by adding a `test`
 folder in the `libs/[module_name]/src` folder, for example:
 
 ```
@@ -132,10 +130,10 @@ compiler.flags.base.DARWIN: >
 compiler.ld.resolve_circular_deps.DARWIN.OVERWRITE: false
 ```
 
-## Adding unit tests
+## Adding unit test forward declarations
 
-To add meaningful unit tests you need to create your function prototype(s) in
-the `test_fifo.h` header file:
+To add individual unit tests you need to declare your function prototype(s) in
+the `test_fifo.h` header file via the `TEST_CASE_DECL` macro:
 
 ```
 #ifndef TEST_FIFO_H
@@ -146,7 +144,7 @@ TEST_CASE_DECL(test_fifo_no_init);
 #endif /* TEST_FIFO_H */
 ```
 
-Then create one or more .c files that will hold the actual unit tests (we use
+Then create one or more .c files that will hold the actual unit tests (we used
 `test_fifo_simple.c` in this example):
 
 ```
@@ -158,7 +156,8 @@ TEST_CASE(test_fifo_no_init) {
 ```
 
 In the test suite (defined in `test_fifo.c`) you then need to include a
-reference to the test function:
+reference to the test function so that it will execute as part of the
+test suite:
 
 ```
 TEST_SUITE(test_fifo_suite) {
@@ -166,10 +165,9 @@ TEST_SUITE(test_fifo_suite) {
 }
 ```
 
-You can run this test suite again with the following command:
+You can then run the test suite again with the following command:
 
 ```
-$ newt test lib/fifo
 $ newt test libs/fifo
 Testing package libs/fifo
 Compiling test_fifo.c
@@ -181,7 +179,7 @@ Passed tests: [libs/fifo]
 All tests passed
 ```
 
-## Add test
+## Add test code
 
 The last step is the add actual test code that can pass or fail in your newt
 unit test function.
