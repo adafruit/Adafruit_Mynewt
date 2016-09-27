@@ -72,17 +72,19 @@
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
 
+/* Adafruit libraries and helpers */
 #include "adafruit/adafruit_util.h"
 #include "adafruit/bledis.h"
 #include "adafruit/bleuart.h"
 
 
+/** Default device name */
 #define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
 
 //--------------------------------------------------------------------+
-//
+// Mbufs
 //--------------------------------------------------------------------+
-/** Mbuf settings. */
+/* Mbuf settings */
 #define MBUF_NUM_MBUFS      (110)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
@@ -96,35 +98,35 @@ struct os_mempool   mbuf_mpool;
 // TASK Settings
 //--------------------------------------------------------------------+
 /** Priority of the nimble host and controller tasks. */
-#define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
+#define BLE_LL_TASK_PRI               (OS_TASK_PRI_HIGHEST)
 
-/** bleprph task settings. */
-#define BLE_TASK_PRIO           1
-#define BLE_STACK_SIZE          (OS_STACK_ALIGN(336))
-struct os_eventq btle_evq;
-struct os_task btle_task;
+/* BLE peripheral task settings */
+#define BLE_TASK_PRIO                 1
+#define BLE_STACK_SIZE                (OS_STACK_ALIGN(336))
+struct  os_eventq  btle_evq;
+struct  os_task    btle_task;
 bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
 
-// shell task
-#define SHELL_TASK_PRIO             (3)
-#define SHELL_MAX_INPUT_LEN         (256)
-#define SHELL_TASK_STACK_SIZE (OS_STACK_ALIGN(384))
+/* Shell task settings */
+#define SHELL_TASK_PRIO               (3)
+#define SHELL_MAX_INPUT_LEN           (256)
+#define SHELL_TASK_STACK_SIZE         (OS_STACK_ALIGN(384))
 os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
 
-// netmgr task
-#define NEWTMGR_TASK_PRIO            (4)
-#define NEWTMGR_TASK_STACK_SIZE      (OS_STACK_ALIGN(512))
+/* newtmgr task settings */
+#define NEWTMGR_TASK_PRIO             (4)
+#define NEWTMGR_TASK_STACK_SIZE       (OS_STACK_ALIGN(512))
 os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
 
-/* Task Blinky */
-#define BLINKY_TASK_PRIO     10
-#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
+/* Blinky task settings */
+#define BLINKY_TASK_PRIO              (10)
+#define BLINKY_STACK_SIZE             OS_STACK_ALIGN(128)
 
 struct os_task blinky_task;
 os_stack_t blinky_stack[BLINKY_STACK_SIZE];
 
 //--------------------------------------------------------------------+
-//
+// Global values
 //--------------------------------------------------------------------+
 /** Our global device address (public) */
 uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
@@ -134,21 +136,34 @@ uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
 
+
 //--------------------------------------------------------------------+
-//
+// Functions prototypes
 //--------------------------------------------------------------------+
+static int cmd_nustest_exec(int argc, char **argv);
+static int btle_gap_event(struct ble_gap_event *event, void *arg);
+
+
+//--------------------------------------------------------------------+
+// Functions
+//--------------------------------------------------------------------+
+/**
+ *  Converts 'tick' to milliseconds
+ */
 static inline uint32_t tick2ms(os_time_t tick)
 {
   return ((uint64_t) (tick*1000)) / OS_TICKS_PER_SEC;
 }
 
-
-static int cmd_nustest_exec(int argc, char **argv);
-static struct shell_cmd cmd_nustest = {
-    .sc_cmd = "nustest",
+static struct shell_cmd cmd_nustest =
+{
+    .sc_cmd      = "nustest",
     .sc_cmd_func = cmd_nustest_exec
 };
 
+/**
+ *  'nustest' shell command handler
+ */
 static int cmd_nustest_exec(int argc, char **argv)
 {
   /* 1st arg is number of packet (default 100)
@@ -180,12 +195,12 @@ static int cmd_nustest_exec(int argc, char **argv)
     data[i] = i%10 + '0';
   }
 
-  // Negotiate a larger MTU if size > 20
+  /* Negotiate a larger MTU if size > 20 */
   if ( size > 20 )
   {
     ble_gattc_exchange_mtu(conn_handle, NULL, NULL);
-    // wait for the MTU procedure to complete, could use complete callback
-    // but just delay 500 ms now
+    /* wait for the MTU procedure to complete. We could use a callback */
+    /* but for now we simply delay 500 ms */
     os_time_delay(500);
   }
 
@@ -193,7 +208,7 @@ static int cmd_nustest_exec(int argc, char **argv)
 
   for(uint8_t i=0; i<count; i++)
   {
-    // delay a bit if out of memory (cannot send)
+    /* Brief delay if out of memory (cannot send) */
     bleuart_write(data, size);
   }
 
@@ -202,15 +217,12 @@ static int cmd_nustest_exec(int argc, char **argv)
 
   free(data);
 
-  /* Print result */
+  /* Print the results */
   printf("Sent %lu bytes (%lu packets of %lu size) in %lu milliseconds\n", total, count, size, ms);
   printf("Speed: %lu.%lu KB/s\n", total/ms, 100*(total%ms)/ms );
 
   return 0;
 }
-
-
-static int btle_gap_event(struct ble_gap_event *event, void *arg);
 
 /**
  * Enables advertising with the following parameters:
@@ -351,6 +363,10 @@ btle_task_handler(void *unused)
     }
 }
 
+
+/**
+ * Blinky task handler
+ */
 void blinky_task_handler(void* arg)
 {
   hal_gpio_init_out(LED_BLINK_PIN, 1);
@@ -441,6 +457,7 @@ int main(void)
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
     ASSERT_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
 
+    /* Device information service (DIS) settings */
     bledis_cfg_t dis_cfg =
     {
         .model        = "Feather52" ,
@@ -456,7 +473,8 @@ int main(void)
     bleuart_gatt_svr_init(&cfg);
     bleuart_init(128);
 #else
-	bleuart_init(&cfg);
+    /* Nordic UART service (NUS) settings */
+    bleuart_init(&cfg);
 #endif
 
     /* Initialize eventq */
@@ -469,7 +487,7 @@ int main(void)
     /* Start the OS */
     os_start();
 
-    /* os start should never return. If it does, this should be an error */
+    /* OS start should never return. If it does, this should be an error */
     assert(0);
 
     return 0;
