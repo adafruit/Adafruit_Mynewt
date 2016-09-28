@@ -347,3 +347,25 @@ To display the next 10 lines enter:
 ```
 
 > Tip: You can adjust the number of lines displayed via `set listsize [count]`
+
+### Displaying code at a specific address
+
+If you wish to display the code at a specific address you can prefix the address
+with a `*` character as shown below:
+
+```
+(gdb) monitor go
+(gdb) list *0x00009e54
+0x9e54 is in crash_device (crash_test.c:46).
+41      if (!strcmp(how, "div0")) {
+42
+43          val1 = 42;
+44          val2 = 0;
+45
+46          val3 = val1 / val2;
+47          console_printf("42/0 = %d\n", val3);
+48      } else if (!strcmp(how, "jump0")) {
+49          ((void (*)(void))0)();
+50      } else if (!strcmp(how, "ref0")) {
+```
+
