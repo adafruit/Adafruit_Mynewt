@@ -72,6 +72,9 @@
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
 
+/* Crash test ... just because */
+#include "crash_test/crash_test.h"
+
 /* Adafruit libraries and helpers */
 #include "adafruit/adafruit_util.h"
 #include "adafruit/bledis.h"
@@ -418,6 +421,8 @@ int main(void)
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
     console_init(shell_console_rx_cb);
+
+    crash_test_init();
 
     nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
 

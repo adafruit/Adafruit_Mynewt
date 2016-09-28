@@ -54,3 +54,4 @@ pkg.deps:
     - "@apache-mynewt-core/net/nimble/host/services/gatt"
     - "@apache-mynewt-core/net/nimble/host/store/ram"
     - "@apache-mynewt-core/net/nimble/transport/ram"
+    - "@apache-mynewt-core/libs/crash_test"
