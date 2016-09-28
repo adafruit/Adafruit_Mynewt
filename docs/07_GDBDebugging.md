@@ -354,7 +354,6 @@ If you wish to display the code at a specific address you can prefix the address
 with a `*` character as shown below:
 
 ```
-(gdb) monitor go
 (gdb) list *0x00009e54
 0x9e54 is in crash_device (crash_test.c:46).
 41      if (!strcmp(how, "div0")) {
