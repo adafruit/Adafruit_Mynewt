@@ -39,9 +39,13 @@ $ newt create-image throughput 0.1.0
 $ newt load throughput
 ```
 
-To start GDB run `newt debug throughput`, changing `throughput` to whatever
-your app is called. This will start up the GDB server and connect to the device
-under test.
+To start GDB via the following command:
+
+```
+$ newt debug throughput
+```
+
+This will start up the GDB server and connect to the device under test.
 
 > See [GDB Debugging](07_GDBDebugging.bd) for details on using GDB.
 
