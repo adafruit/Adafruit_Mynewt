@@ -46,12 +46,9 @@ extern uint8_t _ram_start;
 #define NFFS_AREA_MAX   (8)
 
 /* BOOT_SERIAL pins */
-/* DFU pin is set to 0.07 on the BLEFRIEND32 */
-#define BOOT_SERIAL_DETECT_PIN      (7)
-/* 0 = No pullup, 1 = Pull Up, 2 = Pull Down */
-#define BOOT_SERIAL_DETECT_PIN_CFG  (0)
-/* Board has external pullup and the tact switch sets the pin to GND */
-#define BOOT_SERIAL_DETECT_PIN_VAL  (0)
+#define BOOT_SERIAL_DETECT_PIN      (7)   /* P0.07 */
+#define BOOT_SERIAL_DETECT_PIN_CFG  (1)   /* 0 = No pullup, 1 = Pull Up, 2 = Pull Down */
+#define BOOT_SERIAL_DETECT_PIN_VAL  (0)   /* GND = Serial DFU */
 
 #ifdef __cplusplus
 }
