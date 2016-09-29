@@ -1,6 +1,9 @@
+### Package: targets/bootloader
 pkg.name: "targets/bootloader"
 pkg.type: "target"
-pkg.description: 
+pkg.description:
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com"
 
+pkg.features:
+    - "BOOT_SERIAL"
