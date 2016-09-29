@@ -62,7 +62,7 @@ your BSP:
 /* DFU pin is set to 0.07 on the BLEFRIEND32 */
 #define BOOT_SERIAL_DETECT_PIN      (7)
 /* 0 = No pullup, 1 = Pull Up, 2 = Pull Down */
-#define BOOT_SERIAL_DETECT_PIN_CFG  (0)
+#define BOOT_SERIAL_DETECT_PIN_CFG  (1)
 /* Board has external pullup and the tact switch sets the pin to GND */
 #define BOOT_SERIAL_DETECT_PIN_VAL  (0)
 ```
