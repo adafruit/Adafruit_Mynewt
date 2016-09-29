@@ -47,6 +47,7 @@ pkg.deps:
     - "@apache-mynewt-core/libs/util"
     - "@apache-mynewt-core/libs/newtmgr"
     - "@apache-mynewt-core/libs/newtmgr/transport/ble"
+    - "@apache-mynewt-core/libs/imgmgr"
     - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/net/nimble/controller"
     - "@apache-mynewt-core/net/nimble/host"

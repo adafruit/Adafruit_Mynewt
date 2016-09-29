@@ -45,6 +45,7 @@
 #include <console/console.h>
 #include <shell/shell.h>
 #include <log/log.h>
+#include <imgmgr/imgmgr.h>
 
 /* BLE */
 #include "nimble/ble.h"
@@ -425,6 +426,7 @@ int main(void)
     crash_test_init();
 
     nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
+    imgmgr_module_init();
 
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                  BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
