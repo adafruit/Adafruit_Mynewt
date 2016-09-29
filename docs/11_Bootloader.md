@@ -108,5 +108,5 @@ You can use `newtmgr` to upload a firmware image over serial, as shown below
 as a connection entry):
 
 ```
-$ newtmgr -c serial1 image upload bin/bleuart/apps/bleuart/bleuart.elf.bin
+$ newtmgr -c serial1 image upload bin/bleuart/apps/bleuart/bleuart.img
 ```
