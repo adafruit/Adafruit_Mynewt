@@ -29,17 +29,15 @@ pkg.keywords:
 
 pkg.cflags:
     - "-std=gnu99"
-    - "-DLOG_LEVEL=0xAD"
+    - "-DLOG_LEVEL=LOG_LEVEL_MAX"
     - "-DCFG_DEBUG=1"
     - "-DSTATS_NAME_ENABLE"
-    #- "-Wno-error=unused-variable"
 
 pkg.deps:
     - "libs/adautil"
     - "libs/fifo"
     - "libs/bleuart"
     - "libs/bledis"
-    #- "@apache-mynewt-core/libs/bleuart"
     - "@apache-mynewt-core/libs/os"
     - "@apache-mynewt-core/libs/baselibc"
     - "@apache-mynewt-core/libs/console/full"
