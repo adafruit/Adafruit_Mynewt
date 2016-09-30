@@ -221,8 +221,7 @@ static int cmd_nustest_exec(int argc, char **argv)
   free(data);
 
   /* Print the results */
-  printf("Sent %lu bytes (%lu packets of %lu size) in %lu milliseconds\n", total, count, size, ms);
-  printf("Speed: %lu.%lu KB/s\n", total/ms, 100*(total%ms)/ms );
+  printf("Queued %lu bytes (%lu packets of %lu size) in %lu milliseconds\n", total, count, size, ms);
 
   return 0;
 }
