@@ -31,8 +31,6 @@ pkg.cflags:
     - "-std=gnu99"
     - "-DLOG_LEVEL=1"
     - "-DCFG_DEBUG=1"
-    - "-DNFFS_PRESENT"
-    #- "-DENABLE_SWO"
     #- "-Wno-error=unused-variable"
 
 pkg.deps:
@@ -48,7 +46,6 @@ pkg.deps:
     - "@apache-mynewt-core/libs/newtmgr"
     - "@apache-mynewt-core/libs/newtmgr/transport/ble"
     - "@apache-mynewt-core/libs/imgmgr"
-    - "@apache-mynewt-core/fs/nffs"
     - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/net/nimble/controller"
     - "@apache-mynewt-core/net/nimble/host"

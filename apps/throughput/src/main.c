@@ -85,10 +85,9 @@
 /** Default device name */
 #define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
 
-//--------------------------------------------------------------------+
-// Mbufs
-//--------------------------------------------------------------------+
-/* Mbuf settings */
+/*------------------------------------------------------------------*/
+/* Mbuf settings
+ *------------------------------------------------------------------*/
 #define MBUF_NUM_MBUFS      (110)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
@@ -98,9 +97,9 @@ static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
 struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
-//--------------------------------------------------------------------+
-// TASK Settings
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* TASK Settings
+ *------------------------------------------------------------------*/
 /** Priority of the nimble host and controller tasks. */
 #define BLE_LL_TASK_PRI               (OS_TASK_PRI_HIGHEST)
 
@@ -129,9 +128,11 @@ os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
 struct os_task blinky_task;
 os_stack_t blinky_stack[BLINKY_STACK_SIZE];
 
-//--------------------------------------------------------------------+
-// Global values
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* Global values
+ *------------------------------------------------------------------*/
+static char serialnumber[16 + 1];
+
 /** Our global device address (public) */
 uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 
@@ -141,16 +142,15 @@ uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 uint16_t conn_handle = BLE_HS_CONN_HANDLE_NONE;
 
 
-//--------------------------------------------------------------------+
-// Functions prototypes
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* Functions prototypes
+ *------------------------------------------------------------------*/
 static int cmd_nustest_exec(int argc, char **argv);
 static int btle_gap_event(struct ble_gap_event *event, void *arg);
 
-
-//--------------------------------------------------------------------+
-// Functions
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* Functions
+ *------------------------------------------------------------------*/
 /**
  *  Converts 'tick' to milliseconds
  */
@@ -212,7 +212,6 @@ static int cmd_nustest_exec(int argc, char **argv)
 
   for(uint8_t i=0; i<count; i++)
   {
-    /* Brief delay if out of memory (cannot send) */
     bleuart_write(data, size);
   }
 
@@ -395,107 +394,108 @@ void blinky_task_handler(void* arg)
  */
 int main(void)
 {
-    struct ble_hci_ram_cfg hci_cfg;
-    struct ble_hs_cfg cfg;
+  struct ble_hci_ram_cfg hci_cfg;
+  struct ble_hs_cfg cfg;
 
-    int i;
+  int i;
 
-    /* Initialize OS */
-    os_init();
+  /* Initialize OS */
+  os_init();
 
-    /* Set cputime to count at 1 usec increments */
-    ASSERT_STATUS( cputime_init(1000000) );
+  /* Set cputime to count at 1 usec increments */
+  ASSERT_STATUS(cputime_init(1000000));
 
-    /* Seed random number generator with least significant bytes of device address. */
-    uint32_t seed = 0;
-    for (i = 0; i < 4; ++i) {
-        seed |= g_dev_addr[i];
-        seed <<= 8;
-    }
-    srand(seed);
+  /* Seed random number generator with least significant bytes of device address. */
+  uint32_t seed = 0;
+  for (i = 0; i < 4; ++i)
+  {
+    seed |= g_dev_addr[i];
+    seed <<= 8;
+  }
+  srand(seed);
 
-    /* Initialize msys mbufs. */
-    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
-    ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
-    ASSERT_STATUS( os_msys_register(&mbuf_pool) );
+  /* Initialize msys mbufs. */
+  ASSERT_STATUS(os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data"));
+  ASSERT_STATUS(os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS));
+  ASSERT_STATUS(os_msys_register(&mbuf_pool));
 
-    //------------- Task Init -------------//
-    shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
-    console_init(shell_console_rx_cb);
+  //------------- Task Init -------------//
+  shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
+  console_init(shell_console_rx_cb);
 
-    crash_test_init();
+  crash_test_init();
 
-    nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
-    imgmgr_module_init();
+  nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
+  imgmgr_module_init();
 
-    os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
-                 BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
+  os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
+  BLINKY_TASK_PRIO,
+               OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
 
-    os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
-                 BLE_TASK_PRIO, OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
+  os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
+  BLE_TASK_PRIO,
+               OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
 
-    /* Initialize the BLE LL */
-    ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
+  /* Initialize the BLE LL */
+  ASSERT_STATUS(ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE));
 
-    /* Initialize the RAM HCI transport. */
-    hci_cfg = ble_hci_ram_cfg_dflt;
-    ASSERT_STATUS( ble_hci_ram_init(&hci_cfg) );
+  /* Initialize the RAM HCI transport. */
+  hci_cfg = ble_hci_ram_cfg_dflt;
+  ASSERT_STATUS(ble_hci_ram_init(&hci_cfg));
 
-    /* Initialize the BLE host. */
-    cfg = ble_hs_cfg_dflt;
-    cfg.max_hci_bufs        = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
-    cfg.max_connections     = 1;
-    cfg.max_gattc_procs     = 2;
-    cfg.max_l2cap_chans     = 3;
-    cfg.max_l2cap_sig_procs = 1;
-    cfg.sm_bonding          = 1;
-    cfg.sm_our_key_dist     = BLE_SM_PAIR_KEY_DIST_ENC;
-    cfg.sm_their_key_dist   = BLE_SM_PAIR_KEY_DIST_ENC;
-    cfg.store_read_cb       = ble_store_ram_read;
-    cfg.store_write_cb      = ble_store_ram_write;
+  /* Initialize the BLE host. */
+  cfg = ble_hs_cfg_dflt;
+  cfg.max_hci_bufs = hci_cfg.num_evt_hi_bufs + hci_cfg.num_evt_lo_bufs;
+  cfg.max_connections = 1;
+  cfg.max_gattc_procs = 2;
+  cfg.max_l2cap_chans = 3;
+  cfg.max_l2cap_sig_procs = 1;
+  cfg.sm_bonding = 1;
+  cfg.sm_our_key_dist = BLE_SM_PAIR_KEY_DIST_ENC;
+  cfg.sm_their_key_dist = BLE_SM_PAIR_KEY_DIST_ENC;
+  cfg.store_read_cb = ble_store_ram_read;
+  cfg.store_write_cb = ble_store_ram_write;
 
-    /* Populate config with the required GATT server settings. */
-    cfg.max_attrs           = 0;
-    cfg.max_services        = 0;
-    cfg.max_client_configs  = 0;
+  /* Populate config with the required GATT server settings. */
+  cfg.max_attrs = 0;
+  cfg.max_services = 0;
+  cfg.max_client_configs = 0;
 
-    /* GATT server initialization */
-    ASSERT_STATUS( ble_svc_gap_init(&cfg) );
-    ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
+  /* GATT server initialization */
+  ASSERT_STATUS(ble_svc_gap_init(&cfg));
+  ASSERT_STATUS(ble_svc_gatt_init(&cfg));
+  ASSERT_STATUS(nmgr_ble_gatt_svr_init(&btle_evq, &cfg));
 
-    /* Device information service (DIS) settings */
-    bledis_cfg_t dis_cfg =
-    {
-        .model        = "Feather52" ,
-        .serial       = NULL        ,
-        .firmware_rev = "0.9.0"     ,
-        .hardware_rev = "nRF52832"  ,
-        .software_rev = "0.9.0"     ,
-        .manufacturer = "Adafruit Industries"
-    };
-    bledis_init(&cfg, &dis_cfg);
+  /* Convert MCU Unique Identifier to string as serial number */
+  sprintf(serialnumber, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
 
-#if 0
-    bleuart_gatt_svr_init(&cfg);
-    bleuart_init(128);
-#else
-    /* Nordic UART service (NUS) settings */
-    bleuart_init(&cfg);
-#endif
+  /* Device information service (DIS) settings */
+  bledis_cfg_t dis_cfg =
+  {
+      .model        = "Feather52"  ,
+      .serial       = serialnumber ,
+      .firmware_rev = "0.9.0"      ,
+      .hardware_rev = "nRF52832"   ,
+      .software_rev = "0.9.0"      ,
+      .manufacturer = "Adafruit Industries"
+  };
+  bledis_init(&cfg, &dis_cfg);
 
-    /* Initialize eventq */
-    os_eventq_init(&btle_evq);
-    ASSERT_STATUS( ble_hs_init(&btle_evq, &cfg) );
+  /* Nordic UART service (NUS) settings */
+  bleuart_init(&cfg);
 
-    /* Set the default device name. */
-    ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
+  /* Initialize eventq */
+  os_eventq_init(&btle_evq);
+  ASSERT_STATUS(ble_hs_init(&btle_evq, &cfg));
 
-    /* Start the OS */
-    os_start();
+  /* Set the default device name. */
+  ASSERT_STATUS(ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME));
 
-    /* OS start should never return. If it does, this should be an error */
-    assert(0);
+  /* Start the OS */
+  os_start();
 
-    return 0;
+  /* OS start should never return. If it does, this should be an error */
+  assert(0);
+
+  return 0;
 }

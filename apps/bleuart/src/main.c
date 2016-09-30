@@ -31,16 +31,6 @@
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
 
-#ifdef NFFS_PRESENT
-#include <hal/flash_map.h>
-#include <fs/fs.h>
-#include <nffs/nffs.h>
-//#include <config/config.h>
-//#include <config/config_file.h>
-#else
-#error "Need NFFS or FCB for config storage"
-#endif
-
 /* BLE */
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
@@ -73,26 +63,10 @@
 
 #define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
 
-//--------------------------------------------------------------------+
-//
-//--------------------------------------------------------------------+
-/** NFFS config memory settings. */
-#ifdef NFFS_PRESENT
-/* configuration file */
-#define MY_CONFIG_DIR  "/cfg"
-#define MY_CONFIG_FILE "/cfg/run"
-#define MY_CONFIG_MAX_LINES  32
 
-//static struct conf_file my_conf = {
-//    .cf_name = MY_CONFIG_FILE,
-//    .cf_maxlines = MY_CONFIG_MAX_LINES
-//};
-#endif
-
-//--------------------------------------------------------------------+
-//
-//--------------------------------------------------------------------+
-/** Mbuf settings. */
+/*------------------------------------------------------------------*/
+/* Mbuf settings
+ *------------------------------------------------------------------*/
 #define MBUF_NUM_MBUFS      (12)
 #define MBUF_BUF_SIZE       OS_ALIGN(BLE_MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + BLE_MBUF_MEMBLOCK_OVERHEAD)
@@ -102,9 +76,9 @@ static os_membuf_t  mbuf_mpool_data[MBUF_MEMPOOL_SIZE];
 struct os_mbuf_pool mbuf_pool;
 struct os_mempool   mbuf_mpool;
 
-//--------------------------------------------------------------------+
-// TASK Settings
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* TASK Settings
+ *------------------------------------------------------------------*/
 /** Priority of the nimble host and controller tasks. */
 #define BLE_LL_TASK_PRI             (OS_TASK_PRI_HIGHEST)
 
@@ -115,13 +89,13 @@ struct os_eventq btle_evq;
 struct os_task btle_task;
 bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
 
-// shell task
+/* shell task */
 #define SHELL_TASK_PRIO             (3)
 #define SHELL_MAX_INPUT_LEN         (256)
 #define SHELL_TASK_STACK_SIZE (OS_STACK_ALIGN(384))
 os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
 
-// netmgr task
+/* netmgr task */
 #define NEWTMGR_TASK_PRIO            (4)
 #define NEWTMGR_TASK_STACK_SIZE      (OS_STACK_ALIGN(512))
 os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
@@ -133,57 +107,32 @@ os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
 struct os_task blinky_task;
 os_stack_t blinky_stack[BLINKY_STACK_SIZE];
 
-// BLEUART to UART bridge task
+/* BLEUART to UART bridge task */
 #define BLEUART_BRIDGE_TASK_PRIO     5
 #define BLEUART_BRIDGE_STACK_SIZE    OS_STACK_ALIGN(256)
 
 struct os_task bleuart_bridge_task;
 os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
 
-//--------------------------------------------------------------------+
-//
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* Global values
+ *------------------------------------------------------------------*/
+static char serialnumber[16 + 1];
+
 /** Our global device address (public) */
 uint8_t g_dev_addr[BLE_DEV_ADDR_LEN] = {0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a};
 
 /** Our random address (in case we need it) */
 uint8_t g_random_addr[BLE_DEV_ADDR_LEN];
 
+/*------------------------------------------------------------------*/
+/* Functions prototypes
+ *------------------------------------------------------------------*/
 static int btle_gap_event(struct ble_gap_event *event, void *arg);
 
-#ifdef NFFS_PRESENT
-static void setup_for_nffs(void)
-{
-    /* NFFS_AREA_MAX is defined in the BSP-specified bsp.h header file. */
-    struct nffs_area_desc descs[NFFS_AREA_MAX + 1];
-    int cnt;
-    int rc;
-
-    /* Initialize nffs's internal state. */
-    rc = nffs_init();
-    assert(rc == 0);
-
-    /* Convert the set of flash blocks we intend to use for nffs into an array
-     * of nffs area descriptors.
-     */
-    cnt = NFFS_AREA_MAX;
-    rc = flash_area_to_nffs_desc(FLASH_AREA_NFFS, &cnt, descs);
-    assert(rc == 0);
-
-    /* Attempt to restore an existing nffs file system from flash. */
-    if (nffs_detect(descs) == FS_ECORRUPT) {
-        /* No valid nffs instance detected; format a new one. */
-        rc = nffs_format(descs);
-        assert(rc == 0);
-    }
-
-    fs_mkdir(MY_CONFIG_DIR);
-//    rc = conf_file_src(&my_conf);
-//    assert(rc == 0);
-//    rc = conf_file_dst(&my_conf);
-//    assert(rc == 0);
-}
-#endif
+/*------------------------------------------------------------------*/
+/* Functions
+ *------------------------------------------------------------------*/
 
 /**
  * Enables advertising with the following parameters:
@@ -193,52 +142,46 @@ static void setup_for_nffs(void)
 static void
 btle_advertise(void)
 {
-    /**
-     *  Set the advertisement data included in our advertisements:
-     *     o Flags (indicates advertisement type and other general info).
-     *     o Advertising tx power.
-     *     o Device name.
-     *     o 16-bit service UUIDs (alert notifications).
-     */
-    struct ble_hs_adv_fields fields;
-    memset(&fields, 0, sizeof fields);
+  /**
+   *  Set the advertisement data included in our advertisements:
+   *     o Flags (indicates advertisement type and other general info).
+   *     o Advertising tx power.
+   *     o Device name.
+   *     o 16-bit service UUIDs (alert notifications).
+   */
+  struct ble_hs_adv_fields fields;
+  memset(&fields, 0, sizeof fields);
 
-    /* Indicate that the flags field should be included; specify a value of 0
-     * to instruct the stack to fill the value in for us.
-     */
-    fields.flags_is_present      = 1;
-    fields.flags                 = 0;
+  /* Indicate that the flags field should be included; specify a value of 0
+   * to instruct the stack to fill the value in for us.
+   */
+  fields.flags_is_present = 1;
+  fields.flags = 0;
 
-    /* Indicate that the TX power level field should be included; have the
-     * stack fill this one automatically as well.  This is done by assiging the
-     * special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
-     */
-    fields.tx_pwr_lvl_is_present = 1;
-    fields.tx_pwr_lvl            = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+  /* Indicate that the TX power level field should be included; have the
+   * stack fill this one automatically as well.  This is done by assiging the
+   * special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
+   */
+  fields.tx_pwr_lvl_is_present = 1;
+  fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-    fields.uuids128              = (void*) BLEUART_UUID_SERVICE ;
-    fields.num_uuids128          = 1;
-    fields.uuids128_is_complete  = 0;
+  fields.uuids128 = (void*) BLEUART_UUID_SERVICE;
+  fields.num_uuids128 = 1;
+  fields.uuids128_is_complete = 0;
 
-    ASSERT_STATUS_RETVOID( ble_gap_adv_set_fields(&fields) );
+  ASSERT_STATUS_RETVOID(ble_gap_adv_set_fields(&fields));
 
-    //------------- Scan response data -------------//
-    const char *name = ble_svc_gap_device_name();
-    struct ble_hs_adv_fields rsp_fields =
-    {
-        .name = (uint8_t*) name,
-        .name_len = strlen(name),
-        .name_is_complete = 1
-    };
-    ble_gap_adv_rsp_set_fields(&rsp_fields);
+  /*------------- Scan response data -------------*/
+  const char *name = ble_svc_gap_device_name();
+  struct ble_hs_adv_fields rsp_fields = { .name = (uint8_t*) name, .name_len = strlen(name), .name_is_complete = 1 };
+  ble_gap_adv_rsp_set_fields(&rsp_fields);
 
-    /* Begin advertising. */
-    struct ble_gap_adv_params adv_params;
-    memset(&adv_params, 0, sizeof adv_params);
-    adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
-    adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
-    ASSERT_STATUS_RETVOID( ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER,
-                           &adv_params, btle_gap_event, NULL) );
+  /* Begin advertising. */
+  struct ble_gap_adv_params adv_params;
+  memset(&adv_params, 0, sizeof adv_params);
+  adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
+  adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
+  ASSERT_STATUS_RETVOID(ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL));
 }
 
 /**
@@ -259,25 +202,29 @@ btle_advertise(void)
 static int
 btle_gap_event(struct ble_gap_event *event, void *arg)
 {
-    switch (event->type) {
+  switch (event->type)
+  {
     case BLE_GAP_EVENT_CONNECT:
-        /* A new connection was established or a connection attempt failed. */
-        if (event->connect.status == 0) {
-          bleuart_set_conn_handle(event->connect.conn_handle);
-        }else {
-            /* Connection failed; resume advertising. */
-            btle_advertise();
-        }
-        return 0;
+      /* A new connection was established or a connection attempt failed. */
+      if (event->connect.status == 0)
+      {
+        bleuart_set_conn_handle(event->connect.conn_handle);
+      }
+      else
+      {
+        /* Connection failed; resume advertising. */
+        btle_advertise();
+      }
+      return 0;
 
     case BLE_GAP_EVENT_DISCONNECT:
-        /* Connection terminated; resume advertising. */
-        btle_advertise();
-        return 0;
+      /* Connection terminated; resume advertising. */
+      btle_advertise();
+      return 0;
 
-    }
+  }
 
-    return 0;
+  return 0;
 }
 
 /**
@@ -366,12 +313,6 @@ int main(void)
     uint32_t seed;
     int i;
 
-    /* Initialise config memoery */
-    #ifdef NFFS_PRESENT
-//    conf_init();
-//    assert(conf_register(&test_conf_handler) == 0);
-    #endif
-
     /* Initialize OS */
     os_init();
 
@@ -392,11 +333,6 @@ int main(void)
     ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
     ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
     ASSERT_STATUS( os_msys_register(&mbuf_pool) );
-
-    /* Initialize NFSS config memory */
-    #ifdef NFFS_PRESENT
-    setup_for_nffs();
-    #endif
 
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
@@ -444,13 +380,16 @@ int main(void)
     ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
     ASSERT_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
 
+    /* Convert MCU Unique Identifier to string as serial number */
+    sprintf(serialnumber, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
+
     bledis_cfg_t dis_cfg =
     {
-        .model        = "Feather52" ,
-        .serial       = NULL        ,
-        .firmware_rev = "0.9.0"     ,
-        .hardware_rev = "nRF52832"  ,
-        .software_rev = "0.9.0"     ,
+        .model        = "Feather52"  ,
+        .serial       = serialnumber ,
+        .firmware_rev = "0.9.0"      ,
+        .hardware_rev = "nRF52832"   ,
+        .software_rev = "0.9.0"      ,
         .manufacturer = "Adafruit Industries"
     };
     bledis_init(&cfg, &dis_cfg);
