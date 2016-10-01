@@ -335,7 +335,7 @@ btle_task_handler(void *unused)
     int rc;
 
     shell_cmd_register(&cmd_nustest);
-    /*printf("nustest <count> <packetsize>\r\n");*/
+    /* printf("nustest <count> <packetsize>\r\n"); */
 
     rc = ble_hs_start();
     assert(rc == 0);
