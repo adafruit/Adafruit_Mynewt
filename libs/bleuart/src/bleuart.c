@@ -40,13 +40,13 @@
 #include "adafruit/bleuart.h"
 #include "adafruit/fifo.h"
 
-//--------------------------------------------------------------------+
-// MACRO CONSTANT TYPEDEF
-//--------------------------------------------------------------------+
-
-// UART Serivce: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-// UART RXD    : 6E400002-B5A3-F393-E0A9-E50E24DCCA9E
-// UART TXD    : 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
+/*------------------------------------------------------------------*/
+/* MACRO CONSTANT TYPEDEF
+ *------------------------------------------------------------------*/
+/* UART Serivce: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
+ * UART RXD    : 6E400002-B5A3-F393-E0A9-E50E24DCCA9E
+ * UART TXD    : 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
+ */
 
 const uint8_t BLEUART_UUID_SERVICE[] =
 {
@@ -70,9 +70,9 @@ const uint8_t BLEUART_UUID_CHR_TXD[] =
 #define UUID16_TXD  0x0003
 
 
-//--------------------------------------------------------------------+
-// STATISTICS STRUCT DEFINITION
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* STATISTICS STRUCT DEFINITION
+ *------------------------------------------------------------------*/
 /* Define the core stats structure */
 STATS_SECT_START(bleuart_stat_section)
     STATS_SECT_ENTRY(txd_bytes)
@@ -87,10 +87,9 @@ STATS_NAME_END(bleuart_stat_section)
 
 STATS_SECT_DECL(bleuart_stat_section) g_bleuart_stats;
 
-
-//--------------------------------------------------------------------+
-// VARIABLE DECLARATION
-//--------------------------------------------------------------------+
+/*------------------------------------------------------------------*/
+/* VARIABLE DECLARATION
+ *------------------------------------------------------------------*/
 int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
 static struct
@@ -187,9 +186,6 @@ int bleuart_shell_register(void)
   return 0;
 }
 
-//--------------------------------------------------------------------+
-//
-//--------------------------------------------------------------------+
 int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
   uint16_t uuid16 = uuid_extract_128_to_16(ctxt->chr->uuid128);
