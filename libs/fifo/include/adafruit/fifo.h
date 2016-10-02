@@ -36,20 +36,33 @@
 #ifndef __FIFO_H__
 #define __FIFO_H__
 
+#define CFG_FIFO_MUTEX      1
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "adafruit/adafruit_util.h"
+#if CFG_FIFO_MUTEX
 
-#if 0
-#include "wiced_rtos.h"
-#define ff_mutex_t           wiced_semaphore_t
-#define ff_mutex_lock(_f)     if ((_f)->mutex) wiced_rtos_lock_mutex((_f)->mutex)
-#define ff_mutex_unlock(_f)   if ((_f)->mutex) wiced_rtos_unlock_mutex((_f)->mutex)
+/*Mutex port for newt*/
+#include "os/os_mutex.h"
+
+#define fifo_mutex_t          struct os_mutex
+
+#define fifo_mutex_lock(m)    os_mutex_pend(m, OS_TIMEOUT_NEVER)
+#define fifo_mutex_unlock(m)  os_mutex_release(m)
+
+/* Internal use only */
+#define _mutex_declare(m)     .mutex = m
+
 #else
-#define ff_mutex_lock(x)
-#define ff_mutex_unlock(x)
+
+#define _mutex_declare(m)
+
 #endif
 
 typedef struct _fifo_t
@@ -60,57 +73,68 @@ typedef struct _fifo_t
   volatile uint16_t count           ; ///< number of items in queue
   volatile uint16_t wr_idx          ; ///< write pointer
   volatile uint16_t rd_idx          ; ///< read pointer
-  bool        const overwritable;
+  bool const overwritable;
 
-  #ifdef ff_mutex_t
-  ff_mutex_t * const mutex;
-  #endif
+#if CFG_FIFO_MUTEX
+  fifo_mutex_t * const mutex;
+#endif
+
 } fifo_t;
 
-#define FIFO_DEF(name, ff_depth, type, is_overwritable /*,_mutex*/)\
-  type name##_buffer[ff_depth];\
-  fifo_t * const name = &((fifo_t) {\
-      .buffer       = (uint8_t*) name##_buffer,\
-      .depth        = ff_depth,\
-      .item_size    = sizeof(type),\
-      .overwritable = is_overwritable,\
-      /*.mutex        = _mutex,*/\
+/**
+ * Macro to declare a fifo
+ * @param name         : name of the fifo
+ * @param depth        : max number of items
+ * @param type         : data type of item
+ * @param overwritable : whether fifo should be overwrite when full
+ * @param mutex        : mutex object
+ */
+#define FIFO_DEF(_name, _depth, _type, _overwritable, _mutex)\
+  static _type _name##_buffer[_depth];\
+  fifo_t * const _name = &((fifo_t) {\
+      .buffer       = (uint8_t*) _name##_buffer,\
+      .depth        = _depth,\
+      .item_size    = sizeof(_type),\
+      .overwritable = _overwritable,\
+      _mutex_declare(_mutex)\
   })
 
-void fifo_clear(fifo_t *f);
-bool fifo_write(fifo_t* f, void const * p_data);
-bool fifo_read(fifo_t* f, void * p_buffer);
-bool fifo_peek_at(fifo_t* f, uint16_t position, void * p_buffer);
+void     fifo_clear   (fifo_t *f);
 
-static inline bool fifo_peek(fifo_t* f, void * p_buffer) ATTR_ALWAYS_INLINE;
+bool     fifo_write   (fifo_t* f, void const * p_data);
+uint16_t fifo_write_n (fifo_t* f, void const * p_data, uint16_t count);
+
+bool     fifo_read    (fifo_t* f, void * p_buffer);
+uint16_t fifo_read_n  (fifo_t* f, void * p_buffer, uint16_t count);
+
+bool     fifo_peek_at (fifo_t* f, uint16_t position, void * p_buffer);
 static inline bool fifo_peek(fifo_t* f, void * p_buffer)
 {
   return fifo_peek_at(f, 0, p_buffer);
 }
 
-uint16_t fifo_read_n (fifo_t* f, void * p_buffer, uint16_t count);
-uint16_t fifo_write_n(fifo_t* f, void const * p_data, uint16_t count);
 
-static inline bool fifo_empty(fifo_t* f) ATTR_ALWAYS_INLINE;
 static inline bool fifo_empty(fifo_t* f)
 {
   return (f->count == 0);
 }
 
-static inline bool fifo_full(fifo_t* f) ATTR_ALWAYS_INLINE;
 static inline bool fifo_full(fifo_t* f)
 {
   return (f->count == f->depth);
 }
 
-static inline uint16_t fifo_get_count(fifo_t* f) ATTR_ALWAYS_INLINE;
-static inline uint16_t fifo_get_count(fifo_t* f)
+static inline uint16_t fifo_count(fifo_t* f)
 {
   return f->count;
 }
 
-static inline uint16_t fifo_get_depth(fifo_t* f) ATTR_ALWAYS_INLINE;
-static inline uint16_t fifo_get_depth(fifo_t* f)
+static inline uint16_t fifo_remaining(fifo_t* f)
+{
+  return f->depth - f->count;
+}
+
+static inline uint16_t fifo_depth(fifo_t* f)
 {
   return f->depth;
 }

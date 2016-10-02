@@ -40,7 +40,31 @@
 
 #include "adafruit/fifo.h"
 
-static inline bool is_fifo_initalized(fifo_t* f) ATTR_ALWAYS_INLINE;
+/*------------------------------------------------------------------*/
+/*
+ *------------------------------------------------------------------*/
+#if CFG_FIFO_MUTEX
+
+#define mutex_lock_if_needed(_ff)     if (_ff->mutex) fifo_mutex_lock(_ff->mutex)
+#define mutex_unlock_if_needed(_ff)   if (_ff->mutex) fifo_mutex_unlock(_ff->mutex)
+
+#else
+
+#define mutex_lock_if_needed(_ff)
+#define mutex_unlock_if_needed(_ff)
+
+#endif
+
+static inline uint16_t min16_of(uint16_t x, uint16_t y)
+{
+  return (x < y) ? x : y;
+}
+
+static inline bool fifo_initalized(fifo_t* f)
+{
+  return (f->buffer != NULL) && (f->depth > 0) && (f->item_size > 0);
+}
+
 
 /******************************************************************************/
 /*!
@@ -60,9 +84,10 @@ static inline bool is_fifo_initalized(fifo_t* f) ATTR_ALWAYS_INLINE;
 /******************************************************************************/
 bool fifo_read(fifo_t* f, void * p_buffer)
 {
-  if( !is_fifo_initalized(f) || fifo_empty(f) ) return false;
+  if( !fifo_initalized(f) ) return false;
+  if( fifo_empty(f) ) return false;
 
-  ff_mutex_lock(f);
+  mutex_lock_if_needed(f);
 
   memcpy(p_buffer,
          f->buffer + (f->rd_idx * f->item_size),
@@ -70,7 +95,7 @@ bool fifo_read(fifo_t* f, void * p_buffer)
   f->rd_idx = (f->rd_idx + 1) % f->depth;
   f->count--;
 
-  ff_mutex_unlock(f);
+  mutex_unlock_if_needed(f);
 
   return true;
 }
@@ -93,16 +118,30 @@ bool fifo_read(fifo_t* f, void * p_buffer)
 /******************************************************************************/
 uint16_t fifo_read_n (fifo_t* f, void * p_buffer, uint16_t count)
 {
+  if( !fifo_initalized(f) ) return false;
+  if( fifo_empty(f) ) return false;
+
+  /* Limit up to fifo's count */
+  count = min16_of(count, f->count);
   if( count == 0 ) return 0;
 
-  uint8_t* p_buf = (uint8_t*) p_buffer;
+  mutex_lock_if_needed(f);
 
+  /* Could copy up to 2 portions marked as 'x' if queue is wrapped around
+   * case 1: ....RxxxxW.......
+   * case 2: xxxxxW....Rxxxxxx
+   */
+//  uint16_t index2upper = min16_of(count, f->count-f->rd_idx);
+
+  uint8_t* p_buf = (uint8_t*) p_buffer;
   uint16_t len = 0;
   while( (len < count) && fifo_read(f, p_buf) )
   {
     len++;
     p_buf += f->item_size;
   }
+
+  mutex_unlock_if_needed(f);
 
   return len;
 }
@@ -123,9 +162,11 @@ uint16_t fifo_read_n (fifo_t* f, void * p_buffer, uint16_t count)
 /******************************************************************************/
 bool fifo_peek_at(fifo_t* f, uint16_t position, void * p_buffer)
 {
-  if( !is_fifo_initalized(f) || fifo_empty(f) || (position >= f->count) ) return false;
+  if ( !fifo_initalized(f) ) return false;
+  if ( position >= f->count ) return false;
 
-  uint16_t index = (f->rd_idx + position) % f->depth; // rd_idx is position=0
+  // rd_idx is position=0
+  uint16_t index = (f->rd_idx + position) % f->depth;
   memcpy(p_buffer,
          f->buffer + (index * f->item_size),
          f->item_size);
@@ -152,9 +193,10 @@ bool fifo_peek_at(fifo_t* f, uint16_t position, void * p_buffer)
 /******************************************************************************/
 bool fifo_write(fifo_t* f, void const * p_data)
 {
-  if ( !is_fifo_initalized(f) || (fifo_full(f) && !f->overwritable) ) return false;
+  if ( !fifo_initalized(f) ) return false;
+  if ( fifo_full(f) && !f->overwritable ) return false;
 
-  ff_mutex_lock(f);
+  mutex_lock_if_needed(f);
 
   memcpy( f->buffer + (f->wr_idx * f->item_size),
           p_data,
@@ -171,7 +213,7 @@ bool fifo_write(fifo_t* f, void const * p_data)
     f->count++;
   }
 
-  ff_mutex_unlock(f);
+  mutex_unlock_if_needed(f);
 
   return true;
 }
@@ -217,22 +259,9 @@ uint16_t fifo_write_n(fifo_t* f, void const * p_data, uint16_t count)
 /******************************************************************************/
 void fifo_clear(fifo_t *f)
 {
-  ff_mutex_lock(f);
-  f->rd_idx = f->wr_idx = f->count = 0;
-  ff_mutex_unlock(f);
-}
+  mutex_lock_if_needed(f);
 
-//--------------------------------------------------------------------+
-// HELPER FUNCTIONS
-//--------------------------------------------------------------------+
-static inline bool is_fifo_initalized(fifo_t* f)
-{
-  if( f->buffer == NULL || f->depth == 0 || f->item_size == 0)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  f->rd_idx = f->wr_idx = f->count = 0;
+
+  mutex_unlock_if_needed(f);
 }

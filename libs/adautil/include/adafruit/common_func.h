@@ -113,15 +113,14 @@ static inline bool mem_test_zero(void const* buffer, uint32_t size)
   return true;
 }
 
-static inline uint16_t uuid_extract_128_to_16(uint8_t const uuid128[])
-{
-  return (uuid128[13] << 8) | uuid128[12];
-}
+//------------- Min, Max -------------//
+static inline uint8_t  min8 (uint8_t  x, uint8_t  y) { return (x < y) ? x : y; }
+static inline uint16_t min16(uint16_t x, uint16_t y) { return (x < y) ? x : y; }
+static inline uint32_t min32(uint32_t x, uint32_t y) { return (x < y) ? x : y; }
 
-static inline bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
-{
-  return !memcmp(uuid1, uuid2, 16);
-}
+static inline uint8_t  max8 (uint8_t  x, uint8_t  y) { return (x > y) ? x : y; }
+static inline uint16_t max16(uint16_t x, uint16_t y) { return (x > y) ? x : y; }
+static inline uint32_t max32(uint32_t x, uint32_t y) { return (x > y) ? x : y; }
 
 //------------- Conversion -------------//
 /// form an uint32_t from 4 x uint8_t

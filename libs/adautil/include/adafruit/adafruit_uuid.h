@@ -41,6 +41,16 @@
  extern "C" {
 #endif
 
+static inline uint16_t uuid_extract_128_to_16(uint8_t const uuid128[])
+{
+  return (uuid128[13] << 8) | uuid128[12];
+}
+
+static inline bool uuid_128_equal(uint8_t const uuid1[], uint8_t const uuid2[])
+{
+  return !memcmp(uuid1, uuid2, 16);
+}
+
 // Service UUID
 #define UUID16_SVC_ALERT_NOTIFICATION                         0x1811
 #define UUID16_SVC_BATTERY                                    0x180F

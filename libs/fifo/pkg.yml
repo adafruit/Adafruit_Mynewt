@@ -30,3 +30,4 @@ pkg.keywords:
 
 pkg.deps:
   - libs/adautil
+  - "@apache-mynewt-core/libs/os"

@@ -124,7 +124,7 @@ static const struct ble_gatt_svc_def _service_bleuart[] =
 };
 
 
-FIFO_DEF(bleuart_ffin , CFG_BLE_UART_BUFSIZE, char, true );
+FIFO_DEF(bleuart_ffin, CFG_BLE_UART_BUFSIZE, char, true, NULL);
 //FIFO_DEF(bleuart_ffout, CFG_BLE_UART_BUFSIZE, char, true );
 //uint8_t bleuart_xact_buf[64];
 
