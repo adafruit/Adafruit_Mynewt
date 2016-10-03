@@ -57,7 +57,7 @@
 
 ////------------- General Header -------------//
 #include "compiler_macro.h"
-#include "assertion.h"
+#include "verify.h"
 //#include "binary.h"
 #include "common_func.h"
 #include "adafruit_uuid.h"
