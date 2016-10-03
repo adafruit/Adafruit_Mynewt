@@ -90,7 +90,7 @@ typedef struct _fifo_t
  * @param mutex        : mutex object
  */
 #define FIFO_DEF(_name, _depth, _type, _overwritable, _mutex)\
-  static _type _name##_buffer[_depth];\
+  _type _name##_buffer[_depth];\
   fifo_t * const _name = &((fifo_t) {\
       .buffer       = (uint8_t*) _name##_buffer,\
       .depth        = _depth,\
