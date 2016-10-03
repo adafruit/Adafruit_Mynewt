@@ -124,20 +124,15 @@ static const struct ble_gatt_svc_def _service_bleuart[] =
 };
 
 
-FIFO_DEF(bleuart_ffin, CFG_BLE_UART_BUFSIZE, char, true, NULL);
-//FIFO_DEF(bleuart_ffout, CFG_BLE_UART_BUFSIZE, char, true );
+FIFO_DEF(bleuart_ffin, CFG_BLEUART_BUFSIZE, char, true, NULL);
+//FIFO_DEF(bleuart_ffout, CFG_BLEUART_BUFSIZE, char, true );
 //uint8_t bleuart_xact_buf[64];
 
-static int bleuart_tx_exec(int argc, char **argv);
-static int bleuart_rx_exec(int argc, char **argv);
-
-static struct shell_cmd cmd_bleuart[] =
-{
-    { .sc_cmd = "bleuarttx", .sc_cmd_func = bleuart_tx_exec },
-    { .sc_cmd = "bleuartrx", .sc_cmd_func = bleuart_rx_exec },
-};
-
-
+/**
+ *
+ * @param cfg
+ * @return
+ */
 int bleuart_init(struct ble_hs_cfg *cfg)
 {
   varclr(_bleuart);
@@ -155,11 +150,21 @@ int bleuart_init(struct ble_hs_cfg *cfg)
   return ble_gatts_add_svcs(_service_bleuart);
 }
 
+/**
+ *
+ * @param conn_handle
+ */
 void bleuart_set_conn_handle(uint16_t conn_handle)
 {
   _bleuart.conn_hdl = conn_handle;
 }
 
+/**
+ *
+ * @param buffer
+ * @param size
+ * @return
+ */
 int bleuart_write(void const* buffer, uint32_t size)
 {
   struct os_mbuf *om = ble_hs_mbuf_from_flat(buffer, size);
@@ -167,25 +172,36 @@ int bleuart_write(void const* buffer, uint32_t size)
   return (0 == ble_gattc_notify_custom(_bleuart.conn_hdl, _bleuart.txd_hdl, om)) ? size : 0;
 }
 
+/**
+ *
+ * @param buffer
+ * @param size
+ * @return
+ */
 int bleuart_read(uint8_t* buffer, uint32_t size)
 {
   return fifo_read_n(bleuart_ffin, buffer, size);
 }
 
+/**
+ *
+ * @return
+ */
 int bleuart_getc(void)
 {
   char ch;
   return fifo_read(bleuart_ffin, &ch) ? ch : EOF;
 }
 
-int bleuart_shell_register(void)
-{
-  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[0]) );
-  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[1]) );
 
-  return 0;
-}
-
+/**
+ *
+ * @param conn_handle
+ * @param attr_handle
+ * @param ctxt
+ * @param arg
+ * @return
+ */
 int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
   uint16_t uuid16 = uuid_extract_128_to_16(ctxt->chr->uuid128);
@@ -214,21 +230,147 @@ int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
   return 0;
 }
 
+/*------------------------------------------------------------------*/
+/* Shell command integration
+ * - bleuarttx to send string or bytearray in format AA-BB-CC-DD (hex)
+ * - bleuartrx to receive string
+ *------------------------------------------------------------------*/
+#if CFG_BLEUART_SHELL_ENABLE
 
-static int bleuart_tx_exec(int argc, char **argv)
+static int bleuart_tx_exec(int argc, char **argv);
+static int bleuart_rx_exec(int argc, char **argv);
+
+static struct shell_cmd cmd_bleuart[] =
 {
-  // skip command name
-  for(int i=1; i<argc; i++)
-  {
-    // send space as well
-    if (i > 1) bleuart_putc(' ');
+    { .sc_cmd = "bleuarttx", .sc_cmd_func = bleuart_tx_exec },
+    { .sc_cmd = "bleuartrx", .sc_cmd_func = bleuart_rx_exec },
+};
 
-    bleuart_puts(argv[i]);
-  }
+/**
+ *
+ * @return
+ */
+int bleuart_shell_register(void)
+{
+  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[0]) );
+  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[1]) );
 
   return 0;
 }
 
+/**
+ * Count the number of bytes in bytearray format AA-BB-CC.
+ * Function will strictly check the syntax, any incorrect will
+ * cause a zero return.
+ * @param str input string in AA-BB-CC bytearray format
+ * @return  number of bytes if syntax is correct otherwise 0.
+ */
+uint16_t get_bytearray_size(char const* str)
+{
+  uint16_t count = 0;
+
+  while( *str)
+  {
+    if( !(isxdigit( (int) str[0] ) && isxdigit( (int) str[1])) ) return 0;
+    count++;
+
+    if (str[2] == 0  ) break;
+    if (str[2] != '-') return 0;
+
+    str += 3;
+  }
+
+  return count;
+}
+
+/******************************************************************************/
+/*!
+    @brief    Converts the supplied hexadecimal string to a uint8_t buffer.
+
+    @note     Hex strings must be in the following format: "AA-BB-CC-DD"
+
+    @param    str   The hexadecimal buffer containing the hex string to parser
+    @param    p_buf A pointer to the buffer where the converted hex values
+                    should be placed. p_buf could be NULL
+    @param    size  The number of bytes to convert
+
+    @return   The number of bytes converted
+
+    @note     p_buf is NULL can be used to count the number of bytes converted
+              or simply check to see if the format is correct.
+*/
+/******************************************************************************/
+uint16_t parse_bytearray(char const* str, uint8_t* p_buf, uint16_t size)
+{
+  uint16_t count = 0;
+  char *str_end;
+  int32_t val = strtol(str, &str_end, 16);
+
+  // Loop until there is a conversion error
+  while ( (str < str_end) && (str_end - str <= 2) && (count < size) )
+  {
+    // Copy the current value to p_buf and increase count
+    *p_buf++ = (uint8_t) val;
+
+    count++;
+
+    // Only continue if we find a '-' separator
+    if (*str_end != '-') break;
+
+    // Increase to next input
+    str = str_end+1;
+    val = strtol(str, &str_end, 16);
+  }
+
+  return count;
+}
+
+/**
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
+static int bleuart_tx_exec(int argc, char **argv)
+{
+  const char* str = argv[1];
+
+  // Check if bytearray format
+  uint16_t count = get_bytearray_size(str);
+
+  if ( count )
+  {
+    uint8_t* buf = malloc(count);
+    if (!buf) return (-1);
+
+    count = parse_bytearray(str, buf, count);
+    bleuart_write(buf, count);
+
+    free(buf);
+  }else
+  {
+    bleuart_puts(str);
+  }
+
+//  for(int i=1; i<argc; i++)
+//  {
+//    // send space as well
+//    if (i > 1) bleuart_putc(' ');
+//
+//    bleuart_puts(argv[i]);
+//  }
+
+
+
+  return 0;
+}
+
+/**
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
 static int bleuart_rx_exec(int argc, char **argv)
 {
   (void) argc;
@@ -242,3 +384,6 @@ static int bleuart_rx_exec(int argc, char **argv)
 
   return 0;
 }
+
+#endif
+

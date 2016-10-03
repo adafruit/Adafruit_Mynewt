@@ -44,9 +44,21 @@
 #include "adafruit/adafruit_util.h"
 #include "host/ble_hs.h"
 
-#ifndef CFG_BLE_UART_BUFSIZE
-#define CFG_BLE_UART_BUFSIZE 128
+/*------------------------------------------------------------------*/
+/* Configuration
+ * Default macros can be overwritten by compiler flags
+ * - CFG_BLEUART_BUFSIZE: Size of RXD fifo
+ * - CFG_BLEUART_SHELL_ENABLE: Enable the use of shell to send/receive
+ * bleuart
+ *------------------------------------------------------------------*/
+#ifndef CFG_BLEUART_BUFSIZE
+#define CFG_BLEUART_BUFSIZE 128
 #endif
+
+#ifndef CFG_BLEUART_SHELL_ENABLE
+#define CFG_BLEUART_SHELL_ENABLE 0
+#endif
+
 
 extern const uint8_t BLEUART_UUID_SERVICE[16];
 extern const uint8_t BLEUART_UUID_CHR_RXD[16];
@@ -54,7 +66,16 @@ extern const uint8_t BLEUART_UUID_CHR_TXD[16];
 
 int  bleuart_init(struct ble_hs_cfg *cfg);
 void bleuart_set_conn_handle(uint16_t conn_handle);
+
+#if CFG_BLEUART_SHELL_ENABLE
+
 int  bleuart_shell_register(void);
+
+#else
+
+#define bleuart_shell_register()    (-1)
+
+#endif
 
 int bleuart_write(void const* buffer, uint32_t size);
 
@@ -63,7 +84,7 @@ static inline int bleuart_putc(char ch)
   return bleuart_write(&ch, 1);
 }
 
-static inline int bleuart_puts(char* str)
+static inline int bleuart_puts(const char* str)
 {
   return bleuart_write(str, strlen(str));
 }

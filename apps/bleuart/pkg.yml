@@ -31,7 +31,7 @@ pkg.cflags:
     - "-std=gnu99"
     - "-DLOG_LEVEL=1"
     - "-DCFG_DEBUG=1"
-    #- "-Wno-error=unused-variable"
+    - "-DCFG_BLEUART_SHELL_ENABLE=1"
 
 pkg.deps:
     - "libs/adautil"
