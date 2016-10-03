@@ -169,7 +169,7 @@ btle_advertise(void)
   fields.num_uuids128 = 1;
   fields.uuids128_is_complete = 0;
 
-  ASSERT_STATUS_RETVOID(ble_gap_adv_set_fields(&fields));
+  VERIFY_STATUS(ble_gap_adv_set_fields(&fields), RETURN_VOID);
 
   /*------------- Scan response data -------------*/
   const char *name = ble_svc_gap_device_name();
@@ -181,7 +181,8 @@ btle_advertise(void)
   memset(&adv_params, 0, sizeof adv_params);
   adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
   adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
-  ASSERT_STATUS_RETVOID(ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL));
+  VERIFY_STATUS(ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL),
+                RETURN_VOID);
 }
 
 /**
@@ -317,7 +318,7 @@ int main(void)
     os_init();
 
     /* Set cputime to count at 1 usec increments */
-    ASSERT_STATUS( cputime_init(1000000) );
+    VERIFY_STATUS( cputime_init(1000000) );
 
     /* Seed random number generator with least significant bytes of device
      * address.
@@ -330,9 +331,9 @@ int main(void)
     srand(seed);
 
     /* Initialize msys mbufs. */
-    ASSERT_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
-    ASSERT_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
-    ASSERT_STATUS( os_msys_register(&mbuf_pool) );
+    VERIFY_STATUS( os_mempool_init(&mbuf_mpool, MBUF_NUM_MBUFS, MBUF_MEMBLOCK_SIZE, mbuf_mpool_data, "mbuf_data") );
+    VERIFY_STATUS( os_mbuf_pool_init(&mbuf_pool, &mbuf_mpool, MBUF_MEMBLOCK_SIZE, MBUF_NUM_MBUFS) );
+    VERIFY_STATUS( os_msys_register(&mbuf_pool) );
 
     //------------- Task Init -------------//
     shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
@@ -351,11 +352,11 @@ int main(void)
                  BLE_TASK_PRIO, OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
 
     /* Initialize the BLE LL */
-    ASSERT_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
+    VERIFY_STATUS( ble_ll_init(BLE_LL_TASK_PRI, MBUF_NUM_MBUFS, BLE_MBUF_PAYLOAD_SIZE) );
 
     /* Initialize the RAM HCI transport. */
     hci_cfg = ble_hci_ram_cfg_dflt;
-    ASSERT_STATUS( ble_hci_ram_init(&hci_cfg) );
+    VERIFY_STATUS( ble_hci_ram_init(&hci_cfg) );
 
     /* Initialize the BLE host. */
     cfg = ble_hs_cfg_dflt;
@@ -376,9 +377,9 @@ int main(void)
     cfg.max_client_configs  = 0;
 
     /* GATT server initialization */
-    ASSERT_STATUS( ble_svc_gap_init(&cfg) );
-    ASSERT_STATUS( ble_svc_gatt_init(&cfg) );
-    ASSERT_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
+    VERIFY_STATUS( ble_svc_gap_init(&cfg) );
+    VERIFY_STATUS( ble_svc_gatt_init(&cfg) );
+    VERIFY_STATUS( nmgr_ble_gatt_svr_init(&btle_evq, &cfg) );
 
     /* Convert MCU Unique Identifier to string as serial number */
     sprintf(serialnumber, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
@@ -398,10 +399,10 @@ int main(void)
 
     /* Initialize eventq */
     os_eventq_init(&btle_evq);
-    ASSERT_STATUS( ble_hs_init(&btle_evq, &cfg) );
+    VERIFY_STATUS( ble_hs_init(&btle_evq, &cfg) );
 
     /* Set the default device name. */
-    ASSERT_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
+    VERIFY_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
 
     /* Start the OS */
     os_start();

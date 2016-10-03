@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*!
-    @file     assertion.h
+    @file     verify.h
     @author   hathach
 
     @section LICENSE
@@ -37,81 +37,76 @@
 */
 /******************************************************************************/
 
-#ifndef _ASSERTION_H_
-#define _ASSERTION_H_
+#ifndef _VERIFY_H_
+#define _VERIFY_H_
+
+#include "compiler_macro.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#define RETURN_VOID
+#define err_t int
+
 //--------------------------------------------------------------------+
 // Compile-time Assert
 //--------------------------------------------------------------------+
 #if defined __COUNTER__ && __COUNTER__ != __COUNTER__
-  #define _ASSERT_COUNTER __COUNTER__
+  #define _VERIFY_COUNTER __COUNTER__
 #else
-  #define _ASSERT_COUNTER __LINE__
+  #define _VERIFY_COUNTER __LINE__
 #endif
 
-#define ASSERT_STATIC(const_expr, message) enum { XSTRING_CONCAT_(static_assert_, _ASSERT_COUNTER) = 1/(!!(const_expr)) }
+#define VERIFY_STATIC(const_expr, message) enum { XSTRING_CONCAT_(static_verify_, _VERIFY_COUNTER) = 1/(!!(const_expr)) }
 
 //--------------------------------------------------------------------+
-// Assert Helper
+// VERIFY Helper
 //--------------------------------------------------------------------+
 #if CFG_DEBUG >= 1
-//  #define ASSERT_MESSAGE(format, ...) fprintf(stderr, "[%08ld] %s: %d: " format "\r\n", get_millis(), __func__, __LINE__, __VA_ARGS__)
-//  #define ASSERT_MESSAGE(format, ...) printf("[%08ld] %s: %d: " format "\r\n", get_millis(), __func__, __LINE__, __VA_ARGS__)
-  #define ASSERT_MESSAGE(format, ...) fprintf(stderr, "%s: %d: " format "\r\n", __func__, __LINE__, __VA_ARGS__)
+//  #define VERIFY_MESS(format, ...) printf("[%08ld] %s: %d: verify failed\n", get_millis(), __func__, __LINE__)
+  #define VERIFY_MESS(_status)   printf("%s: %d: verify failed status = %d\n", __func__, __LINE__, _status);
 #else
-  #define ASSERT_MESSAGE(format, ...)
+  #define VERIFY_MESS(_status)
 #endif
 
-#define VOID_RETURN
 
-#define ASSERT_DEFINE(_setup_statement, _condition, _error, _format, ...) \
-  do{\
-    _setup_statement;\
-    if (!(_condition)) {\
-      ASSERT_MESSAGE(_format, __VA_ARGS__);\
-      return _error;\
-    }\
-  }while(0)
+#define VERIFY_DEFINE(_status, _error) \
+    if ( 0 != _status ) {           \
+      VERIFY_MESS(_status) /*;*/\
+      return _error;               \
+    }
 
-#define VERIFY_DEFINE(_setup_statement, _condition, _error) \
-  do{\
-    _setup_statement;\
-    if (!(_condition)) return _error;\
-  }while(0)
+/*------------------------------------------------------------------*/
+/* VERIFY STATUS
+ * - VERIFY_GETARGS, VERIFY_1ARGS, VERIFY_2ARGS are helper to implement
+ * optional parameter for VERIFY_STATUS
+ *------------------------------------------------------------------*/
+#define VERIFY_GETARGS(arg1, arg2, arg3, ...)  arg3
 
-//--------------------------------------------------------------------+
-// Status Assert
-//--------------------------------------------------------------------+
-#define err_t int
+#define VERIFY_1ARGS(sts)             \
+    do {                              \
+      err_t _status = (err_t)(sts);   \
+      VERIFY_DEFINE(_status, _status);\
+    } while(0)
 
-#define ASSERT_STATUS(sts) \
-    ASSERT_DEFINE(err_t _status = (err_t)(sts),\
-                  0 == _status, _status, "error = %d", _status)
+#define VERIFY_2ARGS(sts, _error)     \
+    do {                              \
+      err_t _status = (err_t)(sts);   \
+      VERIFY_DEFINE(_status, _error);\
+    } while(0)
 
-#define ASSERT_STATUS_RETVOID(sts) \
-    ASSERT_DEFINE(err_t _status = (err_t)(sts),\
-                  0 == _status, VOID_RETURN, "error = %d", _status)
-
-#define VERIFY_STATUS(sts)  \
-    VERIFY_DEFINE(err_t _status = (err_t)(sts), 0 == _status, _status)
-
-#define VERIFY_STATUS_RETVOID(sts)  \
-    VERIFY_DEFINE(err_t _status = (err_t)(sts), 0 == _status, VOID_RETURN)
-
-//--------------------------------------------------------------------+
-// Logical Assert
-//--------------------------------------------------------------------+
-#define ASSERT(_condition, _error)       ASSERT_DEFINE( , _condition, _error, "%s", "false")
-#define VERIFY(_condition, _error)       VERIFY_DEFINE( , _condition, _error)
+/**
+ * Check if status is success (zero), otherwise return
+ * - status value if called with 1 parameter e.g VERIFY_STATUS(status)
+ * - 2 parameter if called with 2 parameters e.g VERIFY_STATUS(status, errorcode)
+ */
+#define VERIFY_STATUS(...)  VERIFY_GETARGS(__VA_ARGS__, VERIFY_2ARGS, VERIFY_1ARGS)(__VA_ARGS__)
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _ASSERTION_H_ */
+#endif /* _VERIFY_H_ */

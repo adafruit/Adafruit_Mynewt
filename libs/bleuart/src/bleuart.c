@@ -151,7 +151,7 @@ int bleuart_init(struct ble_hs_cfg *cfg)
   /* Register the stats section */
   stats_register("ble_svc_nus", STATS_HDR(g_bleuart_stats));
 
-  ASSERT_STATUS( ble_gatts_count_cfg(_service_bleuart, cfg) );
+  VERIFY_STATUS( ble_gatts_count_cfg(_service_bleuart, cfg) );
   return ble_gatts_add_svcs(_service_bleuart);
 }
 
@@ -180,8 +180,8 @@ int bleuart_getc(void)
 
 int bleuart_shell_register(void)
 {
-  ASSERT_STATUS( shell_cmd_register(&cmd_bleuart[0]) );
-  ASSERT_STATUS( shell_cmd_register(&cmd_bleuart[1]) );
+  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[0]) );
+  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[1]) );
 
   return 0;
 }
@@ -194,7 +194,8 @@ int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
   switch (uuid16)
   {
     case UUID16_RXD:
-      VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR, 0);
+      if( ctxt->op != BLE_GATT_ACCESS_OP_WRITE_CHR ) return -1;
+
       fifo_write_n(bleuart_ffin, om->om_data, om->om_len);
       STATS_INCN(g_bleuart_stats, rxd_bytes, om->om_len);
     break;

@@ -163,10 +163,10 @@ int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
 
 int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-  VERIFY(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR, -1);
+  if (ctxt->op != BLE_GATT_ACCESS_OP_READ_CHR) return (-1);
 
   uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
-  VERIFY( is_within(UUID16_CHR_MODEL_NUMBER_STRING, uuid16, UUID16_CHR_MANUFACTURER_NAME_STRING), -1);
+  if ( !is_within(UUID16_CHR_MODEL_NUMBER_STRING, uuid16, UUID16_CHR_MANUFACTURER_NAME_STRING) ) return (-1);
 
   const char* str = _dis_cfg.arrptr[uuid16 - UUID16_CHR_MODEL_NUMBER_STRING];
 
