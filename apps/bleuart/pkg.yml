@@ -32,7 +32,11 @@ pkg.cflags:
     - "-DLOG_LEVEL=1"
     - "-DCFG_DEBUG=1"
     - "-DCFG_BLEUART_SHELL_ENABLE=1"
-
+    - "-DNFFS_PRESENT"
+    - "-DFS_PRESENT"
+    - "-DSHELL_PRESENT"
+    - "-DNEWTMGR_PRESENT"
+    
 pkg.deps:
     - "libs/adautil"
     - "libs/fifo"
@@ -46,7 +50,9 @@ pkg.deps:
     - "@apache-mynewt-core/libs/newtmgr"
     - "@apache-mynewt-core/libs/newtmgr/transport/ble"
     - "@apache-mynewt-core/libs/imgmgr"
+    - "@apache-mynewt-core/fs/nffs"
     - "@apache-mynewt-core/sys/log"
+    - "@apache-mynewt-core/sys/config"
     - "@apache-mynewt-core/net/nimble/controller"
     - "@apache-mynewt-core/net/nimble/host"
     - "@apache-mynewt-core/net/nimble/host/services/gap"
