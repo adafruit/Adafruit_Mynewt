@@ -45,7 +45,7 @@ const (
 
 - **`op`**: The operation code
 - **`Flags`**: TBD
-- **`Len`**:  TBD (presumably the payload len when `Data` is present)
+- **`Len`**:  The payload len when `Data` is present
 - **`Group`**: Commands are organized into groups. Groups are defined
   [here](https://github.com/apache/incubator-mynewt-newt/blob/master/newtmgr/protocol/defs.go).
 - **`Seq`**: TBD
