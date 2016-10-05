@@ -46,7 +46,8 @@
 #include <shell/shell.h>
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
-#include "../../../libs/adautil/include/adafruit/adautil.h"
+
+#include "adafruit/adautil.h"
 
 /* BLE */
 #include "nimble/ble.h"
