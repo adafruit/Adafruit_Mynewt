@@ -74,6 +74,22 @@ Data:  [] # No payload (len = 0 above)
 
 When serialized this will be sent as `0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02`.
 
+If this was sent using the serial port, you would get the following request and response:
+
+> Debug output lines 2..5 can be ignored ... these are an artifact of the serial connection where the values need to be encoded to a limited hex range so that they values can be properly displayed in a terminal emulator, etc. No such restrictions exist when working with BLE, whether the full 8-bit range is valid and available.
+
+```
+$ newtmgr -l DEBUG -c serial taskstats
+2016/10/05 14:30:43 [DEBUG] Writing netmgr request &{Op:0 Flags:0 Len:0 Group:0 Seq:0 Id:2 Data:[]}
+2016/10/05 14:30:43 [DEBUG] Serializing request &{Op:0 Flags:0 Len:0 Group:0 Seq:0 Id:2 Data:[]} into buffer [0 0 0 0 0 0 0 2]
+2016/10/05 14:30:43 [DEBUG] Writing [6 9] to data channel
+2016/10/05 14:30:43 [DEBUG] Writing [65 65 111 65 65 65 65 65 65 65 65 65 65 105 66 67] to data channel
+2016/10/05 14:30:43 [DEBUG] Writing [10] to data channel
+2016/10/05 14:30:43 [DEBUG] before deserializing:
+2016/10/05 14:30:43 [DEBUG] Deserialized response &{Op:0 Flags:0 Len:0 Group:0 Seq:0 Id:2 Data:[]}
+2016/10/05 14:30:43 [DEBUG] before deserializing:{"rc": 0,"tasks": {"idle": {"prio": 255,"tid": 0,"state": 1,"stkuse": 26,"stksiz": 64,"cswcnt": 3255553,"runtime": 3118922,"last_checkin": 0,"next_checkin": 0},"shell": {"prio": 3,"tid": 1,"state": 2,"stkuse": 64,"stksiz": 384,"cswcnt": 367,"runtime": 2,"last_checkin": 0,"next_checkin": 0},"newtmgr": {"prio": 4,"tid": 2,"state": 1,"stkuse": 122,"stksiz": 512,"cswcnt": 9,"runtime": 10,"last_checkin": 0,"next_checkin": 0},"blinky": {"prio": 10,"tid": 3,"state": 2,"stkuse": 26,"stksiz": 128,"cswcnt": 3125,"runtime": 0,"last_checkin": 0,"next_checkin": 0},"bleuart_bridge": {"prio": 5,"tid": 4,"state": 1,"stkuse": 28,"stksiz": 256,"cswcnt": 3130609,"runtime": 0,"last_checkin": 0,"next_checkin": 0},"bleprph": {"prio": 1,"tid": 5,"state": 2,"stkuse": 226,"stksiz": 336,"cswcnt": 6283,"runtime": 0,"last_checkin": 0,"next_checkin": 0},"ble_ll": {"prio": 0,"tid": 6,"state": 2,"stkuse": 64,"stksiz": 80,"cswcnt": 145919,"runtime": 5868,"last_checkin": 0,"next_checkin": 0}}}
+```
+
 #### Group Read Request: `image list`
 
 The following command lists images on the device and uses commands from `Group`
