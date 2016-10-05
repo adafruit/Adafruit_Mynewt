@@ -46,12 +46,18 @@ const (
 - **`op`**: The operation code
 - **`Flags`**: TBD
 - **`Len`**:  TBD (presumably the payload len when `Data` is present)
-- **`Group`**: TBD
+- **`Group`**: Commands are organized into groups. Groups are defined
+  [here](https://github.com/apache/incubator-mynewt-newt/blob/master/newtmgr/protocol/defs.go).
 - **`Seq`**: TBD
-- **`Id`**: The command ID to send
+- **`Id`**: The command ID to send. Commands in the default `Group` are defined
+  [here](https://github.com/apache/incubator-mynewt-newt/blob/master/newtmgr/protocol/defs.go).
 - **`Data`**: The payload associated with the command `Id` above
 
 ### Example Packets
+
+The following example commands show how the different fields work:
+
+#### Simple Read Request: `taskstats`
 
 The following example corresponds to the `taskstats` command in newtmgr, and
 can be seen by running `newtmgr -l DEBUG -c serial taskstats`:
@@ -60,10 +66,28 @@ can be seen by running `newtmgr -l DEBUG -c serial taskstats`:
 Op:    0  # NMGR_OP_READ
 Flags: 0
 Len:   0  # No payload present
-Group: 0
+Group: 0  # 0x00 = NMGR_GROUP_ID_DEFAULT
 Seq:   0
-Id:    2  # Command ID = 0x02 ()
-Data:  [] # No payload
+Id:    2  # 0x02 in group 0x00 = NMGR_ID_TASKSTATS
+Data:  [] # No payload (len = 0 above)
 ```
 
 When serialized this will be sent as `0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02`.
+
+#### Group Read Request: `image list`
+
+The following command lists images on the device and uses commands from `Group`
+0x01 (`NMGR_GROUP_ID_IMAGE`), and was generated with `newtmgr -l DEBUG -c serial image list`:
+
+> See [imagelist.go](https://github.com/apache/incubator-mynewt-newt/blob/master/newtmgr/protocol/imagelist.go)
+for a full list of commands in the IMAGE `Group`.
+
+```
+Op:    0  # NMGR_OP_READ
+Flags: 0
+Len:   0  # No payload present
+Group: 1  # 0x01 = NMGR_GROUP_ID_IMAGE
+Seq:   0
+Id:    0  # 0x00 in group 0x01 = IMGMGR_NMGR_OP_LIST
+Data:  [] # No payload (len = 0 above)
+```
