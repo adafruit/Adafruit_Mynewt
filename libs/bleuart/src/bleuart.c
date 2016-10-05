@@ -235,7 +235,7 @@ int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
  * - bleuarttx to send string or bytearray in format AA-BB-CC-DD (hex)
  * - bleuartrx to receive string
  *------------------------------------------------------------------*/
-#if CFG_BLEUART_SHELL_ENABLE
+#if CFG_BLEUART_SHELL_ENABLE && defined(SHELL_PRESENT)
 
 static int bleuart_tx_exec(int argc, char **argv);
 static int bleuart_rx_exec(int argc, char **argv);

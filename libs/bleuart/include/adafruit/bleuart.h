@@ -56,7 +56,7 @@
 #endif
 
 #ifndef CFG_BLEUART_SHELL_ENABLE
-#define CFG_BLEUART_SHELL_ENABLE 0
+#define CFG_BLEUART_SHELL_ENABLE 1
 #endif
 
 
@@ -67,15 +67,12 @@ extern const uint8_t BLEUART_UUID_CHR_TXD[16];
 int  bleuart_init(struct ble_hs_cfg *cfg);
 void bleuart_set_conn_handle(uint16_t conn_handle);
 
-#if CFG_BLEUART_SHELL_ENABLE
+#if CFG_BLEUART_SHELL_ENABLE && defined(SHELL_PRESENT)
 
 int  bleuart_shell_register(void);
 
-#else
-
-#define bleuart_shell_register()    (-1)
-
 #endif
+
 
 int bleuart_write(void const* buffer, uint32_t size);
 
