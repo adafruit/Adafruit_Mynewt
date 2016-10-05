@@ -91,3 +91,20 @@ Seq:   0
 Id:    0  # 0x00 in group 0x01 = IMGMGR_NMGR_OP_LIST
 Data:  [] # No payload (len = 0 above)
 ```
+
+## Transports
+
+### Newtmgr Over Serial
+
+`newtmgr` can be used over TTY serial with the following parameters:
+
+- Baud Rate: 115200
+- HW Flow Control: None
+
+### Newtmgr Over BLE
+
+`newtmgr` can be used over BLE with the following GATT service and
+characteristic UUIDs:
+
+- **Service UUID**: `8D53DC1D-1DB7-4CD3-868B-8A527460AA84`
+- **Characteristic UUID**: `DA2E7828-FBCE-4E01-AE9E-261174997C48`
