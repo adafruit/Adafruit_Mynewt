@@ -40,6 +40,7 @@
 #include <shell/shell.h>
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
+#include "../../../libs/adautil/include/adafruit/adautil.h"
 
 /* BLE */
 #include "nimble/ble.h"
@@ -67,7 +68,6 @@
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
 
-#include "adafruit/adafruit_util.h"
 #include "adafruit/bledis.h"
 #include "adafruit/bleuart.h"
 

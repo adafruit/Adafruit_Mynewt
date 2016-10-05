@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     adafruit_log.c
+    @file     ada_log.h
     @author   hathach
 
     @section LICENSE
@@ -34,31 +34,27 @@
 */
 /**************************************************************************/
 
-#include "adafruit/adafruit_util.h"
+#ifndef _ADA_LOG_H_
+#define _ADA_LOG_H_
 
-//--------------------------------------------------------------------+
-// MACRO CONSTANT TYPEDEF
-//--------------------------------------------------------------------+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-//--------------------------------------------------------------------+
-// VARIABLE DECLARATION
-//--------------------------------------------------------------------+
-static bool _initalized = false;
+#include "log/log.h"
 
-static struct log_handler adalog_hdl;
-struct log adalog;
+#define LOG_MODULE_ADA      0xAD
 
-//--------------------------------------------------------------------+
-// FUNCTION DECLARATION
-//--------------------------------------------------------------------+
+#define ADALOG(lvl, ...)    LOG_##lvl(&adalog, LOG_MODULE_ADA, __VA_ARGS__)
+#define ADALOG_INFO(...)    ADALOG(INFO, __VA_ARGS__)
+#define ADALOG_DEBUG(...)   ADALOG(DEBUG, __VA_ARGS__)
 
-void adalog_init(void)
-{
-  if (_initalized) return;
+void adalog_init(void);
 
-  log_init();
-  log_console_handler_init(&adalog_hdl);
-  log_register("adalog", &adalog, &adalog_hdl);
+extern struct log adalog;
 
-  _initalized = true;
-}
+#ifdef __cplusplus
+ }
+#endif
+
+#endif /* _ADA_LOG_H_ */

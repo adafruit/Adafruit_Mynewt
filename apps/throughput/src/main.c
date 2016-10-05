@@ -46,6 +46,7 @@
 #include <shell/shell.h>
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
+#include "../../../libs/adautil/include/adafruit/adautil.h"
 
 /* BLE */
 #include "nimble/ble.h"
@@ -77,7 +78,6 @@
 #include "crash_test/crash_test.h"
 
 /* Adafruit libraries and helpers */
-#include "adafruit/adafruit_util.h"
 #include "adafruit/bledis.h"
 #include "adafruit/bleuart.h"
 

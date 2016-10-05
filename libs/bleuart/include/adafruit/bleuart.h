@@ -41,7 +41,7 @@
  extern "C" {
 #endif
 
-#include "adafruit/adafruit_util.h"
+#include "adafruit/adautil.h"
 #include "host/ble_hs.h"
 
 /*------------------------------------------------------------------*/

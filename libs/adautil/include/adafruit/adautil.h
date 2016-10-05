@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*!
-    @file     adafruit_util.h
+    @file     adautil.h
     @author   hathach
 
     @section LICENSE
@@ -36,18 +36,14 @@
 */
 /******************************************************************************/
 
-#ifndef _ADAFRUIT_UTIL_H_
-#define _ADAFRUIT_UTIL_H_
+#ifndef _ADAUTIL_H_
+#define _ADAUTIL_H_
 
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-//--------------------------------------------------------------------+
-// INCLUDES
-//--------------------------------------------------------------------+
-
-//------------- Standard Header -------------//
+/* Standard Headers */
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -55,18 +51,18 @@
 #include <stdio.h>
 #include <ctype.h>
 
-////------------- General Header -------------//
+/* Adautil Headers */
 #include "compiler_macro.h"
 #include "verify.h"
 //#include "binary.h"
 #include "common_func.h"
-#include "adafruit_uuid.h"
 
-#include "adafruit_log.h"
+#include "ada_uuid.h"
+#include "ada_log.h"
 
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif /* _ADAFRUIT_UTIL_H_ */
+#endif /* _ADAUTIL_H_ */

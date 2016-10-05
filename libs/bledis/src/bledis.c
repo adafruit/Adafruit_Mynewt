@@ -36,9 +36,9 @@
 
 #include <stats/stats.h>
 
-#include "adafruit/adafruit_util.h"
 #include "host/ble_hs.h"
 #include "adafruit/bledis.h"
+#include "adafruit/adautil.h"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
