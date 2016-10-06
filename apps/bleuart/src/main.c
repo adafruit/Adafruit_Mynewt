@@ -24,23 +24,14 @@
 
 #include "bsp/bsp.h"
 #include "os/os.h"
-#include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
 #include "hal/hal_cputime.h"
-#include <hal/hal_flash.h>
-#include <hal/flash_map.h>
-
-/*NFFS*/
-#include <fs/fs.h>
-#include <nffs/nffs.h>
-#include <config/config.h>
-#include <config/config_file.h>
 
 #include <console/console.h>
 #include <shell/shell.h>
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
-#include "../../../libs/adautil/include/adafruit/adautil.h"
+#include "adafruit/adautil.h"
 
 /* BLE */
 #include "nimble/ble.h"
@@ -136,45 +127,34 @@ struct os_task bleuart_bridge_task;
 os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
 
 /*------------------------------------------------------------------*/
-/* NFFS Config
+/* ADA Config
  *------------------------------------------------------------------*/
-#define MY_CONFIG_FILE "/config"
-#define MY_CONFIG_MAX_LINES  32
-
-static struct conf_file cfg_file =
-{
-    .cf_name = MY_CONFIG_FILE,
-    .cf_maxlines = MY_CONFIG_MAX_LINES
-};
-
-static char* cfg_get(int argc, char **argv, char *val, int max_len);
-static int   cfg_set(int argc, char **argv, char *val);
-static int   cfg_commit(void);
-static int   cfg_export(void (*export_func)(char *name, char *val), enum conf_export_tgt tgt);
-
-static struct conf_handler ada_cfg_handler =
-{
-    .ch_name   = "adafruit",
-    .ch_get    = cfg_get,
-    .ch_set    = cfg_set,
-    .ch_commit = cfg_commit,
-    .ch_export = cfg_export
-};
-
+/* Group config Data to one struct */
 struct
 {
-  char ble_devname[32]; /* ble/devname */
-}ada_cfg =
+  char ble_devname[32];
+}cfgdata =
 {
     .ble_devname = CFG_GAP_DEVICE_NAME
 };
 
+/* Note when saving to flash group name will be added as prefix to each variable name
+ * e.g
+ * - group = "adafruit", variable is "ble/devname"
+ * - "adafruit/ble/devname" will be save to flash
+ */
+adacfg_info_t cfg_info[] =
+{
+    /* Name, Type, Size, Buffer */
+    { "ble/devname", CONF_STRING, 32, cfgdata.ble_devname },
+
+    { 0 } /* Zero for null-terminator */
+};
 
 /*------------------------------------------------------------------*/
 /* Functions prototypes
  *------------------------------------------------------------------*/
 static int btle_gap_event(struct ble_gap_event *event, void *arg);
-static int setup_for_nffs(void);
 
 /**
  * Enables advertising with the following parameters:
@@ -359,11 +339,7 @@ int main(void)
   VERIFY_STATUS( os_msys_register(&mbuf_pool) );
 
   /* Init Config & NFFS */
-  conf_init();
-  VERIFY_STATUS( conf_register(&ada_cfg_handler) );
-  VERIFY_STATUS(hal_flash_init());
-  setup_for_nffs();
-  conf_load();
+  adacfg_init("adafruit", cfg_info);
 
   //------------- Task Init -------------//
   shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
@@ -432,7 +408,7 @@ int main(void)
   VERIFY_STATUS( ble_hs_init(&btle_evq, &cfg) );
 
   /* Set the default device name. */
-  VERIFY_STATUS( ble_svc_gap_device_name_set(ada_cfg.ble_devname) );
+  VERIFY_STATUS( ble_svc_gap_device_name_set(cfgdata.ble_devname) );
 
   /* Start the OS */
   os_start();
@@ -441,90 +417,5 @@ int main(void)
   assert(0);
 
   return 0;
-}
-
-static int setup_for_nffs(void)
-{
-  /* NFFS_AREA_MAX is defined in the BSP-specified bsp.h header file. */
-  struct nffs_area_desc descs[NFFS_AREA_MAX + 1];
-  int cnt;
-
-  /* Initialize nffs's internal state. */
-  VERIFY_STATUS( nffs_init() );
-
-  /* Convert the set of flash blocks we intend to use for nffs into an array
-   * of nffs area descriptors.
-   */
-  cnt = NFFS_AREA_MAX;
-  VERIFY_STATUS( flash_area_to_nffs_desc(FLASH_AREA_NFFS, &cnt, descs) );
-
-  /* Attempt to restore an existing nffs file system from flash. */
-  if ( nffs_detect(descs) == FS_ECORRUPT )
-  {
-    /* No valid nffs instance detected; format a new one. */
-    VERIFY_STATUS ( nffs_format(descs) );
-  }
-
-  VERIFY_STATUS( conf_file_src(&cfg_file) );
-  VERIFY_STATUS( conf_file_dst(&cfg_file) );
-
-  return 0;
-}
-
-/**
- * Callback from config management to load data from Flash to local variable
- * @param argc
- * @param argv
- * @param val
- * @return
- */
-static int cfg_set (int argc, char **argv, char *val)
-{
-  if ( (argc == 2) && !strcmp(argv[0], "ble") && !strcmp(argv[1], "devname") )
-  {
-    return CONF_VALUE_SET(val, CONF_STRING, ada_cfg.ble_devname);
-  }
-
-  return OS_ENOENT;
-}
-
-/**
- * Callback from config management when data is written to Flash
- * @return
- */
-static int cfg_commit (void)
-{
-  /*not used for now*/
-  return 0;
-}
-
-/**
- * Callback from config management to store all local variables to flash
- * @param func
- * @param tgt
- * @return
- */
-static int cfg_export (void (*func) (char *name, char *val), enum conf_export_tgt tgt)
-{
-  func("adafruit/ble/devname", ada_cfg.ble_devname);
-  return 0;
-}
-
-/**
- * Callback from config management to get current value from local variable
- * @param argc
- * @param argv
- * @param buf
- * @param max_len
- * @return
- */
-static char* cfg_get (int argc, char **argv, char *buf, int max_len)
-{
-  if ( (argc == 2) && !strcmp(argv[0], "ble") && !strcmp(argv[1], "devname") )
-  {
-    return ada_cfg.ble_devname;
-  }
-
-  return NULL;
 }
 

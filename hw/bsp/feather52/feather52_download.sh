@@ -77,8 +77,8 @@ echo "r" >> $GDB_CMD_FILE
 echo "qc" >> $GDB_CMD_FILE
 
 msgs=`JLinkExe -device nRF52 -speed auto -if SWD -CommanderScript $GDB_CMD_FILE`
-
 echo $msgs > .gdb_out
+
 rm $GDB_CMD_FILE
 rm $FILE_NAME.bin
 

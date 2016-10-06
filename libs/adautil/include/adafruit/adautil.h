@@ -59,6 +59,7 @@
 
 #include "ada_uuid.h"
 #include "ada_log.h"
+#include "ada_cfg.h"
 
 
 #ifdef __cplusplus
