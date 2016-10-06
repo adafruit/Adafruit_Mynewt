@@ -58,15 +58,29 @@ echo "Downloading" $FILE_NAME "to" $FLASH_OFFSET
 # downloading somewhere in the flash. So need to figure out how to tell it
 # not to do that, or report failure if gdb fails to write this file
 #
-echo "shell /bin/sh -c 'trap \"\" 2;JLinkGDBServer -device nRF52 -speed 4000 -if SWD -port 3333 -singlerun' & " > $GDB_CMD_FILE
-echo "target remote localhost:3333" >> $GDB_CMD_FILE
-echo "restore $FILE_NAME binary $FLASH_OFFSET" >> $GDB_CMD_FILE
-echo "quit" >> $GDB_CMD_FILE
+#echo "shell /bin/sh -c 'trap \"\" 2;JLinkGDBServer -device nRF52 -speed 4000 -if SWD -port 3333 -singlerun' & " > $GDB_CMD_FILE
+#echo "target remote localhost:3333" >> $GDB_CMD_FILE
+#echo "restore $FILE_NAME binary $FLASH_OFFSET" >> $GDB_CMD_FILE
+#echo "quit" >> $GDB_CMD_FILE
 
-msgs=`arm-none-eabi-gdb -x $GDB_CMD_FILE 2>&1`
+#msgs=`arm-none-eabi-gdb -x $GDB_CMD_FILE 2>&1`
+#echo $msgs > .gdb_out
+
+#rm $GDB_CMD_FILE
+
+# JLinkExe loadbin command only work with .bin extension
+cp $FILE_NAME $FILE_NAME.bin
+echo "r" > $GDB_CMD_FILE
+echo "h" >> $GDB_CMD_FILE
+echo "loadbin $FILE_NAME.bin,$FLASH_OFFSET" >> $GDB_CMD_FILE
+echo "r" >> $GDB_CMD_FILE
+echo "qc" >> $GDB_CMD_FILE
+
+msgs=`JLinkExe -device nRF52 -speed auto -if SWD -CommanderScript $GDB_CMD_FILE`
+
 echo $msgs > .gdb_out
-
 rm $GDB_CMD_FILE
+rm $FILE_NAME.bin
 
 # Echo output from script run, so newt can show it if things go wrong.
 echo $msgs
