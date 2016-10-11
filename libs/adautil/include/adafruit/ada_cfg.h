@@ -41,7 +41,7 @@
 #include <config/config.h>
 
 #ifndef CFG_ADACFG_FILE
-#define CFG_ADACFG_FILE   "/config"
+#define CFG_ADACFG_FILE   "/cfg/adafruit"
 #endif
 
 #ifdef __cplusplus

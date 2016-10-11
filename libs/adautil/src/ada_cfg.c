@@ -120,7 +120,6 @@ int adacfg_init(const char* prefix, adacfg_info_t* cfg)
   VERIFY_STATUS( conf_file_src(&_cfg_file) );
   VERIFY_STATUS( conf_file_dst(&_cfg_file) );
 
-#if 1
   /*------------- init Config module & Register config file -------------*/
   conf_init();
 
@@ -130,7 +129,6 @@ int adacfg_init(const char* prefix, adacfg_info_t* cfg)
   VERIFY_STATUS( conf_register(&_adacfg.hdl) );
 
   conf_load();
-#endif
 
   return 0;
 }
