@@ -108,6 +108,8 @@ Id:    0  # 0x00 in group 0x01 = IMGMGR_NMGR_OP_LIST
 Data:  [] # No payload (len = 0 above)
 ```
 
+When serialised this will be sent as `0x00 0x00 0x00 0x00 0x00 0x01 0x00 0x00`.
+
 ## Transports
 
 ### Newtmgr Over Serial
