@@ -376,8 +376,9 @@ void blinky_task_handler(void* arg)
 
   while(1)
   {
-    os_time_delay(1000);
-
+    int32_t delay = OS_TICKS_PER_SEC * 1;
+    os_time_delay(delay);
+    
     hal_gpio_toggle(LED_BLINK_PIN);
   }
 }
