@@ -110,6 +110,9 @@ int adacfg_nffs_init(void)
     VERIFY_STATUS ( nffs_format(descs) );
   }
 
+  // Mkdir anyway, if existed, no action is executed
+  (void) fs_mkdir(ADACFG_DIR);
+
   return 0;
 }
 

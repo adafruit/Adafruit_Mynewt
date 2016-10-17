@@ -40,8 +40,11 @@
 
 #include <config/config.h>
 
+#define ADACFG_DIR        "/cfg"
+#define ADACFG_FILE       "adafruit"
+
 #ifndef CFG_ADACFG_FILE
-#define CFG_ADACFG_FILE   "/cfg/adafruit"
+#define CFG_ADACFG_FILE   ADACFG_DIR "/" ADACFG_FILE
 #endif
 
 #ifdef __cplusplus
