@@ -70,7 +70,8 @@ static int   cfg_export (void (*export_func)(char *name, char *val), enum conf_e
 static struct
 {
   struct conf_handler hdl;
-  adacfg_info_t* varlist;
+  uint8_t list_count;
+  const adacfg_info_t* varlist[CFG_ADACFG_MAXCONFIG];
 } _adacfg =
 {
     .hdl = {
@@ -116,7 +117,12 @@ int adacfg_nffs_init(void)
   return 0;
 }
 
-int adacfg_init(const char* prefix, adacfg_info_t* cfg)
+/**
+ * Initialize Config module with a common prefix
+ * @param prefix
+ * @return
+ */
+int adacfg_init(const char* prefix)
 {
   adacfg_nffs_init();
 
@@ -126,16 +132,36 @@ int adacfg_init(const char* prefix, adacfg_info_t* cfg)
   /*------------- init Config module & Register config file -------------*/
   conf_init();
 
+  _adacfg.list_count = 0;
   if (prefix) _adacfg.hdl.ch_name = (char*) prefix;
-
-  _adacfg.varlist = cfg;
   VERIFY_STATUS( conf_register(&_adacfg.hdl) );
+
+  return 0;
+}
+
+/**
+ * Add an configure array
+ * @param cfg
+ * @return
+ */
+int adacfg_add(const adacfg_info_t* cfg)
+{
+  if ( _adacfg.list_count >= CFG_ADACFG_MAXCONFIG ) return -1;
+
+  _adacfg.varlist[_adacfg.list_count++] = cfg;
 
   conf_load();
 
   return 0;
 }
 
+/**
+ * Helper to check if var name in [argc, argv] is equal to string array
+ * @param name
+ * @param argc
+ * @param argv
+ * @return
+ */
 static bool name_equal(char const * name, int argc, char **argv)
 {
   for(int i=0; i<argc; i++)
@@ -164,16 +190,19 @@ static bool name_equal(char const * name, int argc, char **argv)
  */
 static int cfg_set (int argc, char **argv, char *val)
 {
-  adacfg_info_t* cfgvar = _adacfg.varlist;
-
-  while ( cfgvar->name )
+  for ( uint8_t i = 0; i < _adacfg.list_count; i++ )
   {
-    if ( name_equal(cfgvar->name, argc, argv) )
-    {
-      return conf_value_from_str(val, cfgvar->type, cfgvar->value, cfgvar->len);
-    }
+    const adacfg_info_t* cfgvar = _adacfg.varlist[i];
 
-    cfgvar++;
+    while ( cfgvar->name )
+    {
+      if ( name_equal(cfgvar->name, argc, argv) )
+      {
+        return conf_value_from_str(val, cfgvar->type, cfgvar->value, cfgvar->len);
+      }
+
+      cfgvar++;
+    }
   }
 
   return OS_ENOENT;
@@ -205,15 +234,18 @@ static int cfg_export (void (*func) (char *name, char *val), enum conf_export_tg
   char* varname = fullname + strlen(fullname);
   *varname++ = '/';
 
-  adacfg_info_t* cfgvar = _adacfg.varlist;
-  while ( cfgvar->name )
+  for ( uint8_t i = 0; i < _adacfg.list_count; i++ )
   {
-    char* value = conf_str_from_value(cfgvar->type, cfgvar->value, tempbuf, sizeof(tempbuf));
+    const adacfg_info_t* cfgvar = _adacfg.varlist[i];
+    while ( cfgvar->name )
+    {
+      char* value = conf_str_from_value(cfgvar->type, cfgvar->value, tempbuf, sizeof(tempbuf));
 
-    strcpy(varname, cfgvar->name);
-    func(fullname, value);
+      strcpy(varname, cfgvar->name);
+      func(fullname, value);
 
-    cfgvar++;
+      cfgvar++;
+    }
   }
 
   free(tempbuf);
@@ -232,16 +264,19 @@ static int cfg_export (void (*func) (char *name, char *val), enum conf_export_tg
  */
 static char* cfg_get (int argc, char **argv, char *buf, int max_len)
 {
-  adacfg_info_t* cfgvar = _adacfg.varlist;
-
-  while ( cfgvar->name )
+  for ( uint8_t i = 0; i < _adacfg.list_count; i++ )
   {
-    if ( name_equal(cfgvar->name, argc, argv) )
-    {
-      return conf_str_from_value(cfgvar->type, cfgvar->value, buf, max_len);
-    }
+    const adacfg_info_t* cfgvar = _adacfg.varlist[i];
 
-    cfgvar++;
+    while ( cfgvar->name )
+    {
+      if ( name_equal(cfgvar->name, argc, argv) )
+      {
+        return conf_str_from_value(cfgvar->type, cfgvar->value, buf, max_len);
+      }
+
+      cfgvar++;
+    }
   }
 
   return NULL;

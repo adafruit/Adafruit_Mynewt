@@ -47,6 +47,10 @@
 #define CFG_ADACFG_FILE   ADACFG_DIR "/" ADACFG_FILE
 #endif
 
+#ifndef CFG_ADACFG_MAXCONFIG
+#define CFG_ADACFG_MAXCONFIG 10
+#endif
+
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -59,7 +63,8 @@ typedef struct
   void* value;
 } adacfg_info_t;
 
-int adacfg_init(const char* prefix, adacfg_info_t* cfg);
+int adacfg_init(const char* prefix);
+int adacfg_add(const adacfg_info_t* cfg);
 
 
 #ifdef __cplusplus

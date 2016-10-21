@@ -143,7 +143,7 @@ struct
  * - group = "adafruit", variable is "ble/devname"
  * - "adafruit/ble/devname" will be save to flash
  */
-adacfg_info_t cfg_info[] =
+const adacfg_info_t cfg_info[] =
 {
     /* Name, Type, Size, Buffer */
     { "ble/devname", CONF_STRING, 32, cfgdata.ble_devname },
@@ -340,7 +340,8 @@ int main(void)
   VERIFY_STATUS( os_msys_register(&mbuf_pool) );
 
   /* Init Config & NFFS */
-  adacfg_init("adafruit", cfg_info);
+  adacfg_init("adafruit");
+  adacfg_add(cfg_info);
 
   //------------- Task Init -------------//
   shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
