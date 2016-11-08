@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -40,8 +40,11 @@ extern uint8_t _ram_start;
 /* LED pins */
 #define LED_BLINK_PIN   (17)
 
+/* SPI SS */
+#define SPI_SS_PIN      (22)
+
 /* UART info */
-#define CONSOLE_UART    0
+#define CONSOLE_UART    "uart0"
 
 #define NFFS_AREA_MAX   (8)
 

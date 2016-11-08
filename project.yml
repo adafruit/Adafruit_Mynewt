@@ -24,7 +24,7 @@ project.name: "Adafruit_Mynewt"
 
 project.repositories:
     - apache-mynewt-core
-    - mynewt_arduino_zero
+    #- mynewt_arduino_zero
 
 repository.apache-mynewt-core:
     type: github

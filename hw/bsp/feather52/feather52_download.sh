@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,93 +16,25 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Called: $0 <bsp_directory_path> <binary> [features...]
-#  - bsp_directory_path is absolute path to hw/bsp/bsp_name
-#  - binary is the path to prefix to target binary, .elf.bin appended to this
-#    name is the raw binary format of the binary.
-#  - features are the target features. So you can have e.g. different
-#    flash offset for bootloader 'feature'
-#
-#
+# Called with following variables set:
+#  - CORE_PATH is absolute path to @apache-mynewt-core
+#  - BSP_PATH is absolute path to hw/bsp/bsp_name
+#  - BIN_BASENAME is the path to prefix to target binary,
+#    .elf appended to name is the ELF file
+#  - IMAGE_SLOT is the image slot to download to (for non-mfg-image, non-boot)
+#  - FEATURES holds the target features string
+#  - EXTRA_JTAG_CMD holds extra parameters to pass to jtag software
+#  - MFG_IMAGE is "1" if this is a manufacturing image
+#  - FLASH_OFFSET contains the flash offset to download to
+#  - BOOT_LOADER is set if downloading a bootloader
 
-if [ $# -lt 2 ]; then
-    echo "Need binary to download"
-    exit 1
-fi
+. $CORE_PATH/hw/scripts/jlink.sh
 
-IS_BOOTLOADER=0
-BASENAME=$2
-GDB_CMD_FILE=.gdb_cmds
-
-# Look for 'bootloader' from 3rd arg onwards
-shift
-shift
-while [ $# -gt 0 ]; do
-    if [ $1 = "bootloader" ]; then
-        IS_BOOTLOADER=1
-    fi
-    shift
-done
-
-if [ $IS_BOOTLOADER -eq 1 ]; then
+if [ "$MFG_IMAGE" ]; then
     FLASH_OFFSET=0x0
-    FILE_NAME=$BASENAME.elf.bin
-else
-    FLASH_OFFSET=0x8000
-    FILE_NAME=$BASENAME.img
 fi
 
-echo "Downloading" $FILE_NAME "to" $FLASH_OFFSET
+JLINK_DEV="nRF52"
 
-# XXX for some reason JLinkExe overwrites flash at offset 0 when
-# downloading somewhere in the flash. So need to figure out how to tell it
-# not to do that, or report failure if gdb fails to write this file
-#
-#echo "shell /bin/sh -c 'trap \"\" 2;JLinkGDBServer -device nRF52 -speed 4000 -if SWD -port 3333 -singlerun' & " > $GDB_CMD_FILE
-#echo "target remote localhost:3333" >> $GDB_CMD_FILE
-#echo "restore $FILE_NAME binary $FLASH_OFFSET" >> $GDB_CMD_FILE
-#echo "quit" >> $GDB_CMD_FILE
-
-#msgs=`arm-none-eabi-gdb -x $GDB_CMD_FILE 2>&1`
-#echo $msgs > .gdb_out
-
-#rm $GDB_CMD_FILE
-
-# JLinkExe loadbin command only work with .bin extension
-cp $FILE_NAME $FILE_NAME.bin
-echo "r" > $GDB_CMD_FILE
-echo "h" >> $GDB_CMD_FILE
-echo "loadbin $FILE_NAME.bin,$FLASH_OFFSET" >> $GDB_CMD_FILE
-echo "r" >> $GDB_CMD_FILE
-echo "qc" >> $GDB_CMD_FILE
-
-msgs=`JLinkExe -device nRF52 -speed auto -if SWD -CommanderScript $GDB_CMD_FILE`
-echo $msgs > .gdb_out
-
-rm $GDB_CMD_FILE
-rm $FILE_NAME.bin
-
-# Echo output from script run, so newt can show it if things go wrong.
-echo $msgs
-
-error=`echo $msgs | grep error`
-if [ -n "$error" ]; then
-    exit 1
-fi
-
-error=`echo $msgs | grep -i failed`
-if [ -n "$error" ]; then
-    exit 1
-fi
-
-error=`echo $msgs | grep -i "unknown / supported"`
-if [ -n "$error" ]; then
-    exit 1
-fi
-
-error=`echo $msgs | grep -i "not found"`
-if [ -n "$error" ]; then
-    exit 1
-fi
-
-exit 0
+common_file_to_load
+jlink_load

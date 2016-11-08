@@ -18,12 +18,12 @@
 #
 
 bsp.arch: cortex_m4
-bsp.compiler: compiler/arm-none-eabi-m4
-bsp.linkerscript: "nrf52dk.ld"
-bsp.linkerscript.BOOT_LOADER.OVERWRITE: "boot-nrf52dk.ld"
-bsp.part2linkerscript: "split-nrf52dk.ld"
-bsp.downloadscript: nrf52dk_download.sh
-bsp.debugscript: nrf52dk_debug.sh
+bsp.compiler: "@apache-mynewt-core/compiler/arm-none-eabi-m4"
+bsp.linkerscript: "feather52.ld"
+bsp.linkerscript.BOOT_LOADER.OVERWRITE: "boot-feather52.ld"
+bsp.part2linkerscript: "split-feather52.ld"
+bsp.downloadscript: feather52_download.sh
+bsp.debugscript: feather52_debug.sh
 
 bsp.flash_map:
     areas:

@@ -1,7 +1,7 @@
 ### Package: targets/bootloader
 pkg.name: "targets/bootloader"
 pkg.type: "target"
-pkg.description:
+pkg.description: Bootloader for feather52 board
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com"
 
