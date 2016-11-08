@@ -10,7 +10,7 @@ syscfg.defs:
         value:  1000000
     XTAL_32768:
         description: 'TBD'
-        value: 1
+        value: 0
     ADC_0:
         description: 'TBD'
         value:  0
