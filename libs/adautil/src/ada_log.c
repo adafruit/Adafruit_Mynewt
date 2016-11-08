@@ -45,7 +45,7 @@
 //--------------------------------------------------------------------+
 static bool _initalized = false;
 
-static struct log_handler adalog_hdl;
+//static struct log_handler adalog_hdl;
 struct log adalog;
 
 //--------------------------------------------------------------------+
@@ -57,8 +57,8 @@ void adalog_init(void)
   if (_initalized) return;
 
   log_init();
-  log_console_handler_init(&adalog_hdl);
-  log_register("adalog", &adalog, &adalog_hdl);
+//  log_console_handler_init(&adalog_hdl);
+  log_register("adalog", &adalog, &log_console_handler, NULL, LOG_SYSLEVEL);
 
   _initalized = true;
 }

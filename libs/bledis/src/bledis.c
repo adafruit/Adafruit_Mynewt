@@ -121,7 +121,7 @@ static const struct ble_gatt_svc_def _dis_service[] =
 static int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
 
-int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
+int bledis_init(bledis_cfg_t const * dis_cfg)
 {
   adalog_init();
 
@@ -154,7 +154,7 @@ int bledis_init(struct ble_hs_cfg * ble_cfg, bledis_cfg_t const * dis_cfg)
   }
 
   // Register Service
-  ble_gatts_count_cfg(_dis_service, ble_cfg);
+  ble_gatts_count_cfg(_dis_service);
   ble_gatts_add_svcs (_dis_service);
 
   return 0;

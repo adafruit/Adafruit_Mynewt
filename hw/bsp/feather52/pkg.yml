@@ -30,7 +30,6 @@ pkg.cflags:
     # Nordic SDK files require these defines.
     - '-DNRF52'
     - '-DSPI_MASTER_0_ENABLE'
-    # Removed cflag: -DBSP_HAS_32768_XTAL
 
 pkg.deps:
     - "@apache-mynewt-core/boot/bootutil"
