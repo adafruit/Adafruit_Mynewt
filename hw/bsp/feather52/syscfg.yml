@@ -1,4 +1,4 @@
-# Package: hw/bsp/nrf52dk
+# Package: hw/bsp/feather52
 
 syscfg.defs:
     BSP_NRF52:
