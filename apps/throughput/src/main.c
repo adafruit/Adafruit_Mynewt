@@ -160,7 +160,7 @@ static int cmd_nustest_exec(int argc, char **argv)
   free(data);
 
   /* Print the results */
-  printf("Queued %lu bytes (%lu packets of %lu size)\n", total, count, size);
+  printf("Submitted %lu bytes (%lu packets of %lu size)\n", total, count, size);
 
   return 0;
 }
@@ -172,51 +172,51 @@ static int cmd_nustest_exec(int argc, char **argv)
  */
 static void btle_advertise(void)
 {
-    /**
-     *  Set the advertisement data included in our advertisements:
-     *     o Flags (indicates advertisement type and other general info).
-     *     o Advertising tx power.
-     *     o Device name.
-     *     o 16-bit service UUIDs (alert notifications).
-     */
-    struct ble_hs_adv_fields fields;
-    memset(&fields, 0, sizeof fields);
+  /**
+   *  Set the advertisement data included in our advertisements:
+   *     o Flags (indicates advertisement type and other general info).
+   *     o Advertising tx power.
+   *     o Device name.
+   *     o 16-bit service UUIDs (alert notifications).
+   */
+  struct ble_hs_adv_fields fields;
+  memset(&fields, 0, sizeof fields);
 
-    /* Indicate that the flags field should be included; specify a value of 0
-     * to instruct the stack to fill the value in for us.
-     */
-    fields.flags_is_present      = 1;
-    fields.flags                 = 0;
+  /* Indicate that the flags field should be included; specify a value of 0
+   * to instruct the stack to fill the value in for us.
+   */
+  fields.flags_is_present      = 1;
+  fields.flags                 = 0;
 
-    /* Indicate that the TX power level field should be included; have the
-     * stack fill this one automatically as well.  This is done by assiging the
-     * special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
-     */
-    fields.tx_pwr_lvl_is_present = 1;
-    fields.tx_pwr_lvl            = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+  /* Indicate that the TX power level field should be included; have the
+   * stack fill this one automatically as well.  This is done by assiging the
+   * special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
+   */
+  fields.tx_pwr_lvl_is_present = 1;
+  fields.tx_pwr_lvl            = BLE_HS_ADV_TX_PWR_LVL_AUTO;
 
-    fields.uuids128              = (void*) BLEUART_UUID_SERVICE ;
-    fields.num_uuids128          = 1;
-    fields.uuids128_is_complete  = 0;
+  fields.uuids128              = (void*) BLEUART_UUID_SERVICE ;
+  fields.num_uuids128          = 1;
+  fields.uuids128_is_complete  = 0;
 
-    VERIFY_STATUS( ble_gap_adv_set_fields(&fields), RETURN_VOID );
+  VERIFY_STATUS( ble_gap_adv_set_fields(&fields), RETURN_VOID );
 
-    //------------- Scan response data -------------//
-    const char *name = ble_svc_gap_device_name();
-    struct ble_hs_adv_fields rsp_fields =
-    {
-        .name = (uint8_t*) name,
-        .name_len = strlen(name),
-        .name_is_complete = 1
-    };
-    ble_gap_adv_rsp_set_fields(&rsp_fields);
+  //------------- Scan response data -------------//
+  const char *name = ble_svc_gap_device_name();
+  struct ble_hs_adv_fields rsp_fields =
+  {
+      .name = (uint8_t*) name,
+      .name_len = strlen(name),
+      .name_is_complete = 1
+  };
+  ble_gap_adv_rsp_set_fields(&rsp_fields);
 
-    /* Begin advertising. */
-    struct ble_gap_adv_params adv_params;
-    memset(&adv_params, 0, sizeof adv_params);
-    adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
-    adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
-    VERIFY_STATUS(ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL),
+  /* Begin advertising. */
+  struct ble_gap_adv_params adv_params;
+  memset(&adv_params, 0, sizeof adv_params);
+  adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
+  adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
+  VERIFY_STATUS(ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL),
                 RETURN_VOID);
 }
 
