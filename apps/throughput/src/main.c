@@ -327,8 +327,8 @@ int main(void)
 
   /* Initialize the BLE host. */
   ble_hs_cfg.sync_cb        = btle_on_sync;
-  ble_hs_cfg.store_read_cb  = ble_store_ram_read;
-  ble_hs_cfg.store_write_cb = ble_store_ram_write;
+//  ble_hs_cfg.store_read_cb  = ble_store_ram_read;
+//  ble_hs_cfg.store_write_cb = ble_store_ram_write;
 
   /* Convert MCU Unique Identifier to string as serial number */
   sprintf(serialnumber, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);

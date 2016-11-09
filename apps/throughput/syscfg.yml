@@ -8,15 +8,9 @@ syscfg.vals:
     BLE_ROLE_OBSERVER: 0
     BLE_ROLE_PERIPHERAL: 1
 
-    # Log reboot messages to a flash circular buffer.
-    REBOOT_LOG_FCB: 1
-    LOG_FCB: 1
-    CONFIG_FCB: 1
-
-    # Enable newtmgr commands.
-    #STATS_NEWTMGR: 1
-    #LOG_NEWTMGR: 1
-
-    # Enable Config.
-    #CONFIG_NEWTMGR: 1
+    STATS_NAMES: 1
+    
+    # CLI & Shell
     SHELL_TASK: 1
+    STATS_CLI: 1
+    STATS_NEWTMGR: 1

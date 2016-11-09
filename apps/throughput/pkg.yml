@@ -43,6 +43,7 @@ pkg.deps:
     - "@apache-mynewt-core/sys/sysinit"
     - "@apache-mynewt-core/sys/id"
     - "@apache-mynewt-core/sys/log"
+    - "@apache-mynewt-core/sys/stats"
     - "@apache-mynewt-core/mgmt/newtmgr"
     - "@apache-mynewt-core/mgmt/newtmgr/transport/ble"
     - "@apache-mynewt-core/mgmt/imgmgr"
