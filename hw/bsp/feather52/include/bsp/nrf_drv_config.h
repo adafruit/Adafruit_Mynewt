@@ -220,14 +220,14 @@ extern "C" {
 #define SPI0_INSTANCE_INDEX 0
 #endif
 
-#define SPI1_ENABLED 0
+#define SPI1_ENABLED 1
 
 #if (SPI1_ENABLED == 1)
 #define SPI1_USE_EASY_DMA 0
 
-#define SPI1_CONFIG_SCK_PIN         2
-#define SPI1_CONFIG_MOSI_PIN        3
-#define SPI1_CONFIG_MISO_PIN        4
+#define SPI1_CONFIG_SCK_PIN         12
+#define SPI1_CONFIG_MOSI_PIN        13
+#define SPI1_CONFIG_MISO_PIN        14
 #define SPI1_CONFIG_IRQ_PRIORITY    APP_IRQ_PRIORITY_LOW
 
 #define SPI1_INSTANCE_INDEX (SPI0_ENABLED)
@@ -310,8 +310,8 @@ extern "C" {
 #define TWI0_USE_EASY_DMA 0
 
 #define TWI0_CONFIG_FREQUENCY    NRF_TWI_FREQ_100K
-#define TWI0_CONFIG_SCL          27
-#define TWI0_CONFIG_SDA          26
+#define TWI0_CONFIG_SCL          26
+#define TWI0_CONFIG_SDA          25
 #define TWI0_CONFIG_IRQ_PRIORITY APP_IRQ_PRIORITY_LOW
 
 #define TWI0_INSTANCE_INDEX      0

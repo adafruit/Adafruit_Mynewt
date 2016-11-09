@@ -35,7 +35,7 @@
 #include "uart_hal/uart_hal.h"
 #include "os/os_dev.h"
 #include "bsp.h"
-#if MYNEWT_VAL(SPI_0_MASTER)
+#if MYNEWT_VAL(SPI_0_MASTER) || MYNEWT_VAL(SPI_1_MASTER)
 #include "nrf_drv_spi.h"
 #endif
 #if MYNEWT_VAL(SPI_0_SLAVE)
@@ -109,6 +109,26 @@ static const nrf_drv_spis_config_t os_bsp_spi0s_cfg = {
     .mode         = NRF_DRV_SPIS_MODE_0,
     .bit_order    = NRF_DRV_SPIS_BIT_ORDER_MSB_FIRST,
     .irq_priority = (1 << __NVIC_PRIO_BITS) - 1
+};
+#endif
+
+#if MYNEWT_VAL(SPI_1_MASTER)
+/*
+ * NOTE: do not set the ss pin here! This would cause the nordic SDK
+ * to start using the SS pin when configured as a master and this is
+ * not what our HAL expects. Our HAL expects that the SS pin, if used,
+ * is treated as a gpio line and is handled outside the SPI routines.
+ */
+static const nrf_drv_spi_config_t os_bsp_spi1m_cfg = {
+    .sck_pin      = SPI1_CONFIG_SCK_PIN,
+    .mosi_pin     = SPI1_CONFIG_MOSI_PIN,
+    .miso_pin     = SPI1_CONFIG_MISO_PIN,
+    .ss_pin       = NRF_DRV_SPI_PIN_NOT_USED,
+    .irq_priority = (1 << __NVIC_PRIO_BITS) - 1,
+    .orc          = 0xFF,
+    .frequency    = NRF_DRV_SPI_FREQ_4M,
+    .mode         = NRF_DRV_SPI_MODE_0,
+    .bit_order    = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
 };
 #endif
 
@@ -221,6 +241,11 @@ hal_bsp_init(void)
 
 #if MYNEWT_VAL(SPI_0_SLAVE)
     rc = hal_spi_init(0, (void *)&os_bsp_spi0s_cfg, HAL_SPI_TYPE_SLAVE);
+    assert(rc == 0);
+#endif
+
+#if MYNEWT_VAL(SPI_1_MASTER)
+    rc = hal_spi_init(1, (void *)&os_bsp_spi1m_cfg, HAL_SPI_TYPE_MASTER);
     assert(rc == 0);
 #endif
 

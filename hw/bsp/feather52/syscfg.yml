@@ -52,7 +52,7 @@ syscfg.defs:
         value:  22
     SPI_1_MASTER:
         description: 'SPI 1 master'
-        value:  0
+        value:  1
     SPI_1_MASTER_SS_PIN:
         description: 'SPI 1 (master) SS pin number.'
         value:  -1
@@ -81,7 +81,7 @@ syscfg.defs:
 
     I2C_0:
         description: 'NRF52 I2C (TWI) interface 0'
-        value:  '0'
+        value:  '1'
 
 syscfg.vals:
     CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
