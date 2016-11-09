@@ -4,6 +4,44 @@
 
 For details see: http://mynewt.apache.org/newtmgr/overview/
 
+## Adding newtmgr Support to an app
+
+To enable newtmgr support, you must have shell and newtmgr dependencies in
+your `pkg.yml` file:
+
+```
+pkg.deps:
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/hw/hal"
+    - "@apache-mynewt-core/sys/sysinit"
+    - "@apache-mynewt-core/sys/console/full"
+    - "@apache-mynewt-core/sys/shell"
+    - "@apache-mynewt-core/mgmt/newtmgr"
+    - "@apache-mynewt-core/mgmt/newtmgr/transport/nmgr_shell"
+```
+
+Then in the syscfg.yml file you can enable newtmgr support via:
+
+```
+syscfg.vals:
+    # Stats
+    STATS_NAMES: 1
+
+    # Enable the shell task.
+    STATS_CLI: 1
+    LOG_CLI: 1
+    SHELL_TASK: 1
+
+    # Enable newtmgr commands.
+    STATS_NEWTMGR: 1
+    LOG_NEWTMGR: 1
+    CONFIG_NEWTMGR: 1
+```
+
+> You also need to be sure that you have a **Default System Event Queue** handler
+in your main.c file for the newtmgr task to run properly. See
+06_Shell.md for details on adding a default system event queue.
+
 ## Connection Profiles
 
 The `newtmgr` tools works with connection profiles, such as serial or ble,
