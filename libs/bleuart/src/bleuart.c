@@ -133,7 +133,7 @@ FIFO_DEF(bleuart_ffin, CFG_BLEUART_BUFSIZE, char, true, NULL);
  * @param cfg
  * @return
  */
-int bleuart_init(struct ble_hs_cfg *cfg)
+int bleuart_init(void)
 {
   varclr(_bleuart);
 
@@ -146,7 +146,7 @@ int bleuart_init(struct ble_hs_cfg *cfg)
   /* Register the stats section */
   stats_register("ble_svc_nus", STATS_HDR(g_bleuart_stats));
 
-  VERIFY_STATUS( ble_gatts_count_cfg(_service_bleuart, cfg) );
+  VERIFY_STATUS( ble_gatts_count_cfg(_service_bleuart) );
   return ble_gatts_add_svcs(_service_bleuart);
 }
 

@@ -64,7 +64,7 @@ extern const uint8_t BLEUART_UUID_SERVICE[16];
 extern const uint8_t BLEUART_UUID_CHR_RXD[16];
 extern const uint8_t BLEUART_UUID_CHR_TXD[16];
 
-int  bleuart_init(struct ble_hs_cfg *cfg);
+int  bleuart_init(void);
 void bleuart_set_conn_handle(uint16_t conn_handle);
 
 #if CFG_BLEUART_SHELL_ENABLE && defined(SHELL_PRESENT)
