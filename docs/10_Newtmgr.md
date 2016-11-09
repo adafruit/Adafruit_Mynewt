@@ -73,16 +73,6 @@ images present in flash memory:
 $ newtmgr -c serial image list
 ```
 
-## Adding Image Management Support to apps
-
-To enable image management support via `newtmgr` in your application, you must include the following dependency in your `pkg.yml` file:
-
-```
-- "@apache-mynewt-core/libs/imgmgr"
-```
-
-You also need to make sure that you initialise the image manager by calling `imgmgr_module_init();` in your startup code.
-
 ## Uploading Application Images with `newtmgr`
 
 The `newtmgr` tool can be used to upload an application image to bank number
