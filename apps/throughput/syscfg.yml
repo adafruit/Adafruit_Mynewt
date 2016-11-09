@@ -8,13 +8,10 @@ syscfg.vals:
     BLE_ROLE_OBSERVER: 0
     BLE_ROLE_PERIPHERAL: 1
 
-    # Disable unused eddystone feature.
-    BLE_EDDYSTONE: 0
-
     # Log reboot messages to a flash circular buffer.
-    #REBOOT_LOG_FCB: 1
-    #LOG_FCB: 1
-    #CONFIG_FCB: 1
+    REBOOT_LOG_FCB: 1
+    LOG_FCB: 1
+    CONFIG_FCB: 1
 
     # Enable newtmgr commands.
     #STATS_NEWTMGR: 1
@@ -22,3 +19,4 @@ syscfg.vals:
 
     # Enable Config.
     #CONFIG_NEWTMGR: 1
+    SHELL_TASK: 1

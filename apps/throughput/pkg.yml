@@ -29,9 +29,7 @@ pkg.keywords:
 
 pkg.cflags:
     - "-std=gnu99"
-    - "-DLOG_LEVEL=LOG_LEVEL_MAX"
     - "-DCFG_DEBUG=1"
-    - "-DSTATS_NAME_ENABLE"
 
 pkg.deps:
     - "libs/adautil"
@@ -43,15 +41,15 @@ pkg.deps:
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/sysinit"
-    #- "@apache-mynewt-core/libs/util"
+    - "@apache-mynewt-core/sys/id"
+    - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/mgmt/newtmgr"
     - "@apache-mynewt-core/mgmt/newtmgr/transport/ble"
     - "@apache-mynewt-core/mgmt/imgmgr"
-    - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/net/nimble/controller"
     - "@apache-mynewt-core/net/nimble/host"
     - "@apache-mynewt-core/net/nimble/host/services/gap"
     - "@apache-mynewt-core/net/nimble/host/services/gatt"
     - "@apache-mynewt-core/net/nimble/host/store/ram"
     - "@apache-mynewt-core/net/nimble/transport/ram"
-    #- "@apache-mynewt-core/libs/crash_test"
+    - "@apache-mynewt-core/test/crash_test"

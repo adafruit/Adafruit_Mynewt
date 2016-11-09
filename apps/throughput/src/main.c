@@ -41,7 +41,6 @@
 #include "os/os.h"
 #include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
-//#include "hal/hal_cputime.h"
 
 #include "sysinit/sysinit.h"
 #include <console/console.h>
@@ -49,38 +48,20 @@
 #include <log/log.h>
 #include <imgmgr/imgmgr.h>
 
-#include "adafruit/adautil.h"
-
 /* BLE */
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
-#include "host/ble_hs_adv.h"
-#include "host/ble_uuid.h"
-#include "host/ble_att.h"
-#include "host/ble_gap.h"
-#include "host/ble_gatt.h"
-#include "host/ble_l2cap.h"
-#include "host/ble_sm.h"
-#include "controller/ble_ll.h"
-
-/* RAM HCI transport. */
-#include "transport/ram/ble_hci_ram.h"
+#include "services/gap/ble_svc_gap.h"
 
 /* Newtmgr include */
 #include "newtmgr/newtmgr.h"
 #include "nmgrble/newtmgr_ble.h"
 
-/* RAM persistence layer. */
-#include "store/ram/ble_store_ram.h"
-
-/* Mandatory services. */
-#include "services/gap/ble_svc_gap.h"
-#include "services/gatt/ble_svc_gatt.h"
-
 /* Crash test ... just because */
-//#include "crash_test/crash_test.h"
+#include "crash_test/crash_test.h"
 
 /* Adafruit libraries and helpers */
+#include "adafruit/adautil.h"
 #include "adafruit/bledis.h"
 #include "adafruit/bleuart.h"
 
@@ -98,17 +79,6 @@
 struct  os_eventq  btle_evq;
 struct  os_task    btle_task;
 bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
-
-/* Shell task settings */
-#define SHELL_TASK_PRIO               (3)
-#define SHELL_MAX_INPUT_LEN           (256)
-#define SHELL_TASK_STACK_SIZE         (OS_STACK_ALIGN(384))
-os_stack_t shell_stack[SHELL_TASK_STACK_SIZE];
-
-/* newtmgr task settings */
-#define NEWTMGR_TASK_PRIO             (4)
-#define NEWTMGR_TASK_STACK_SIZE       (OS_STACK_ALIGN(512))
-os_stack_t newtmgr_stack[NEWTMGR_TASK_STACK_SIZE];
 
 /* Blinky task settings */
 #define BLINKY_TASK_PRIO              (10)
@@ -133,14 +103,6 @@ static int btle_gap_event(struct ble_gap_event *event, void *arg);
 /*------------------------------------------------------------------*/
 /* Functions
  *------------------------------------------------------------------*/
-/**
- *  Converts 'tick' to milliseconds
- */
-static inline uint32_t tick2ms(os_time_t tick)
-{
-  return ((uint64_t) (tick*1000)) / OS_TICKS_PER_SEC;
-}
-
 static struct shell_cmd cmd_nustest =
 {
     .sc_cmd      = "nustest",
@@ -190,20 +152,15 @@ static int cmd_nustest_exec(int argc, char **argv)
     os_time_delay(500);
   }
 
-  os_time_t tick = os_time_get();
-
   for(uint8_t i=0; i<count; i++)
   {
     bleuart_write(data, size);
   }
 
-  tick = os_time_get() -  tick;
-  uint32_t ms = tick2ms(tick);
-
   free(data);
 
   /* Print the results */
-  printf("Queued %lu bytes (%lu packets of %lu size) in %lu milliseconds\n", total, count, size, ms);
+  printf("Queued %lu bytes (%lu packets of %lu size)\n", total, count, size);
 
   return 0;
 }
@@ -278,8 +235,7 @@ static void btle_advertise(void)
  *                                  of the return code is specific to the
  *                                  particular GAP event being signalled.
  */
-static int
-btle_gap_event(struct ble_gap_event *event, void *arg)
+static int btle_gap_event(struct ble_gap_event *event, void *arg)
 {
   switch ( event->type )
   {
@@ -312,52 +268,12 @@ btle_gap_event(struct ble_gap_event *event, void *arg)
 /**
  * Event loop for the main bleprph task.
  */
-static void
-btle_task_handler(void *unused)
+static void btle_task_handler(void *unused)
 {
-  /* Command usage: nustest <count> <packetsize> */
-  shell_cmd_register(&cmd_nustest);
-
   while (1)
   {
-    os_eventq_get(&btle_evq);
+    os_eventq_run(&btle_evq);
   }
-
-#if 0
-    struct os_event *ev;
-    struct os_callout_func *cf;
-    int rc;
-
-    /* Command usage: nustest <count> <packetsize> */
-    shell_cmd_register(&cmd_nustest);
-
-    rc = ble_hs_start();
-    assert(rc == 0);
-
-    /* Begin advertising. */
-//    btle_advertise();
-
-    while (1) {
-        ev = os_eventq_get(&btle_evq);
-
-        /* Check if the event is a nmgr ble mqueue event */
-        rc = nmgr_ble_proc_mq_evt(ev);
-        if (!rc) {
-            continue;
-        }
-
-        switch (ev->ev_type) {
-        case OS_EVENT_T_TIMER:
-            cf = (struct os_callout_func *)ev;
-            assert(cf->cf_func);
-            cf->cf_func(CF_ARG(cf));
-            break;
-        default:
-            assert(0);
-            break;
-        }
-    }
-#endif
 }
 
 static void btle_on_sync(void)
@@ -400,18 +316,14 @@ int main(void)
   /* Initialize OS */
   sysinit();
 
+  /* Initialize eventq */
+  os_eventq_init(&btle_evq);
+
   //------------- Task Init -------------//
-//  shell_task_init(SHELL_TASK_PRIO, shell_stack, SHELL_TASK_STACK_SIZE, SHELL_MAX_INPUT_LEN);
-//  console_init(shell_console_rx_cb);
-
-//  nmgr_task_init(NEWTMGR_TASK_PRIO, newtmgr_stack, NEWTMGR_TASK_STACK_SIZE);
-//  imgmgr_module_init();
-
   os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
                BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
   os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
                BLE_TASK_PRIO, OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
-
 
   /* Initialize the BLE host. */
   ble_hs_cfg.sync_cb        = btle_on_sync;
@@ -436,8 +348,8 @@ int main(void)
   /* Nordic UART service (NUS) settings */
   bleuart_init();
 
-  /* Initialize eventq */
-  os_eventq_init(&btle_evq);
+  /* Command usage: nustest <count> <packetsize> */
+  shell_cmd_register(&cmd_nustest);
 
   /* Set the default device name. */
   VERIFY_STATUS(ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME));

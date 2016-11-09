@@ -26,6 +26,7 @@ pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
   - adafruit
+  - bleuart
 
 pkg.deps:
   - libs/adautil
