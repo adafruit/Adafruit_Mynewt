@@ -6,7 +6,7 @@ For details see: http://mynewt.apache.org/newtmgr/overview/
 
 ## Adding newtmgr Support to an app
 
-To enable newtmgr support, you must have shell and newtmgr dependencies in
+To enable newtmgr support, you must have `shell` and `newtmgr` dependencies in
 your `pkg.yml` file:
 
 ```
@@ -20,7 +20,7 @@ pkg.deps:
     - "@apache-mynewt-core/mgmt/newtmgr/transport/nmgr_shell"
 ```
 
-Then in the syscfg.yml file you can enable newtmgr support via:
+Then in the `syscfg.yml` file you can enable newtmgr support via:
 
 ```
 syscfg.vals:
