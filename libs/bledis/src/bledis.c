@@ -75,6 +75,13 @@ STATS_SECT_DECL(bledis_stat_section) g_bledis_stats;
 
 #endif
 
+#if MYNEWT_VAL(BLEDIS_ADALOG)
+  #define _LOG(x)  x
+#else
+  #define _LOG(x)
+#endif
+
+
 //--------------------------------------------------------------------+
 // VARIABLE DECLARATION
 //--------------------------------------------------------------------+
@@ -126,7 +133,7 @@ static int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct b
 
 int bledis_init(bledis_cfg_t const * dis_cfg)
 {
-  adalog_init();
+  _LOG( adalog_init() );
 
   memclr(_dis_chars, sizeof(_dis_chars));
   _dis_cfg.named = *dis_cfg;
@@ -148,7 +155,7 @@ int bledis_init(bledis_cfg_t const * dis_cfg)
   {
     if ( _dis_cfg.arrptr[i] != NULL )
     {
-      ADALOG_INFO("[BLEDIS] %s added\n", _dis_chr_text[i]);
+      _LOG( ADALOG_INFO("[BLEDIS] %s added\n", _dis_chr_text[i]) );
 
       _dis_chars[count].uuid128   = _dis_uuid128[i];
       _dis_chars[count].access_cb = bledis_access_cb;

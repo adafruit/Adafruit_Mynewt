@@ -2,3 +2,6 @@ syscfg.defs:
     BLEDIS_STATS:
         description: 'Enable bledis statictics'
         value: 0
+    BLEDIS_ADALOG:
+        description: 'Enable bledis logging with adalog'
+        value: 1
