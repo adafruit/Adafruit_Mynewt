@@ -36,7 +36,7 @@
 
 #include "adafruit/adautil.h"
 
-#if defined (NFFS_PRESENT) && defined(FS_PRESENT)
+#if MYNEWT_VAL(ADAUTIL_CFG)
 
 #include <bsp/bsp.h>
 #include <hal/hal_flash.h>
@@ -55,12 +55,6 @@
 /*------------------------------------------------------------------*/
 /* VARIABLE DECLARATION
  *------------------------------------------------------------------*/
-static struct conf_file _cfg_file =
-{
-    .cf_name     = CFG_ADACFG_FILE,
-    .cf_maxlines = 32
-};
-
 static char* cfg_get    (int argc, char **argv, char *val, int max_len);
 static int   cfg_set    (int argc, char **argv, char *val);
 static int   cfg_commit (void);
@@ -85,37 +79,6 @@ static struct
 /*------------------------------------------------------------------*/
 /* FUNCTION DECLARATION
  *------------------------------------------------------------------*/
-int adacfg_nffs_init(void)
-{
-  /*------------- Init NFFS -------------*/
-  VERIFY_STATUS( hal_flash_init() );
-
-  /* NFFS_AREA_MAX is defined in the BSP-specified bsp.h header file. */
-  struct nffs_area_desc descs[NFFS_AREA_MAX + 1];
-  int cnt;
-
-  /* Initialize nffs's internal state. */
-  VERIFY_STATUS( nffs_init() );
-
-  /* Convert the set of flash blocks we intend to use for nffs into an array
-   * of nffs area descriptors.
-   */
-  cnt = NFFS_AREA_MAX;
-  VERIFY_STATUS( flash_area_to_nffs_desc(FLASH_AREA_NFFS, &cnt, descs) );
-
-  /* Attempt to restore an existing nffs file system from flash. */
-  if ( nffs_detect(descs) == FS_ECORRUPT )
-  {
-    /* No valid nffs instance detected; format a new one. */
-    VERIFY_STATUS ( nffs_format(descs) );
-  }
-
-  // Mkdir anyway, if existed, no action is executed
-  (void) fs_mkdir(ADACFG_DIR);
-
-  return 0;
-}
-
 /**
  * Initialize Config module with a common prefix
  * @param prefix
@@ -123,14 +86,10 @@ int adacfg_nffs_init(void)
  */
 int adacfg_init(const char* prefix)
 {
-  adacfg_nffs_init();
+  /* NFFS should already initialized with nffs_pkg_init() & config_pkg_init
+   * inside sysinit(). We only need to register handler */
 
-  VERIFY_STATUS( conf_file_src(&_cfg_file) );
-  VERIFY_STATUS( conf_file_dst(&_cfg_file) );
-
-  /*------------- init Config module & Register config file -------------*/
-  conf_init();
-
+  /*------------- Register config file -------------*/
   _adacfg.list_count = 0;
   if (prefix) _adacfg.hdl.ch_name = (char*) prefix;
   VERIFY_STATUS( conf_register(&_adacfg.hdl) );

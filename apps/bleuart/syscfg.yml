@@ -1,5 +1,3 @@
-#syscfg.defs:
-
 syscfg.vals:
     # Use INFO log level to reduce code size.  DEBUG is too large for nRF51.
     LOG_LEVEL: 1
@@ -16,7 +14,14 @@ syscfg.vals:
     SHELL_TASK: 1
     STATS_CLI: 1
     STATS_NEWTMGR: 1
-    #CONFIG_NEWTMGR: 1
+    
+    # Config with NFFS
+    CONFIG_NFFS: 1
+    CONFIG_CLI: 1
+    CONFIG_NEWTMGR: 1
+    #CONFIG_NFFS_DIR: '"/cfg"'
+    #CONFIG_NFFS_FILE: '"/cfg/run"'
+    #CONFIG_NFFS_MAX_LINES: 32    
     
     #Adafruit
     BLEUART_BUFSIZE: 128
@@ -24,4 +29,6 @@ syscfg.vals:
     BLEUART_STATS: 1
     
     BLEDIS_STATS: 0
+    
+    ADAUTIL_CFG: 1
 

@@ -282,8 +282,8 @@ int main(void)
   os_eventq_init(&btle_evq);
 
   /* Init Config & NFFS */
-//  adacfg_init("adafruit");
-//  adacfg_add(cfg_info);
+  adacfg_init("adafruit");
+  adacfg_add(cfg_info);
 
   //------------- Task Init -------------//
   os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,

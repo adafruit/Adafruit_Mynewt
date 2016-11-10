@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 pkg.name: libs/adautil
-pkg.description: Adafruit utilities.
+pkg.description: Library containing miscellaneous utilities.
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
@@ -35,5 +35,4 @@ pkg.deps.ADAUTIL_LOG:
 
 pkg.deps.ADAUTIL_CFG:  
   - "@apache-mynewt-core/sys/config"
-  - "@apache-mynewt-core/fs/fs"
   - "@apache-mynewt-core/fs/nffs"

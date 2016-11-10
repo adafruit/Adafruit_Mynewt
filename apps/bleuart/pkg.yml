@@ -30,9 +30,6 @@ pkg.keywords:
 pkg.cflags:
     - "-std=gnu99"
     - "-DCFG_DEBUG=1"
-    #- "-DNFFS_PRESENT"
-    #- "-DFS_PRESENT"
-    - "-DNEWTMGR_PRESENT"
     
 pkg.deps:
     - "libs/adautil"
@@ -48,7 +45,6 @@ pkg.deps:
     - "@apache-mynewt-core/sys/log"
     - "@apache-mynewt-core/sys/stats"
     - "@apache-mynewt-core/sys/config"
-    - "@apache-mynewt-core/fs/fs"
     - "@apache-mynewt-core/fs/nffs"
     - "@apache-mynewt-core/mgmt/newtmgr"
     - "@apache-mynewt-core/mgmt/newtmgr/transport/ble"
