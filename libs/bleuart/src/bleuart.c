@@ -73,6 +73,8 @@ const uint8_t BLEUART_UUID_CHR_TXD[] =
 /*------------------------------------------------------------------*/
 /* STATISTICS STRUCT DEFINITION
  *------------------------------------------------------------------*/
+#if MYNEWT_VAL(BLEUART_STATS)
+
 /* Define the core stats structure */
 STATS_SECT_START(bleuart_stat_section)
     STATS_SECT_ENTRY(txd_bytes)
@@ -87,9 +89,15 @@ STATS_NAME_END(bleuart_stat_section)
 
 STATS_SECT_DECL(bleuart_stat_section) g_bleuart_stats;
 
+#endif
+
 /*------------------------------------------------------------------*/
 /* VARIABLE DECLARATION
  *------------------------------------------------------------------*/
+FIFO_DEF(bleuart_ffin, MYNEWT_VAL(BLEUART_BUFSIZE), char, true, NULL);
+//FIFO_DEF(bleuart_ffout, MYNEWT_VAL(BLEUART_BUFSIZE), char, true );
+//uint8_t bleuart_xact_buf[64];
+
 int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
 static struct
@@ -123,11 +131,6 @@ static const struct ble_gatt_svc_def _service_bleuart[] =
   , { 0 } /* No more services. */
 };
 
-
-FIFO_DEF(bleuart_ffin, CFG_BLEUART_BUFSIZE, char, true, NULL);
-//FIFO_DEF(bleuart_ffout, CFG_BLEUART_BUFSIZE, char, true );
-//uint8_t bleuart_xact_buf[64];
-
 /**
  *
  * @param cfg
@@ -137,14 +140,15 @@ int bleuart_init(void)
 {
   varclr(_bleuart);
 
+#if MYNEWT_VAL(BLEUART_STATS)
   /* Initialise the stats section */
-  stats_init(
-      STATS_HDR(g_bleuart_stats),
-      STATS_SIZE_INIT_PARMS(g_bleuart_stats, STATS_SIZE_32),
-      STATS_NAME_INIT_PARMS(bleuart_stat_section));
+  stats_init( STATS_HDR(g_bleuart_stats),
+              STATS_SIZE_INIT_PARMS(g_bleuart_stats, STATS_SIZE_32),
+              STATS_NAME_INIT_PARMS(bleuart_stat_section));
 
   /* Register the stats section */
-  stats_register("ble_svc_nus", STATS_HDR(g_bleuart_stats));
+  stats_register("ble_uart", STATS_HDR(g_bleuart_stats));
+#endif
 
   VERIFY_STATUS( ble_gatts_count_cfg(_service_bleuart) );
   return ble_gatts_add_svcs(_service_bleuart);
@@ -168,7 +172,11 @@ void bleuart_set_conn_handle(uint16_t conn_handle)
 int bleuart_write(void const* buffer, uint32_t size)
 {
   struct os_mbuf *om = ble_hs_mbuf_from_flat(buffer, size);
+
+#if MYNEWT_VAL(BLEUART_STATS)
   STATS_INCN(g_bleuart_stats, txd_bytes, size);
+#endif
+
   return (0 == ble_gattc_notify_custom(_bleuart.conn_hdl, _bleuart.txd_hdl, om)) ? size : 0;
 }
 
@@ -213,7 +221,10 @@ int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
       if( ctxt->op != BLE_GATT_ACCESS_OP_WRITE_CHR ) return -1;
 
       fifo_write_n(bleuart_ffin, om->om_data, om->om_len);
+
+      #if MYNEWT_VAL(BLEUART_STATS)
       STATS_INCN(g_bleuart_stats, rxd_bytes, om->om_len);
+      #endif
     break;
 
     case UUID16_TXD:
@@ -235,15 +246,15 @@ int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
  * - bleuarttx to send string or bytearray in format AA-BB-CC-DD (hex)
  * - bleuartrx to receive string
  *------------------------------------------------------------------*/
-#if CFG_BLEUART_SHELL_ENABLE && defined(SHELL_PRESENT)
+#if MYNEWT_VAL(BLEUART_CLI)
 
 static int bleuart_tx_exec(int argc, char **argv);
 static int bleuart_rx_exec(int argc, char **argv);
 
-static struct shell_cmd cmd_bleuart[] =
+static struct shell_cmd _bleuart_cmd[] =
 {
-    { .sc_cmd = "bleuarttx", .sc_cmd_func = bleuart_tx_exec },
-    { .sc_cmd = "bleuartrx", .sc_cmd_func = bleuart_rx_exec },
+    { .sc_cmd = "but", .sc_cmd_func = bleuart_tx_exec },
+    { .sc_cmd = "bur", .sc_cmd_func = bleuart_rx_exec },
 };
 
 /**
@@ -252,8 +263,8 @@ static struct shell_cmd cmd_bleuart[] =
  */
 int bleuart_shell_register(void)
 {
-  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[0]) );
-  VERIFY_STATUS( shell_cmd_register(&cmd_bleuart[1]) );
+  VERIFY_STATUS( shell_cmd_register(&_bleuart_cmd[0]) );
+  VERIFY_STATUS( shell_cmd_register(&_bleuart_cmd[1]) );
 
   return 0;
 }

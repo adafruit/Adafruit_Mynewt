@@ -1,9 +1,0 @@
-### Package: targets/zero_boot
-pkg.name: "targets/zero_boot"
-pkg.type: "target"
-pkg.description: 
-pkg.author: "Adafruit <support@adafruit.com>"
-pkg.homepage: "http://www.adafruit.com"
-
-pkg.features:
-    - "arduino_zero"

@@ -36,8 +36,6 @@
 #ifndef ADA_CFG_H_
 #define ADA_CFG_H_
 
-#if defined (NFFS_PRESENT) && defined(FS_PRESENT)
-
 #include <config/config.h>
 
 #define ADACFG_DIR        "/cfg"
@@ -69,8 +67,6 @@ int adacfg_add(const adacfg_info_t* cfg);
 
 #ifdef __cplusplus
  }
-#endif
-
 #endif
 
 #endif /* ADA_CFG_H_ */

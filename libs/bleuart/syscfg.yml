@@ -1,0 +1,10 @@
+syscfg.defs:
+    BLEUART_BUFSIZE:
+        description: 'Bleuart fifo buffer size'
+        value: 128
+    BLEUART_CLI:
+        description: 'Enable Bleuart send/receive using CLI'
+        value: 1
+    BLEUART_STATS:
+        description: 'Enable Bleuart statictics'
+        value: 0

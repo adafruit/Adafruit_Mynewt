@@ -40,7 +40,6 @@
 
 #include <bsp/bsp.h>
 #include <hal/hal_flash.h>
-#include <hal/flash_map.h>
 
 #include <fs/fs.h>
 #include <nffs/nffs.h>

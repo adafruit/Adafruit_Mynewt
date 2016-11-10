@@ -37,28 +37,18 @@
 #ifndef _ADAFRUIT_BLEUART_H_
 #define _ADAFRUIT_BLEUART_H_
 
+/*------------------------------------------------------------------*/
+/* Configuration is done by syscfg.yml in application folder
+ * - BLEUART_BUFSIZE: Size of RXD fifo (default 128)
+ * - BLEUART_CLI    : Enable the use of shell to send/receive bleuart
+ *------------------------------------------------------------------*/
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
 #include "adafruit/adautil.h"
 #include "host/ble_hs.h"
-
-/*------------------------------------------------------------------*/
-/* Configuration
- * Default macros can be overwritten by compiler flags
- * - CFG_BLEUART_BUFSIZE: Size of RXD fifo
- * - CFG_BLEUART_SHELL_ENABLE: Enable the use of shell to send/receive
- * bleuart
- *------------------------------------------------------------------*/
-#ifndef CFG_BLEUART_BUFSIZE
-#define CFG_BLEUART_BUFSIZE 128
-#endif
-
-#ifndef CFG_BLEUART_SHELL_ENABLE
-#define CFG_BLEUART_SHELL_ENABLE 1
-#endif
-
 
 extern const uint8_t BLEUART_UUID_SERVICE[16];
 extern const uint8_t BLEUART_UUID_CHR_RXD[16];
@@ -67,10 +57,8 @@ extern const uint8_t BLEUART_UUID_CHR_TXD[16];
 int  bleuart_init(void);
 void bleuart_set_conn_handle(uint16_t conn_handle);
 
-#if CFG_BLEUART_SHELL_ENABLE && defined(SHELL_PRESENT)
-
+#if MYNEWT_VAL(BLEUART_CLI)
 int  bleuart_shell_register(void);
-
 #endif
 
 

@@ -37,9 +37,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+
 #include "bsp/bsp.h"
 #include "os/os.h"
-#include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
 
 #include "sysinit/sysinit.h"
@@ -266,9 +266,9 @@ static int btle_gap_event(struct ble_gap_event *event, void *arg)
 }
 
 /**
- * Event loop for the main bleprph task.
+ * Event loop for the main btle task.
  */
-static void btle_task_handler(void *unused)
+static void btle_task_handler (void *unused)
 {
   while (1)
   {

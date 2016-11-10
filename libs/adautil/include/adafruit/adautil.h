@@ -57,6 +57,7 @@
 //#include "binary.h"
 #include "common_func.h"
 
+#include "syscfg/syscfg.h"
 #include "ada_uuid.h"
 #include "ada_log.h"
 #include "ada_cfg.h"

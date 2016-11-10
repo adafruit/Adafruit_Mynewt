@@ -29,4 +29,6 @@ pkg.keywords:
 
 pkg.deps:
   - libs/adautil
+  
+pkg.deps.BLEDIS_STATS:  
   - "@apache-mynewt-core/sys/stats"

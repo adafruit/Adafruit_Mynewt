@@ -1,0 +1,7 @@
+syscfg.defs:
+    ADAUTIL_LOG:
+        description: 'Enable Adafruit Log util'
+        value: 1
+    ADAUTIL_CFG:
+        description: 'Enable Adafruit Config util'
+        value: 0        

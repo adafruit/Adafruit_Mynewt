@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 pkg.name: libs/bleuart
-pkg.description: BLE UART library
+pkg.description: Adafruit BLE UART library
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
@@ -31,8 +31,10 @@ pkg.keywords:
 pkg.deps:
   - libs/adautil
   - libs/fifo
-  - "@apache-mynewt-core/sys/console/full"
-  - "@apache-mynewt-core/sys/shell"
   - "@apache-mynewt-core/kernel/os"
   - "@apache-mynewt-core/net/nimble/host"
+
+pkg.deps.BLEUART_CLI:  
+  - "@apache-mynewt-core/sys/console/full"
+  - "@apache-mynewt-core/sys/shell"
   - "@apache-mynewt-core/sys/stats"

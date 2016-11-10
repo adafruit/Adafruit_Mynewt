@@ -1,4 +1,0 @@
-#target.app: "@apache-mynewt-core/apps/blinky"
-target.app: "apps/blinky"
-target.bsp: "@mynewt_arduino_zero/hw/bsp/arduino_zero"
-target.build_profile: "debug"

@@ -1,0 +1,4 @@
+syscfg.defs:
+    BLEDIS_STATS:
+        description: 'Enable bledis statictics'
+        value: 0

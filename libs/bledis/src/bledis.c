@@ -49,6 +49,8 @@ enum { BLEDIS_MAX_CHAR = sizeof(bledis_cfg_t)/4 };
 //--------------------------------------------------------------------+
 // STATISTICS STRUCT DEFINITION
 //--------------------------------------------------------------------+
+#if MYNEWT_VAL(BLEDIS_STATS)
+
 /* Define the core stats structure */
 STATS_SECT_START(bledis_stat_section)
     STATS_SECT_ENTRY(model_reads)
@@ -71,6 +73,7 @@ STATS_NAME_END(bledis_stat_section)
 
 STATS_SECT_DECL(bledis_stat_section) g_bledis_stats;
 
+#endif
 
 //--------------------------------------------------------------------+
 // VARIABLE DECLARATION
@@ -128,6 +131,7 @@ int bledis_init(bledis_cfg_t const * dis_cfg)
   memclr(_dis_chars, sizeof(_dis_chars));
   _dis_cfg.named = *dis_cfg;
 
+#if MYNEWT_VAL(BLEDIS_STATS)
   /* Initialise the stats section */
   stats_init(
       STATS_HDR(g_bledis_stats),
@@ -136,6 +140,7 @@ int bledis_init(bledis_cfg_t const * dis_cfg)
 
   /* Register the stats section */
   stats_register("ble_svc_dis", STATS_HDR(g_bledis_stats));
+#endif
 
   // Include only configured characteristics
   int count = 0;
@@ -172,6 +177,7 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
 
   os_mbuf_append(ctxt->om, str, strlen(str));
 
+#if MYNEWT_VAL(BLEDIS_STATS)
   /* Increment the stats counter */
   switch (uuid16)
   {
@@ -194,6 +200,7 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
       STATS_INC(g_bledis_stats, manufacturer_reads);
       break;
   }
+#endif
 
   return 0;
 }

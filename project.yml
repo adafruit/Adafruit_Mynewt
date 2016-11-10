@@ -32,8 +32,8 @@ repository.apache-mynewt-core:
     user: apache
     repo: incubator-mynewt-core
 
-repository.mynewt_arduino_zero:
-    type: github
-    vers: 0-dev
-    user: runtimeinc
-    repo: mynewt_arduino_zero    
+#repository.mynewt_arduino_zero:
+#    type: github
+#    vers: 0-dev
+#    user: runtimeinc
+#    repo: mynewt_arduino_zero    
