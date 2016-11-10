@@ -25,6 +25,7 @@ pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
 
 pkg.deps:
+    - "hw/drivers/sensors/tls2561"
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/hw/hal"
     - "@apache-mynewt-core/sys/sysinit"
