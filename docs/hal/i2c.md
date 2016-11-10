@@ -2,9 +2,21 @@
 
 ## BSP Config
 
-Make sure that your BSP is configured for I2C support. In the case of the
-**nRF51** and **nRF52**, this means adding the `nrf_drv_config.h` file to
-your BSP with the following settings (for example):
+### `syscfg.yml` Settings
+
+In the BSP's `syscfg.yml` file add:
+
+```
+I2C_0:
+    description: 'NRF52 I2C (TWI) interface 0'
+    value:  '1'
+```
+
+### Pin Settings
+
+In the case of the **nRF51** and **nRF52**, most pin config takes place in the
+`nrf_drv_config.h` file which should be part of your BSP. For example, the
+following code configures I2C0 to use pins 25 (SDA) and 26 (SCL) at 100kHz:
 
 ```
 #define TWI0_ENABLED 1
@@ -21,28 +33,88 @@ your BSP with the following settings (for example):
 #endif
 ```
 
-Then in the BSP's `syscfg.yml` file add:
-
-```
-I2C_0:
-    description: 'NRF52 I2C (TWI) interface 0'
-    value:  '1'
-```
-
 ## Library/Application Config
 
 ### `pkg.yml` Settings
 
-ToDo
+In the `pkg.deps` section add the following dependency:
 
-### `syscfg.yml` Settings
-
-ToDo
+```
+pkg.deps:
+    - "@apache-mynewt-core/hw/hal"
+```
 
 ### Source Code
+
+> If `I2C_O` is set to `1` in the BSP or app's `syscfg.yml` file, I2C0 will be
+initialised when `sysinit` is called, but the following changes are required
+to use the I2C bus in your application:
 
 Add the following header to your .c file:
 
 ```
 #include "hal/hal_i2c.h"
+```
+
+You can then perform read, write or probe commands using the following
+functions:
+
+```
+int hal_i2c_master_write(uint8_t i2c_num, struct hal_i2c_master_data *pdata,
+                         uint32_t timeout, uint8_t last_op);
+int hal_i2c_master_read(uint8_t i2c_num, struct hal_i2c_master_data *pdata,
+                         uint32_t timeout, uint8_t last_op);
+int hal_i2c_master_probe(uint8_t i2c_num, uint8_t address, uint32_t timeout);
+
+```
+
+#### `hal_i2c_master_probe` Usage
+
+To probe all valid I2C addresses you could run the following shell command:
+
+```
+static int
+shell_i2cscan_cmd(int argc, char **argv)
+{
+    uint8_t addr;
+    int32_t timeout = OS_TICKS_PER_SEC / 10
+    uint8_t dev_count = 0;
+
+    console_printf("Scanning I2C bus 0\n"
+                   "     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n"
+                   "00:          ");
+
+    /* Scan all valid I2C addresses (0x03..0x77) */
+    for (addr = 0x03; addr < 0x78; addr++) {
+        int rc = hal_i2c_master_probe(0, addr, timeout);
+        if (!(addr % 16)) {
+          console_printf("\n%02x: ", addr);
+        }
+        if (!rc) {
+            console_printf("%02x ", addr);
+            dev_count++;
+        } else {
+            console_printf("-- ");
+        }
+    }
+    console_printf("\nFound %u devices on I2C bus 0\n", dev_count);
+
+    return 0;
+}
+```
+
+Which would result in the following output on the shell:
+
+```
+5594:Scanning I2C bus 0
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 1f
+20: -- 21 -- -- -- -- -- -- -- 29 -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+70: -- -- -- -- -- -- 76 --
+Found 4 devices on I2C bus 0
 ```
