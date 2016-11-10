@@ -1,6 +1,6 @@
 /*****************************************************************************/
 /*!
-    @file     tls2561.c
+    @file     tsl2561.c
     @author   ktown (Adafruit Industries)
 
     @section LICENSE
@@ -38,7 +38,7 @@
 #include <stdio.h>
 
 #include "sysinit/sysinit.h"
-#include "adafruit/tls2561.h"
+#include "adafruit/tsl2561.h"
 #include "hal/hal_i2c.h"
 #include "console/console.h"
 #include "shell/shell.h"
@@ -86,30 +86,30 @@
 #define TSL2561_CONTROL_POWEROFF          (0x00)
 
 int
-tls2561_enable(void) {
+tsl2561_enable(void) {
     int rc;
     /* Enable the device by setting the control bit to 0x03 */
-    rc = tls2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
+    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
                         TSL2561_CONTROL_POWERON);
     return rc;
 }
 
 int
-tls2561_disable(void) {
+tsl2561_disable(void) {
     int rc;
-    /* Disable the device by setting the control bit to 0x03 */
-    rc = tls2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
+    /* Disable the device by setting the control bit to 0x00 */
+    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
                        TSL2561_CONTROL_POWEROFF);
     return rc;
 }
 
 int
-tls2561_write8(uint8_t reg, uint32_t value) {
+tsl2561_write8(uint8_t reg, uint32_t value) {
     int rc;
 
     uint8_t payload[2] = { reg, value & 0xFF };
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TLS2561_I2CADDR),
+      .address = MYNEWT_VAL(TSL2561_I2CADDR),
       .len = 2,
       .buffer = payload
     };
@@ -120,12 +120,12 @@ tls2561_write8(uint8_t reg, uint32_t value) {
 }
 
 int
-tls2561_read8(uint8_t reg, uint8_t *value) {
+tsl2561_read8(uint8_t reg, uint8_t *value) {
     int rc;
     uint8_t payload;
 
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TLS2561_I2CADDR),
+      .address = MYNEWT_VAL(TSL2561_I2CADDR),
       .len = 1,
       .buffer = &payload
     };
@@ -146,12 +146,12 @@ tls2561_read8(uint8_t reg, uint8_t *value) {
 }
 
 int
-tls2561_read16(uint8_t reg, uint16_t *value) {
+tsl2561_read16(uint8_t reg, uint16_t *value) {
     int rc;
     uint8_t payload[2] = { reg, 0 };
 
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TLS2561_I2CADDR),
+      .address = MYNEWT_VAL(TSL2561_I2CADDR),
       .len = 1,
       .buffer = payload
     };
@@ -175,41 +175,41 @@ tls2561_read16(uint8_t reg, uint16_t *value) {
 }
 
 int
-tls2561_get_data(uint16_t *broadband, uint16_t *ir) {
+tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
     int rc;
 
     /* ToDo: Wait integration time ms in a more efficient manner */
     os_time_delay(OS_TICKS_PER_SEC >> 1); // 0.5s = worst case
 
     *broadband = *ir = 0;
-    rc = tls2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW,
+    rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW,
                         broadband);
     assert(rc == 0);
-    rc = tls2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW,
+    rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW,
                         ir);
     assert(rc == 0);
 
     return 0;
 }
 
-#if MYNEWT_VAL(TLS2561_CLI)
-static int tls2561_shell_cmd(int argc, char **argv);
+#if MYNEWT_VAL(TSL2561_CLI)
+static int tsl2561_shell_cmd(int argc, char **argv);
 
-static struct shell_cmd tls2561_shell_cmd_struct = {
-    .sc_cmd = "tls2561",
-    .sc_cmd_func = tls2561_shell_cmd
+static struct shell_cmd tsl2561_shell_cmd_struct = {
+    .sc_cmd = "tsl2561",
+    .sc_cmd_func = tsl2561_shell_cmd
 };
 
 static int
-tls2561_shell_cmd(int argc, char **argv) {
+tsl2561_shell_cmd(int argc, char **argv) {
     int rc;
     uint16_t full;
     uint16_t ir;
 
     /* Get a new data sample */
-    tls2561_enable();
-    rc = tls2561_get_data(&full, &ir);
-    tls2561_disable();
+    tsl2561_enable();
+    rc = tsl2561_get_data(&full, &ir);
+    tsl2561_disable();
     console_printf("Full: %u\n", full);
     console_printf("IR:   %u\n", ir);
 
@@ -218,19 +218,19 @@ tls2561_shell_cmd(int argc, char **argv) {
 #endif
 
 void
-tls2561_init(void) {
+tsl2561_init(void) {
     int rc;
 
-#if !MYNEWT_VAL(TLS2561_TASK)
+#if !MYNEWT_VAL(TSL2561_TASK)
     return;
 #endif
 
-#if MYNEWT_VAL(TLS2561_CLI)
-    rc = shell_cmd_register(&tls2561_shell_cmd_struct);
+#if MYNEWT_VAL(TSL2561_CLI)
+    rc = shell_cmd_register(&tsl2561_shell_cmd_struct);
     SYSINIT_PANIC_ASSERT(rc == 0);
 #endif
 
     /* Disable the device by default to save power */
-    rc = tls2561_disable();
+    rc = tsl2561_disable();
     SYSINIT_PANIC_ASSERT(rc == 0);
 }

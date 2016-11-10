@@ -20,28 +20,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-pkg.name: hw/drivers/sensors/tls2561
-pkg.description: Driver for the TLS2561 light sensor
+pkg.name: hw/drivers/sensors/tsl2561
+pkg.description: Driver for the TSL2561 light sensor
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
     - adafruit
-    - tls2561
+    - tsl2561
 
 pkg.deps:
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/hw/hal"
 
-pkg.deps.SHELL_TLS2561:
+pkg.deps.SHELL_TSL2561:
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/sysinit"
 
-pkg.deps.LOG_TLS2561:
+pkg.deps.LOG_TSL2561:
     - "@apache-mynewt-core/sys/log"
 
-pkg.deps.STATS_TLS2561:
+pkg.deps.STATS_TSL2561:
     - "@apache-mynewt-core/sys/stats"
 
-pkg.init_function: tls2561_init
+pkg.init_function: tsl2561_init
 pkg.init_stage: 6

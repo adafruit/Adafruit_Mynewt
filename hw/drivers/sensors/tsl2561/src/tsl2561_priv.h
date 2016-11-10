@@ -1,6 +1,6 @@
 /*****************************************************************************/
 /*!
-    @file     tls2561_priv.h
+    @file     tsl2561_priv.h
     @author   ktown (Adafruit Industries)
 
     @section LICENSE
@@ -33,22 +33,22 @@
     THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*****************************************************************************/
-#ifndef __ADAFRUIT_TLS2561_PRIV_H__
-#define __ADAFRUIT_TLS2561_PRIV_H__
+#ifndef __ADAFRUIT_TSL2561_PRIV_H__
+#define __ADAFRUIT_TSL2561_PRIV_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int tls2561_enable   (void);
-int tls2561_disable  (void);
-int tls2561_write8   (uint8_t reg, uint32_t value);
-int tls2561_read8    (uint8_t reg, uint8_t *value);
-int tls2561_read16   (uint8_t reg, uint16_t *value);
-int tls2561_get_data (uint16_t *broadband, uint16_t *ir);
+int tsl2561_enable   (void);
+int tsl2561_disable  (void);
+int tsl2561_write8   (uint8_t reg, uint32_t value);
+int tsl2561_read8    (uint8_t reg, uint8_t *value);
+int tsl2561_read16   (uint8_t reg, uint16_t *value);
+int tsl2561_get_data (uint16_t *broadband, uint16_t *ir);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ADAFRUIT_TLS2561_PRIV_H_ */
+#endif /* __ADAFRUIT_TSL2561_PRIV_H_ */

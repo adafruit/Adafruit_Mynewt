@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     tls2561.h
+    @file     tsl2561.h
     @author   ktown (Adafruit Industries)
 
     @section LICENSE
@@ -34,8 +34,8 @@
 */
 /**************************************************************************/
 
-#ifndef __ADAFRUIT_TLS2561_H__
-#define __ADAFRUIT_TLS2561_H__
+#ifndef __ADAFRUIT_TSL2561_H__
+#define __ADAFRUIT_TSL2561_H__
 
 #include <os/os.h>
 
@@ -43,10 +43,10 @@
 extern "C" {
 #endif
 
-void tls2561_init(void);
+void tsl2561_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ADAFRUIT_TLS2561_H__ */
+#endif /* __ADAFRUIT_TSL2561_H__ */

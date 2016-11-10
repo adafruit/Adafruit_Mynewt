@@ -30,7 +30,7 @@
 #include "console/console.h"
 #include "shell/shell.h"
 
-#include "adafruit/tls2561.h"
+#include "adafruit/tsl2561.h"
 
 /* Init all tasks */
 volatile int tasks_initialized;
