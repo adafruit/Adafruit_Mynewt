@@ -85,13 +85,6 @@ struct  os_eventq  btle_evq;
 struct  os_task    btle_task;
 bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
 
-/* Blinky task settings */
-#define BLINKY_TASK_PRIO              (10)
-#define BLINKY_STACK_SIZE             OS_STACK_ALIGN(128)
-
-struct os_task blinky_task;
-os_stack_t blinky_stack[BLINKY_STACK_SIZE];
-
 /* BLEUART to UART bridge task */
 #define BLEUART_BRIDGE_TASK_PRIO      5
 #define BLEUART_BRIDGE_STACK_SIZE     OS_STACK_ALIGN(256)
@@ -234,26 +227,12 @@ static void btle_on_sync(void)
   btle_advertise();
 }
 
-/**
- * Blinky task handler
- */
-void blinky_task_handler(void* arg)
-{
-  hal_gpio_init_out(LED_BLINK_PIN, 1);
-
-  while(1)
-  {
-    int32_t delay = OS_TICKS_PER_SEC * 1;
-    os_time_delay(delay);
-
-    hal_gpio_toggle(LED_BLINK_PIN);
-  }
-}
-
 void bleuart_bridge_task_handler(void* arg)
 {
-  // register 'nus' command to send BLEUART
-  bleuart_shell_register();
+  timeout_t blinky_tm;
+
+  // Configure timeout = 1000 ms
+  timeout_set(&blinky_tm, 1000);
 
   while(1)
   {
@@ -265,6 +244,14 @@ void bleuart_bridge_task_handler(void* arg)
       console_write( (char*)&ch, 1);
     }
 
+    // Blink LED if timer expired
+    if ( timeout_expired(&blinky_tm) )
+    {
+      hal_gpio_toggle(LED_BLINK_PIN);
+      timeout_periodic_reset(&blinky_tm);
+    }
+
+    // Sleep (should be yield)
     os_time_delay(1);
   }
 }
@@ -286,9 +273,6 @@ int main(void)
   adacfg_add(cfg_info);
 
   //------------- Task Init -------------//
-  os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
-               BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
-
   os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
                BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
 

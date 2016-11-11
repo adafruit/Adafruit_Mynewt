@@ -26,6 +26,7 @@
 #include "sysflash/sysflash.h"
 #include "flash_map/flash_map.h"
 #include "hal/hal_bsp.h"
+#include "hal/hal_gpio.h"
 #include "hal/hal_flash.h"
 #include "hal/hal_spi.h"
 #include "hal/hal_watchdog.h"
@@ -267,4 +268,8 @@ hal_bsp_init(void)
             nrf52_adc_dev_init, &os_bsp_adc0_config);
     assert(rc == 0);
 #endif
+
+    /* LED */
+    hal_gpio_init_out(LED_BLINK_PIN, 0);
+    hal_gpio_init_out(LED_2, 0);
 }

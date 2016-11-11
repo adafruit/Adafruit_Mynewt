@@ -56,6 +56,7 @@
 #include "verify.h"
 //#include "binary.h"
 #include "common_func.h"
+#include "timeout_timer.h"
 
 #include "syscfg/syscfg.h"
 #include "ada_uuid.h"

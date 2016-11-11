@@ -151,7 +151,14 @@ int bleuart_init(void)
 #endif
 
   VERIFY_STATUS( ble_gatts_count_cfg(_service_bleuart) );
-  return ble_gatts_add_svcs(_service_bleuart);
+  VERIFY_STATUS( ble_gatts_add_svcs(_service_bleuart) );
+
+#if MYNEWT_VAL(BLEUART_CLI)
+  int bleuart_shell_register(void);
+  bleuart_shell_register();
+#endif
+
+  return 0;
 }
 
 /**

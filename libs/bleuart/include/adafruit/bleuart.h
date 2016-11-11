@@ -57,11 +57,6 @@ extern const uint8_t BLEUART_UUID_CHR_TXD[16];
 int  bleuart_init(void);
 void bleuart_set_conn_handle(uint16_t conn_handle);
 
-#if MYNEWT_VAL(BLEUART_CLI)
-int  bleuart_shell_register(void);
-#endif
-
-
 int bleuart_write(void const* buffer, uint32_t size);
 
 static inline int bleuart_putc(char ch)
