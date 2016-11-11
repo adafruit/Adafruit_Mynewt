@@ -26,40 +26,26 @@
 #endif
 
 /* Init all tasks */
-volatile int tasks_initialized;
 int init_tasks(void);
 
 /* Task 1 */
-#define BLINKY_TASK_PRIO (1)
-#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(256)
+#define BLINKY_TASK_PRIO     (1)
+#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
 
 struct os_task blinky_task;
 os_stack_t blinky_stack[BLINKY_STACK_SIZE];
-static volatile int g_task1_loops;
-
-/* For LED toggling */
-int g_led_pin;
 
 void
 blinky_task_handler(void *arg)
 {
-    struct os_task *t;
-
-    g_led_pin = LED_BLINK_PIN;
-    hal_gpio_init_out(g_led_pin, 1);
+    hal_gpio_init_out(LED_BLINK_PIN, 1);
 
     while (1) {
-        t = os_sched_get_current_task();
-        assert(t->t_func == blinky_task_handler);
-
-        ++g_task1_loops;
-
         /* Wait one second */
-        int32_t delay = OS_TICKS_PER_SEC * 1;
-        os_time_delay(delay);
+        os_time_delay(OS_TICKS_PER_SEC * 1);
 
         /* Toggle the LED */
-        hal_gpio_toggle(g_led_pin);
+        hal_gpio_toggle(LED_BLINK_PIN);
     }
 }
 
@@ -76,8 +62,6 @@ init_tasks(void)
 {
     os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
             BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
-
-    tasks_initialized = 1;
 
     return 0;
 }
