@@ -139,53 +139,6 @@ Split status: N/A
 
 When serialised this will be sent as `0x00 0x00 0x00 0x00 0x00 0x01 0x00 0x00`.
 
-You can get an alternate view of the command using the **`-t`** (trace) flag, as shown
-in the example below for the same command:
-
-```
-$ newtmgr -t -c serial image list
-2016/11/11 12:27:09 [INFO] Outgoing:
-00000000  06 09                                             |..|
-
-2016/11/11 12:27:09 [INFO] Outgoing:
-00000000  41 41 6f 41 41 41 41 41  41 41 45 41 41 44 63 77  |AAoAAAAAAAEAADcw|
-
-2016/11/11 12:27:09 [INFO] Outgoing:
-00000000  0a                                                |.|
-
-2016/11/11 12:27:09 [INFO] Incoming:
-00000000  06 09 41 41 6f 41 41 41  41 41 41 41 45 41 41 44  |..AAoAAAAAAAEAAD|
-00000010  63 77                                             |cw|
-
-2016/11/11 12:27:09 [INFO] Incoming:
-00000000  0d                                                |.|
-
-2016/11/11 12:27:09 [INFO] Incoming:
-00000000  06 09 41 49 55 42 41 51  42 37 41 41 45 41 41 4c  |..AIUBAQB7AAEAAL|
-00000010  39 6d 61 57 31 68 5a 32  56 7a 6e 37 39 6b 63 32  |9maW1hZ2Vzn79kc2|
-00000020  78 76 64 41 42 6e 64 6d  56 79 63 32 6c 76 62 6d  |xvdABndmVyc2lvbm|
-00000030  55 77 4c 6a 4d 75 4d 47  52 6f 59 58 4e 6f 57 43  |UwLjMuMGRoYXNoWC|
-00000040  44 53 54 4c 4d 46 45 31  51 58 4b 37 55 51 6e 35  |DSTLMFE1QXK7UQn5|
-00000050  79 30 72 6e 68 68 32 57  31 71 2f 66 78 47 32 30  |y0rnhh2W1q/fxG20|
-00000060  67 73 36 79 30 30 71 4b  65 4f 30 47 68 69 62 32  |gs6y00qKeO0Ghib2|
-00000070  39 30 59 57 4a 73 5a 66  56 6e 63 47 56 75 5a 47  |90YWJsZfVncGVuZG|
-00000080  6c 75                                             |lu|
-
-2016/11/11 12:27:09 [INFO] Incoming:
-00000000  04 14 5a 2f 52 70 59 32  39 75 5a 6d 6c 79 62 57  |..Z/RpY29uZmlybW|
-00000010  56 6b 39 57 5a 68 59 33  52 70 64 6d 58 31 2f 2f  |Vk9WZhY3RpdmX1//|
-00000020  39 72 63 33 42 73 61 58  52 54 64 47 46 30 64 58  |9rc3BsaXRTdGF0dX|
-00000030  4d 41 2f 31 4e 74                                 |MA/1Nt|
-
-Images:
- slot=0
-    version: 0.3.0
-    bootable: true
-    flags: active confirmed
-    hash: d24cb3051354172bb5109f9cb4ae7861d96d6afdfc46db482ceb2d34a8a78ed0
-Split status: N/A
-```
-
 ## Transports
 
 ### Newtmgr Over Serial
