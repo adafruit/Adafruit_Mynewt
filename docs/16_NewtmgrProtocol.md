@@ -76,8 +76,6 @@ When serialized this will be sent as `0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02`.
 
 If this was sent using the serial port, you would get the following request and response:
 
-> Debug output lines 2..5 can be ignored ... these are an artifact of the serial connection where the values need to be encoded to a limited hex range so that they values can be properly displayed in a terminal emulator, etc. No such restrictions exist when working with BLE, whether the full 8-bit range is valid and available.
-
 ```
 $ newtmgr -l DEBUG -c serial taskstats
 2016/11/11 12:45:44 [DEBUG] Writing newtmgr request &{Op:0 Flags:0 Len:0 Group:0 Seq:0 Id:2 Data:[]}
