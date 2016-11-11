@@ -84,6 +84,24 @@
 static uint8_t _tsl2561_gain;
 static uint8_t _tsl2561_integration_time;
 
+#if MYNEWT_VAL(TSL2561_LOG)
+
+#include "log/log.h"
+
+#define LOG_MODULE_TSL2561  2561
+
+#define TSL2561_INFO(...)     LOG_INFO(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
+#define TSL2561_ERR(...)      LOG_ERROR(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
+
+static struct log _log;
+
+#else
+
+#define TSL2561_INFO(...)
+#define TSL2561_ERR(...)
+
+#endif
+
 int
 tsl2561_enable(uint8_t state) {
     /* Enable the device by setting the control bit to 0x03 */
@@ -101,7 +119,13 @@ tsl2561_write8(uint8_t reg, uint32_t value) {
       .buffer = payload
     };
 
-    return hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+
+    if (rc) {
+      TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
+    }
+
+    return rc;
 }
 
 int
@@ -119,6 +143,7 @@ tsl2561_read8(uint8_t reg, uint8_t *value) {
     payload = reg;
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
+        TSL2561_ERR("Failed to address sensor\n");
         return rc;
     }
 
@@ -126,6 +151,10 @@ tsl2561_read8(uint8_t reg, uint8_t *value) {
     payload = 0;
     rc = hal_i2c_master_read(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     *value = payload;
+
+    if (rc) {
+        TSL2561_ERR("Failed to read @0x%02X\n", reg);
+    }
 
     return rc;
 }
@@ -144,6 +173,7 @@ tsl2561_read16(uint8_t reg, uint16_t *value) {
     /* Register write */
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
+        TSL2561_ERR("Failed to address sensor\n");
         return rc;
     }
 
@@ -152,6 +182,10 @@ tsl2561_read16(uint8_t reg, uint16_t *value) {
     data_struct.len = 2;
     rc = hal_i2c_master_read(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     *value = (uint16_t)payload[0] | ((uint16_t)payload[1] << 8);
+
+    if (rc) {
+        TSL2561_ERR("Failed to read @0x%02X\n", reg);
+    }
 
     /* ToDo: Log raw reads */
     // console_printf("0x%04X\n", (uint16_t)payload[0] | ((uint16_t)payload[1] << 8));
@@ -269,6 +303,10 @@ tsl2561_init(void) {
 #if MYNEWT_VAL(TSL2561_CLI)
     rc = shell_cmd_register(&tsl2561_shell_cmd_struct);
     SYSINIT_PANIC_ASSERT(rc == 0);
+#endif
+
+#if MYNEWT_VAL(TSL2561_LOG)
+    log_register("tsl2561", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 #endif
 
     tsl2561_set_gain(TSL2561_GAIN_1X);

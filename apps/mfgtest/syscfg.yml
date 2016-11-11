@@ -22,3 +22,4 @@ syscfg.vals:
     # TSL2561 driver
     TSL2561_TASK: 1
     TSL2561_CLI: 1
+    TSL2561_LOG: 1
