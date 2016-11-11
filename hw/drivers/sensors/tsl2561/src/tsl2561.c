@@ -63,10 +63,6 @@
 #define TSL2561_REGISTER_CHAN1_LOW        (0x0E)
 #define TSL2561_REGISTER_CHAN1_HIGH       (0x0F)
 
-#define TSL2561_VISIBLE                   (2)     /* Channel 0 - channel 1 */
-#define TSL2561_INFRARED                  (1)     /* Channel 1 */
-#define TSL2561_FULLSPECTRUM              (0)     /* Channel 0 */
-
 #define TSL2561_CONTROL_POWERON           (0x03)
 #define TSL2561_CONTROL_POWEROFF          (0x00)
 
@@ -90,17 +86,14 @@ static uint8_t _tsl2561_integration_time;
 
 int
 tsl2561_enable(uint8_t state) {
-    int rc;
     /* Enable the device by setting the control bit to 0x03 */
-    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
-                        state ? TSL2561_CONTROL_POWERON : TSL2561_CONTROL_POWEROFF);
-    return rc;
+    return tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
+                          state ? TSL2561_CONTROL_POWERON :
+                                  TSL2561_CONTROL_POWEROFF);
 }
 
 int
 tsl2561_write8(uint8_t reg, uint32_t value) {
-    int rc;
-
     uint8_t payload[2] = { reg, value & 0xFF };
     struct hal_i2c_master_data data_struct = {
       .address = MYNEWT_VAL(TSL2561_I2CADDR),
@@ -108,9 +101,7 @@ tsl2561_write8(uint8_t reg, uint32_t value) {
       .buffer = payload
     };
 
-    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
-
-    return rc;
+    return hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
 }
 
 int
