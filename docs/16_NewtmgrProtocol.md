@@ -8,6 +8,12 @@ The protocol isn't documented but the following information has been inferred
 from the source code available on Github and using the `-l DEBUG` flag When
 executing commands.
 
+## Source Code
+
+The golang source for newtmgr is [available here](https://github.com/apache/incubator-mynewt-newt/tree/master/newtmgr),
+and can be used to provide some insight into how data is exchanged between the
+utility and the device under test.
+
 ## Newtmgr Frame Format
 
 ToDo
