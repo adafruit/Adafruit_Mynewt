@@ -28,3 +28,9 @@ To update the `newt` and `newtmgr` tools:
 
 This will cause the tools in $GOPATH/bin to be rebuilt, which you can see
 by running `ls -l $GOPATH/bin`
+
+### 'cannot find package ...' error
+
+If you get a `cannot find package ...` error running `go install` you may need
+to run the following command to get the latest dependencies:
+`go get mynewt.apache.org/newt/...`
