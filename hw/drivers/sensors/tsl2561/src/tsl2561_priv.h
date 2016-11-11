@@ -40,12 +40,10 @@
 extern "C" {
 #endif
 
-int tsl2561_enable   (void);
-int tsl2561_disable  (void);
-int tsl2561_write8   (uint8_t reg, uint32_t value);
-int tsl2561_read8    (uint8_t reg, uint8_t *value);
-int tsl2561_read16   (uint8_t reg, uint16_t *value);
-int tsl2561_get_data (uint16_t *broadband, uint16_t *ir);
+int tsl2561_enable (uint8_t state);
+int tsl2561_write8 (uint8_t reg, uint32_t value);
+int tsl2561_read8 (uint8_t reg, uint8_t *value);
+int tsl2561_read16 (uint8_t reg, uint16_t *value);
 
 #ifdef __cplusplus
 }

@@ -43,7 +43,62 @@
 extern "C" {
 #endif
 
-void tsl2561_init(void);
+/**
+ * Initialize the tls2561. This function is normally called by sysinit.
+ */
+void tsl2561_init (void);
+
+/**
+ * Gets a new data sample from the light sensor.
+ *
+ * @param broadband The full (visible + ir) sensor output
+ * @param ir        The ir sensor output
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_get_data (uint16_t *broadband, uint16_t *ir);
+
+/**
+ * Sets the integration time used when sampling light values.
+ *
+ * @param int_time The integration time which can be one of:
+ *                  - 0x00: 13ms
+ *                  - 0x01: 101ms
+ *                  - 0x02: 402ms
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_set_integration_time (uint8_t int_time);
+
+/**
+ * Gets the current integration time used when sampling light values.
+ *
+ * @return The integration time which can be one of:
+ *         - 0x00: 13ms
+ *         - 0x01: 101ms
+ *         - 0x02: 402ms
+ */
+uint8_t tsl2561_get_integration_time (void);
+
+/**
+ * Sets the gain increment used when sampling light values.
+ *
+ * @param gain The gain increment which can be one of:
+ *                  - 0x00: 1x (no gain)
+ *                  - 0x10: 16x gain
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_set_gain (uint8_t gain);
+
+/**
+ * Gets the current gain increment used when sampling light values.
+ *
+ * @return The gain increment which can be one of:
+ *         - 0x00: 1x (no gain)
+ *         - 0x10: 16x gain
+ */
+uint8_t tsl2561_get_gain (void);
 
 #ifdef __cplusplus
 }

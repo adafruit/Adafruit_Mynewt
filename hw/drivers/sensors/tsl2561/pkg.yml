@@ -21,12 +21,14 @@
 # SOFTWARE.
 
 pkg.name: hw/drivers/sensors/tsl2561
-pkg.description: Driver for the TSL2561 light sensor
+pkg.description: Driver for the TSL2561 light to digital sensor
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
     - adafruit
     - tsl2561
+    - i2c
+    - sensor
 
 pkg.deps:
     - "@apache-mynewt-core/kernel/os"

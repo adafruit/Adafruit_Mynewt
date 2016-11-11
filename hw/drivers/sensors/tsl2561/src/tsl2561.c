@@ -85,21 +85,15 @@
 #define TSL2561_CONTROL_POWERON           (0x03)
 #define TSL2561_CONTROL_POWEROFF          (0x00)
 
+static uint8_t _tsl2561_gain;
+static uint8_t _tsl2561_integration_time;
+
 int
-tsl2561_enable(void) {
+tsl2561_enable(uint8_t state) {
     int rc;
     /* Enable the device by setting the control bit to 0x03 */
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
-                        TSL2561_CONTROL_POWERON);
-    return rc;
-}
-
-int
-tsl2561_disable(void) {
-    int rc;
-    /* Disable the device by setting the control bit to 0x00 */
-    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
-                       TSL2561_CONTROL_POWEROFF);
+                        state ? TSL2561_CONTROL_POWERON : TSL2561_CONTROL_POWEROFF);
     return rc;
 }
 
@@ -177,9 +171,25 @@ tsl2561_read16(uint8_t reg, uint16_t *value) {
 int
 tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
     int rc;
+    int delay_ticks;
 
-    /* ToDo: Wait integration time ms in a more efficient manner */
-    os_time_delay(OS_TICKS_PER_SEC >> 1); // 0.5s = worst case
+    tsl2561_enable(1);
+
+    /* Wait integration time ms before getting a data sample */
+    /* ToDo: Find a more efficient and accurate solution */
+    switch (_tsl2561_integration_time) {
+        case TSL2561_INTEGRATIONTIME_13MS:
+            delay_ticks = OS_TICKS_PER_SEC / 75;
+        break;
+        case TSL2561_INTEGRATIONTIME_101MS:
+            delay_ticks = OS_TICKS_PER_SEC / 9;
+        break;
+        case TSL2561_INTEGRATIONTIME_402MS:
+        default:
+            delay_ticks = OS_TICKS_PER_SEC / 2;
+        break;
+    }
+    os_time_delay(delay_ticks);
 
     *broadband = *ir = 0;
     rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW,
@@ -189,7 +199,47 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
                         ir);
     assert(rc == 0);
 
-    return 0;
+    tsl2561_enable(0);
+
+    return rc;
+}
+
+int
+tsl2561_set_integration_time(uint8_t int_time) {
+    int rc;
+
+    tsl2561_enable(1);
+    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
+                        _tsl2561_integration_time | _tsl2561_gain);
+    assert(rc == 0);
+    _tsl2561_integration_time = int_time;
+    tsl2561_enable(0);
+
+    return rc;
+}
+
+uint8_t
+tsl2561_get_integration_time(void) {
+    return _tsl2561_integration_time;
+}
+
+int
+tsl2561_set_gain(uint8_t gain) {
+    int rc;
+
+    tsl2561_enable(1);
+    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
+                        _tsl2561_integration_time | _tsl2561_gain);
+    assert(rc == 0);
+    _tsl2561_gain = gain;
+    tsl2561_enable(0);
+
+    return rc;
+}
+
+uint8_t
+tsl2561_get_gain(void) {
+    return _tsl2561_gain;
 }
 
 #if MYNEWT_VAL(TSL2561_CLI)
@@ -207,11 +257,11 @@ tsl2561_shell_cmd(int argc, char **argv) {
     uint16_t ir;
 
     /* Get a new data sample */
-    tsl2561_enable();
     rc = tsl2561_get_data(&full, &ir);
-    tsl2561_disable();
-    console_printf("Full: %u\n", full);
-    console_printf("IR:   %u\n", ir);
+    console_printf("Gain:  %u\n", tsl2561_get_gain());
+    console_printf("ITime: 0x%02X\n", tsl2561_get_integration_time());
+    console_printf("Full:  %u\n", full);
+    console_printf("IR:    %u\n", ir);
 
     return rc;
 }
@@ -230,7 +280,10 @@ tsl2561_init(void) {
     SYSINIT_PANIC_ASSERT(rc == 0);
 #endif
 
+    tsl2561_set_gain(TSL2561_GAIN_1X);
+    tsl2561_set_integration_time(TSL2561_INTEGRATIONTIME_13MS);
+
     /* Disable the device by default to save power */
-    rc = tsl2561_disable();
+    rc = tsl2561_enable(0);
     SYSINIT_PANIC_ASSERT(rc == 0);
 }
