@@ -20,14 +20,14 @@
 bsp.arch: cortex_m4
 bsp.compiler: "@apache-mynewt-core/compiler/arm-none-eabi-m4"
 bsp.linkerscript:
-    - "feather52.ld"
+    - "hw/bsp/feather52/feather52.ld"
     - "@apache-mynewt-core/hw/mcu/nordic/nrf52xxx/nrf52.ld"
 bsp.linkerscript.BOOT_LOADER.OVERWRITE:
-    - "boot-feather52.ld"
+    - "hw/bsp/feather52/boot-feather52.ld"
     - "@apache-mynewt-core/hw/mcu/nordic/nrf52xxx/nrf52.ld"
 bsp.part2linkerscript: "split-feather52.ld"
-bsp.downloadscript: feather52_download.sh
-bsp.debugscript: feather52_debug.sh
+bsp.downloadscript: "hw/bsp/feather52/feather52_download.sh"
+bsp.debugscript: "hw/bsp/feather52/feather52_debug.sh"
 
 bsp.flash_map:
     areas:
