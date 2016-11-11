@@ -93,22 +93,98 @@ $ newtmgr -l DEBUG -c serial taskstats
 #### Group Read Request: `image list`
 
 The following command lists images on the device and uses commands from `Group`
-0x01 (`NMGR_GROUP_ID_IMAGE`), and was generated with `newtmgr -l DEBUG -c serial image list`:
+0x01 (`NMGR_GROUP_ID_IMAGE`), and was generated with `$ newtmgr -l DEBUG -c serial image list`:
 
 > See [imagelist.go](https://github.com/apache/incubator-mynewt-newt/blob/master/newtmgr/protocol/imagelist.go)
 for a full list of commands in the IMAGE `Group`.
 
 ```
-Op:    0  # NMGR_OP_READ
-Flags: 0
-Len:   0  # No payload present
-Group: 1  # 0x01 = NMGR_GROUP_ID_IMAGE
-Seq:   0
-Id:    0  # 0x00 in group 0x01 = IMGMGR_NMGR_OP_LIST
-Data:  [] # No payload (len = 0 above)
+$ newtmgr -l DEBUG -c serial image list
+2016/11/11 12:25:51 [DEBUG] Writing newtmgr request &{Op:0 Flags:0 Len:0 Group:1 Seq:0 Id:0 Data:[]}
+2016/11/11 12:25:51 [DEBUG] Serializing request &{Op:0 Flags:0 Len:0 Group:1 Seq:0 Id:0 Data:[]} into buffer [0 0 0 0 0 1 0 0]
+2016/11/11 12:25:51 [DEBUG] Tx packet dump:
+00000000  00 00 00 00 00 01 00 00                           |........|
+
+2016/11/11 12:25:51 [DEBUG] Writing [6 9] to data channel
+2016/11/11 12:25:51 [DEBUG] Writing [65 65 111 65 65 65 65 65 65 65 69 65 65 68 99 119] to data channel
+2016/11/11 12:25:51 [DEBUG] Writing [10] to data channel
+2016/11/11 12:25:51 [DEBUG] Reading [6 9 65 65 111 65 65 65 65 65 65 65 69 65 65 68 99 119] from data channel
+2016/11/11 12:25:51 [DEBUG] Rx packet dump:
+00000000  00 00 00 00 00 01 00 00                           |........|
+
+2016/11/11 12:25:51 [DEBUG] Deserialized response &{Op:0 Flags:0 Len:0 Group:1 Seq:0 Id:0 Data:[]}
+2016/11/11 12:25:51 [DEBUG] Reading [13] from data channel
+2016/11/11 12:25:51 [DEBUG] Reading [6 9 65 73 85 66 65 81 66 55 65 65 69 65 65 76 57 109 97 87 49 104 90 50 86 122 110 55 57 107 99 50 120 118 100 65 66 110 100 109 86 121 99 50 108 118 98 109 85 119 76 106 77 117 77 71 82 111 89 88 78 111 87 67 68 83 84 76 77 70 69 49 81 88 75 55 85 81 110 53 121 48 114 110 104 104 50 87 49 113 47 102 120 71 50 48 103 115 54 121 48 48 113 75 101 79 48 71 104 105 98 50 57 48 89 87 74 115 90 102 86 110 99 71 86 117 90 71 108 117] from data channel
+2016/11/11 12:25:51 [DEBUG] Reading [4 20 90 47 82 112 89 50 57 117 90 109 108 121 98 87 86 107 57 87 90 104 89 51 82 112 100 109 88 49 47 47 57 114 99 51 66 115 97 88 82 84 100 71 70 48 100 88 77 65 47 49 78 116] from data channel
+2016/11/11 12:25:51 [DEBUG] Rx packet dump:
+00000000  01 01 00 7b 00 01 00 00  bf 66 69 6d 61 67 65 73  |...{.....fimages|
+00000010  9f bf 64 73 6c 6f 74 00  67 76 65 72 73 69 6f 6e  |..dslot.gversion|
+00000020  65 30 2e 33 2e 30 64 68  61 73 68 58 20 d2 4c b3  |e0.3.0dhashX .L.|
+00000030  05 13 54 17 2b b5 10 9f  9c b4 ae 78 61 d9 6d 6a  |..T.+......xa.mj|
+00000040  fd fc 46 db 48 2c eb 2d  34 a8 a7 8e d0 68 62 6f  |..F.H,.-4....hbo|
+00000050  6f 74 61 62 6c 65 f5 67  70 65 6e 64 69 6e 67 f4  |otable.gpending.|
+00000060  69 63 6f 6e 66 69 72 6d  65 64 f5 66 61 63 74 69  |iconfirmed.facti|
+00000070  76 65 f5 ff ff 6b 73 70  6c 69 74 53 74 61 74 75  |ve...ksplitStatu|
+00000080  73 00 ff                                          |s..|
+
+2016/11/11 12:25:51 [DEBUG] Deserialized response &{Op:1 Flags:1 Len:123 Group:1 Seq:0 Id:0 Data:[191 102 105 109 97 103 101 115 159 191 100 115 108 111 116 0 103 118 101 114 115 105 111 110 101 48 46 51 46 48 100 104 97 115 104 88 32 210 76 179 5 19 84 23 43 181 16 159 156 180 174 120 97 217 109 106 253 252 70 219 72 44 235 45 52 168 167 142 208 104 98 111 111 116 97 98 108 101 245 103 112 101 110 100 105 110 103 244 105 99 111 110 102 105 114 109 101 100 245 102 97 99 116 105 118 101 245 255 255 107 115 112 108 105 116 83 116 97 116 117 115 0 255]}
+Images:
+ slot=0
+    version: 0.3.0
+    bootable: true
+    flags: active confirmed
+    hash: d24cb3051354172bb5109f9cb4ae7861d96d6afdfc46db482ceb2d34a8a78ed0
+Split status: N/A
 ```
 
 When serialised this will be sent as `0x00 0x00 0x00 0x00 0x00 0x01 0x00 0x00`.
+
+You can get an alternate view of the command using the **`-t`** (trace) flag, as shown
+in the example below for the same command:
+
+```
+$ newtmgr -t -c serial image list
+2016/11/11 12:27:09 [INFO] Outgoing:
+00000000  06 09                                             |..|
+
+2016/11/11 12:27:09 [INFO] Outgoing:
+00000000  41 41 6f 41 41 41 41 41  41 41 45 41 41 44 63 77  |AAoAAAAAAAEAADcw|
+
+2016/11/11 12:27:09 [INFO] Outgoing:
+00000000  0a                                                |.|
+
+2016/11/11 12:27:09 [INFO] Incoming:
+00000000  06 09 41 41 6f 41 41 41  41 41 41 41 45 41 41 44  |..AAoAAAAAAAEAAD|
+00000010  63 77                                             |cw|
+
+2016/11/11 12:27:09 [INFO] Incoming:
+00000000  0d                                                |.|
+
+2016/11/11 12:27:09 [INFO] Incoming:
+00000000  06 09 41 49 55 42 41 51  42 37 41 41 45 41 41 4c  |..AIUBAQB7AAEAAL|
+00000010  39 6d 61 57 31 68 5a 32  56 7a 6e 37 39 6b 63 32  |9maW1hZ2Vzn79kc2|
+00000020  78 76 64 41 42 6e 64 6d  56 79 63 32 6c 76 62 6d  |xvdABndmVyc2lvbm|
+00000030  55 77 4c 6a 4d 75 4d 47  52 6f 59 58 4e 6f 57 43  |UwLjMuMGRoYXNoWC|
+00000040  44 53 54 4c 4d 46 45 31  51 58 4b 37 55 51 6e 35  |DSTLMFE1QXK7UQn5|
+00000050  79 30 72 6e 68 68 32 57  31 71 2f 66 78 47 32 30  |y0rnhh2W1q/fxG20|
+00000060  67 73 36 79 30 30 71 4b  65 4f 30 47 68 69 62 32  |gs6y00qKeO0Ghib2|
+00000070  39 30 59 57 4a 73 5a 66  56 6e 63 47 56 75 5a 47  |90YWJsZfVncGVuZG|
+00000080  6c 75                                             |lu|
+
+2016/11/11 12:27:09 [INFO] Incoming:
+00000000  04 14 5a 2f 52 70 59 32  39 75 5a 6d 6c 79 62 57  |..Z/RpY29uZmlybW|
+00000010  56 6b 39 57 5a 68 59 33  52 70 64 6d 58 31 2f 2f  |Vk9WZhY3RpdmX1//|
+00000020  39 72 63 33 42 73 61 58  52 54 64 47 46 30 64 58  |9rc3BsaXRTdGF0dX|
+00000030  4d 41 2f 31 4e 74                                 |MA/1Nt|
+
+Images:
+ slot=0
+    version: 0.3.0
+    bootable: true
+    flags: active confirmed
+    hash: d24cb3051354172bb5109f9cb4ae7861d96d6afdfc46db482ceb2d34a8a78ed0
+Split status: N/A
+```
 
 ## Transports
 
