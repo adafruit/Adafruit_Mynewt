@@ -45,3 +45,6 @@ tags
 *.swp
 *.swo
 repos/
+/.cproject
+/.project
+/.settings/language.settings.xml
