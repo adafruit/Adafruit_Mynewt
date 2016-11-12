@@ -50,7 +50,8 @@
 #include "stats/stats.h"
 #endif
 
-/* ToDo: Add timer based polling and data ready callback */
+/* ToDo: Add timer based polling in bg and data ready callback (os_event?) */
+/* ToDo: Add interrupt handling on the INT pin */
 
 static uint8_t g_tsl2561_gain;
 static uint8_t g_tsl2561_integration_time;
