@@ -42,44 +42,66 @@
 #include "adafruit/tsl2561.h"
 #include "tsl2561_priv.h"
 
+#if MYNEWT_VAL(TSL2561_LOG)
+#include "log/log.h"
+#endif
+
+#if MYNEWT_VAL(TSL2561_STATS)
+#include "stats/stats.h"
+#endif
+
 /* ToDo: Add timer based polling and data ready callback */
-/* ToDo: Add STATS support */
 
 static uint8_t g_tsl2561_gain;
 static uint8_t g_tsl2561_integration_time;
 static uint8_t g_tsl2561_enabled;
 
+#if MYNEWT_VAL(TSL2561_STATS)
+/* Define the stats section and records */
+STATS_SECT_START(tsl2561_stat_section)
+    STATS_SECT_ENTRY(samples_13ms)
+    STATS_SECT_ENTRY(samples_101ms)
+    STATS_SECT_ENTRY(samples_402ms)
+    STATS_SECT_ENTRY(ints_cleared)
+    STATS_SECT_ENTRY(errors)
+STATS_SECT_END
+
+/* Define a few stat names for querying */
+STATS_NAME_START(tsl2561_stat_section)
+    STATS_NAME(tsl2561_stat_section, samples_13ms)
+    STATS_NAME(tsl2561_stat_section, samples_101ms)
+    STATS_NAME(tsl2561_stat_section, samples_402ms)
+    STATS_NAME(tsl2561_stat_section, ints_cleared)
+    STATS_NAME(tsl2561_stat_section, errors)
+STATS_NAME_END(tsl2561_stat_section)
+
+/* Global variable used to hold stats data */
+STATS_SECT_DECL(tsl2561_stat_section) g_tsl2561stats;
+#endif
+
 #if MYNEWT_VAL(TSL2561_LOG)
-
-#include "log/log.h"
-
 #define LOG_MODULE_TSL2561  2561
-
 #define TSL2561_INFO(...)     LOG_INFO(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
 #define TSL2561_ERR(...)      LOG_ERROR(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
-
 static struct log _log;
-
 #else
-
 #define TSL2561_INFO(...)
 #define TSL2561_ERR(...)
-
 #endif
 
 int
 tsl2561_write8(uint8_t reg, uint32_t value) {
     uint8_t payload[2] = { reg, value & 0xFF };
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TSL2561_I2CADDR),
-      .len = 2,
-      .buffer = payload
+        .address = MYNEWT_VAL(TSL2561_I2CADDR),
+        .len = 2,
+        .buffer = payload
     };
 
     int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
 
     if (rc) {
-      TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
+        TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
     }
 
     return rc;
@@ -91,9 +113,9 @@ tsl2561_read8(uint8_t reg, uint8_t *value) {
     uint8_t payload;
 
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TSL2561_I2CADDR),
-      .len = 1,
-      .buffer = &payload
+        .address = MYNEWT_VAL(TSL2561_I2CADDR),
+        .len = 1,
+        .buffer = &payload
     };
 
     /* Register write */
@@ -122,9 +144,9 @@ tsl2561_read16(uint8_t reg, uint16_t *value) {
     uint8_t payload[2] = { reg, 0 };
 
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TSL2561_I2CADDR),
-      .len = 1,
-      .buffer = payload
+        .address = MYNEWT_VAL(TSL2561_I2CADDR),
+        .len = 1,
+        .buffer = payload
     };
 
     /* Register write */
@@ -176,17 +198,16 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
     int delay_ticks;
 
     /* Wait integration time ms before getting a data sample */
-    /* ToDo: Find a more efficient and accurate solution */
     switch (g_tsl2561_integration_time) {
         case TSL2561_INTEGRATIONTIME_13MS:
-            delay_ticks = OS_TICKS_PER_SEC / 75;
+            delay_ticks = 14 * OS_TICKS_PER_SEC / 1000;
         break;
         case TSL2561_INTEGRATIONTIME_101MS:
-            delay_ticks = OS_TICKS_PER_SEC / 9;
+            delay_ticks = 102 * OS_TICKS_PER_SEC / 1000;
         break;
         case TSL2561_INTEGRATIONTIME_402MS:
         default:
-            delay_ticks = OS_TICKS_PER_SEC / 2;
+            delay_ticks = 403 * OS_TICKS_PER_SEC / 1000;
         break;
     }
     os_time_delay(delay_ticks);
@@ -198,6 +219,21 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
     rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW,
                         ir);
     assert(rc == 0);
+
+#if MYNEWT_VAL(TSL2561_STATS)
+    switch (g_tsl2561_integration_time) {
+        case TSL2561_INTEGRATIONTIME_13MS:
+            STATS_INC(g_tsl2561stats, samples_13ms);
+        break;
+        case TSL2561_INTEGRATIONTIME_101MS:
+            STATS_INC(g_tsl2561stats, samples_101ms);
+        break;
+        case TSL2561_INTEGRATIONTIME_402MS:
+            STATS_INC(g_tsl2561stats, samples_402ms);
+        default:
+        break;
+    }
+#endif
 
     return rc;
 }
@@ -270,17 +306,22 @@ int tsl2561_enable_interrupt (uint8_t enable) {
 int tsl2561_clear_interrupt (void) {
     uint8_t payload = { TSL2561_CLEAR_BIT };
     struct hal_i2c_master_data data_struct = {
-      .address = MYNEWT_VAL(TSL2561_I2CADDR),
-      .len = 1,
-      .buffer = &payload
+        .address = MYNEWT_VAL(TSL2561_I2CADDR),
+        .len = 1,
+        .buffer = &payload
     };
 
     /* To clear the interrupt set the CLEAR bit in the COMMAND register */
     int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
 
     if (rc) {
-      TSL2561_ERR("Failed to send CLEAR command\n");
+        TSL2561_ERR("Failed to send CLEAR command\n");
+        return rc;
     }
+
+#if MYNEWT_VAL(TSL2561_STATS)
+    STATS_INC(g_tsl2561stats, ints_cleared);
+#endif
 
     return rc;
 }
@@ -300,6 +341,18 @@ tsl2561_init(void) {
 
 #if MYNEWT_VAL(TSL2561_LOG)
     log_register("tsl2561", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
+#endif
+
+#if MYNEWT_VAL(TSL2561_STATS)
+    /* Initialise the stats entry */
+    rc = stats_init(
+        STATS_HDR(g_tsl2561stats),
+        STATS_SIZE_INIT_PARMS(g_tsl2561stats, STATS_SIZE_32),
+        STATS_NAME_INIT_PARMS(tsl2561_stat_section));
+    assert(rc == 0);
+    /* Register the entry with the stats registry */
+    rc = stats_register("tsl2561", STATS_HDR(g_tsl2561stats));
+    assert(rc == 0);
 #endif
 
     tsl2561_set_gain(TSL2561_GAIN_1X);

@@ -24,6 +24,9 @@ pkg.author: "Adafruit Industries <info@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com/"
 pkg.keywords:
 
+pkg.cflags:
+    - "-DSTATS_NAME_ENABLE"
+
 pkg.deps:
     - "hw/drivers/sensors/tsl2561"
     - "@apache-mynewt-core/kernel/os"
