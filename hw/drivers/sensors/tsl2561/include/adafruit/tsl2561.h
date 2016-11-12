@@ -58,6 +58,13 @@ void tsl2561_init (void);
 int tsl2561_enable (uint8_t state);
 
 /**
+ * Gets the current 'enabled' state for the IC
+ *
+ * @return 1 if the IC is enabled, otherwise 0
+ */
+uint8_t tsl2561_get_enable (void);
+
+/**
  * Gets a new data sample from the light sensor.
  *
  * @param broadband The full (visible + ir) sensor output

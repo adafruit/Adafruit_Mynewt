@@ -35,6 +35,7 @@
 /**************************************************************************/
 
 #include <string.h>
+#include <errno.h>
 #include "sysinit/sysinit.h"
 #include "console/console.h"
 #include "shell/shell.h"
@@ -58,6 +59,20 @@ tsl2561_shell_err_too_few_args(char *cmd_name)
     return -1;
 }
 */
+
+static int
+tsl2561_shell_stol(char *param_val, long min, long max, long *output) {
+    char *endptr;
+    long lval = strtol(param_val, &endptr, 10); /* Base 10 */
+    if (param_val != '\0' && *endptr == '\0' &&
+        lval >= min && lval <= max) {
+            *output = lval;
+    } else {
+        return EINVAL;
+    }
+
+    return 0;
+}
 
 static int
 tsl2561_shell_err_too_many_args(char *cmd_name)
@@ -87,9 +102,10 @@ static int
 tsl2561_shell_help(void) {
     console_printf("%s cmd [flags...]\n", tsl2561_shell_cmd_struct.sc_cmd);
     console_printf("cmd:\n");
-    console_printf("  r [samples]\n");
-    console_printf("  gain [value]\n");
-    console_printf("  time [value]\n");
+    console_printf("  r    [n_samples]\n");
+    console_printf("  gain [1|16]\n");
+    console_printf("  time [13|101|402]\n");
+    console_printf("  en   [0|1]\n");
 
     return 0;
 }
@@ -106,14 +122,11 @@ tsl2561_shell_cmd_read(int argc, char **argv) {
 
     /* Check if more than one sample requested */
     if (argc == 3) {
-        char *endptr;
-        long lval = strtol(argv[2], &endptr, 10); /* Base 10 */
-        if (argv[2] != '\0' && *endptr == '\0' &&
-            lval >= 1 && lval <= UINT16_MAX) {
-                samples = lval;
-        } else {
+        long val = 0;
+        if (tsl2561_shell_stol(argv[2], 1, UINT16_MAX, &val)) {
             return tsl2561_shell_err_invalid_arg(argv[2]);
         }
+        samples = (uint16_t)val;
     }
 
     while(samples--) {
@@ -131,24 +144,102 @@ tsl2561_shell_cmd_read(int argc, char **argv) {
 
 static int
 tsl2561_shell_cmd_gain(int argc, char **argv) {
-    if (argc > 2) {
+    if (argc > 3) {
         return tsl2561_shell_err_too_many_args(argv[1]);
     }
 
-    uint8_t gain = tsl2561_get_gain();
-    console_printf("0x%02X\n", gain);
+    /* Display the gain */
+    if (argc == 2) {
+        uint8_t gain = tsl2561_get_gain();
+        console_printf("%u\n", gain ? 16u : 1u);
+    }
+
+    /* Update the gain */
+    if (argc == 3) {
+        long val = 0;
+        if (tsl2561_shell_stol(argv[2], 1, 16, &val)) {
+            return tsl2561_shell_err_invalid_arg(argv[2]);
+        }
+        /* Make sure gain is 1 ot 16 */
+        if ((val != 1) && (val != 16)) {
+            return tsl2561_shell_err_invalid_arg(argv[2]);
+        }
+        tsl2561_set_gain(val ? TSL2561_GAIN_16X : TSL2561_GAIN_1X);
+    }
 
     return 0;
 }
 
 static int
 tsl2561_shell_cmd_time(int argc, char **argv) {
-    if (argc > 2) {
+    if (argc > 3) {
         return tsl2561_shell_err_too_many_args(argv[1]);
     }
 
-    uint8_t time = tsl2561_get_integration_time();
-    console_printf("0x%02X\n", time);
+    /* Display the integration time */
+    if (argc == 2) {
+        uint8_t time = tsl2561_get_integration_time();
+        switch (time) {
+            case TSL2561_INTEGRATIONTIME_13MS:
+                console_printf("13\n");
+            break;
+            case TSL2561_INTEGRATIONTIME_101MS:
+                console_printf("101\n");
+            break;
+            case TSL2561_INTEGRATIONTIME_402MS:
+                console_printf("402\n");
+            break;
+        }
+    }
+
+    /* Set the integration time */
+    if (argc == 3) {
+        long val = 0;
+        if (tsl2561_shell_stol(argv[2], 13, 402, &val)) {
+            return tsl2561_shell_err_invalid_arg(argv[2]);
+        }
+        /* Make sure val is 13, 102 or 402 */
+        if ((val != 13) && (val != 101) && (val != 402)) {
+            return tsl2561_shell_err_invalid_arg(argv[2]);
+        }
+        switch(val) {
+            case 13:
+                tsl2561_set_integration_time(TSL2561_INTEGRATIONTIME_13MS);
+            break;
+            case 101:
+                tsl2561_set_integration_time(TSL2561_INTEGRATIONTIME_101MS);
+            break;
+            case 402:
+                tsl2561_set_integration_time(TSL2561_INTEGRATIONTIME_402MS);
+            break;
+        }
+    }
+
+    return 0;
+}
+
+static int
+tsl2561_shell_cmd_en(int argc, char **argv) {
+    if (argc > 3) {
+        return tsl2561_shell_err_too_many_args(argv[1]);
+    }
+
+    /* Display current enable state */
+    if (argc == 2) {
+        console_printf("%u\n", tsl2561_get_enable());
+    }
+
+    /* Update the enable state */
+    if (argc == 3) {
+        char *endptr;
+        long lval = strtol(argv[2], &endptr, 10); /* Base 10 */
+        if (argv[2] != '\0' && *endptr == '\0' &&
+            lval >= 0 && lval <= 1) {
+                tsl2561_enable(lval);
+        } else {
+            return tsl2561_shell_err_invalid_arg(argv[2]);
+        }
+    }
 
     return 0;
 }
@@ -172,6 +263,11 @@ tsl2561_shell_cmd(int argc, char **argv) {
     /* Integration time command */
     if (argc > 1 && strcmp(argv[1], "time") == 0) {
       return tsl2561_shell_cmd_time(argc, argv);
+    }
+
+    /* Enable */
+    if (argc > 1 && strcmp(argv[1], "en") == 0) {
+      return tsl2561_shell_cmd_en(argc, argv);
     }
 
     return tsl2561_shell_err_unknown_arg(argv[1]);

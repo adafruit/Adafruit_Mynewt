@@ -47,6 +47,7 @@
 
 static uint8_t g_tsl2561_gain;
 static uint8_t g_tsl2561_integration_time;
+static uint8_t g_tsl2561_enabled;
 
 #if MYNEWT_VAL(TSL2561_LOG)
 
@@ -151,10 +152,22 @@ tsl2561_read16(uint8_t reg, uint16_t *value) {
 
 int
 tsl2561_enable(uint8_t state) {
+    int rc;
+
     /* Enable the device by setting the control bit to 0x03 */
-    return tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
-                          state ? TSL2561_CONTROL_POWERON :
-                                  TSL2561_CONTROL_POWEROFF);
+    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL,
+                        state ? TSL2561_CONTROL_POWERON :
+                                TSL2561_CONTROL_POWEROFF);
+    if (!rc) {
+        g_tsl2561_enabled = state ? 1 : 0;
+    }
+
+    return rc;
+}
+
+uint8_t
+tsl2561_get_enable (void) {
+    return g_tsl2561_enabled;
 }
 
 int
@@ -210,8 +223,12 @@ int
 tsl2561_set_gain(uint8_t gain) {
     int rc;
 
+    if ((gain != TSL2561_GAIN_1X) && (gain != TSL2561_GAIN_16X)) {
+        return EINVAL;
+    }
+
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
-                        g_tsl2561_integration_time | g_tsl2561_gain);
+                        g_tsl2561_integration_time | gain);
     assert(rc == 0);
     g_tsl2561_gain = gain;
 
