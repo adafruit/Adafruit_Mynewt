@@ -42,10 +42,6 @@
 #include "adafruit/tsl2561.h"
 #include "tsl2561_priv.h"
 
-#if MYNEWT_VAL(TSL2561_CLI)
-#include "tsl2561_shell.h"
-#endif
-
 /* ToDo: Add timer based polling and data ready callback */
 /* ToDo: Add STATS support */
 

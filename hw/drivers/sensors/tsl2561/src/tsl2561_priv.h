@@ -71,9 +71,16 @@
 extern "C" {
 #endif
 
+/* tsl2561.c */
 int tsl2561_write8 (uint8_t reg, uint32_t value);
 int tsl2561_read8 (uint8_t reg, uint8_t *value);
 int tsl2561_read16 (uint8_t reg, uint16_t *value);
+
+/* tsl2561_shell.c */
+#if MYNEWT_VAL(TSL2561_CLI)
+int tsl2561_shell_init(void);
+#endif
+
 
 #ifdef __cplusplus
 }

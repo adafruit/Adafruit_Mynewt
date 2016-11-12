@@ -40,7 +40,6 @@
 #include "shell/shell.h"
 #include "adafruit/tsl2561.h"
 #include "tsl2561_priv.h"
-#include "tsl2561_shell.h"
 
 #if MYNEWT_VAL(TSL2561_CLI)
 static int tsl2561_shell_cmd(int argc, char **argv);
@@ -51,18 +50,6 @@ static struct shell_cmd tsl2561_shell_cmd_struct = {
 };
 
 /*
-static struct kv_pair {
-    char *key;
-    int val;
-};
-
-static struct kv_pair tsl2561_shell_cmd_int_time[] = {
-    { "13", TSL2561_INTEGRATIONTIME_13MS },
-    { "101", TSL2561_INTEGRATIONTIME_101MS },
-    { "402", TSL2561_INTEGRATIONTIME_402MS },
-    { NULL },
-};
-
 static int
 tsl2561_shell_err_too_few_args(char *cmd_name)
 {
@@ -89,10 +76,20 @@ tsl2561_shell_err_unknown_arg(char *cmd_name)
 }
 
 static int
+tsl2561_shell_err_invalid_arg(char *cmd_name)
+{
+    console_printf("Error: invalid argument \"%s\"\n",
+                   cmd_name);
+    return -1;
+}
+
+static int
 tsl2561_shell_help(void) {
-    console_printf("%s [r]\n", tsl2561_shell_cmd_struct.sc_cmd);
-    console_printf("%s [gain]\n", tsl2561_shell_cmd_struct.sc_cmd);
-    console_printf("%s [time]\n", tsl2561_shell_cmd_struct.sc_cmd);
+    console_printf("%s cmd [flags...]\n", tsl2561_shell_cmd_struct.sc_cmd);
+    console_printf("cmd:\n");
+    console_printf("  r [samples]\n");
+    console_printf("  gain [value]\n");
+    console_printf("  time [value]\n");
 
     return 0;
 }
@@ -101,15 +98,33 @@ static int
 tsl2561_shell_cmd_read(int argc, char **argv) {
     uint16_t full;
     uint16_t ir;
+    uint16_t samples = 1;
 
-    int rc = tsl2561_get_data(&full, &ir);
-    if (rc != 0) {
-        console_printf("Read failed: %d\n", rc);
-        return rc;
+    if (argc > 3) {
+        return tsl2561_shell_err_too_many_args(argv[1]);
     }
 
-    console_printf("Full:  %u\n", full);
-    console_printf("IR:    %u\n", ir);
+    /* Check if more than one sample requested */
+    if (argc == 3) {
+        char *endptr;
+        long lval = strtol(argv[2], &endptr, 10); /* Base 10 */
+        if (argv[2] != '\0' && *endptr == '\0' &&
+            lval >= 1 && lval <= UINT16_MAX) {
+                samples = lval;
+        } else {
+            return tsl2561_shell_err_invalid_arg(argv[2]);
+        }
+    }
+
+    while(samples--) {
+        int rc = tsl2561_get_data(&full, &ir);
+        if (rc != 0) {
+            console_printf("Read failed: %d\n", rc);
+            return rc;
+        }
+        console_printf("Full:  %u\n", full);
+        console_printf("IR:    %u\n", ir);
+    }
 
     return 0;
 }
