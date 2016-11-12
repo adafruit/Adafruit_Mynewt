@@ -36,11 +36,41 @@
 #ifndef __ADAFRUIT_TSL2561_PRIV_H__
 #define __ADAFRUIT_TSL2561_PRIV_H__
 
+#define TSL2561_REGISTER_CONTROL          (0x00)
+#define TSL2561_REGISTER_TIMING           (0x01)
+#define TSL2561_REGISTER_THRESHHOLDL_LOW  (0x02)
+#define TSL2561_REGISTER_THRESHHOLDL_HIGH (0x03)
+#define TSL2561_REGISTER_THRESHHOLDH_LOW  (0x04)
+#define TSL2561_REGISTER_THRESHHOLDH_HIGH (0x05)
+#define TSL2561_REGISTER_INTERRUPT        (0x06)
+#define TSL2561_REGISTER_ID               (0x0A)
+#define TSL2561_REGISTER_CHAN0_LOW        (0x0C)
+#define TSL2561_REGISTER_CHAN0_HIGH       (0x0D)
+#define TSL2561_REGISTER_CHAN1_LOW        (0x0E)
+#define TSL2561_REGISTER_CHAN1_HIGH       (0x0F)
+
+#define TSL2561_CONTROL_POWERON           (0x03)
+#define TSL2561_CONTROL_POWEROFF          (0x00)
+
+#define TSL2561_INTEGRATIONTIME_13MS      (0x00)  /* 13.7ms */
+#define TSL2561_INTEGRATIONTIME_101MS     (0x01)  /* 101ms */
+#define TSL2561_INTEGRATIONTIME_402MS     (0x02)  /* 402ms */
+
+#define TSL2561_GAIN_1X                   (0x00)  /* No gain */
+#define TSL2561_GAIN_16X                  (0x10)  /* 16x gain */
+
+#define TSL2561_COMMAND_BIT               (0x80)  /* Must be 1 */
+#define TSL2561_CLEAR_BIT                 (0x40)  /* 1=Clear any pending int */
+#define TSL2561_WORD_BIT                  (0x20)  /* 1=Read/write word */
+#define TSL2561_BLOCK_BIT                 (0x10)  /* 1=Use block read/write */
+
+#define TSL2561_CONTROL_POWERON           (0x03)
+#define TSL2561_CONTROL_POWEROFF          (0x00)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int tsl2561_enable (uint8_t state);
 int tsl2561_write8 (uint8_t reg, uint32_t value);
 int tsl2561_read8 (uint8_t reg, uint8_t *value);
 int tsl2561_read16 (uint8_t reg, uint16_t *value);

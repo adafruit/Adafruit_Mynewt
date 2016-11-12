@@ -49,6 +49,15 @@ extern "C" {
 void tsl2561_init (void);
 
 /**
+ * Enable or disables the sensor to save power
+ *
+ * @param state  1 to enable the sensor, 0 to disable it
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_enable (uint8_t state);
+
+/**
  * Gets a new data sample from the light sensor.
  *
  * @param broadband The full (visible + ir) sensor output
@@ -99,6 +108,50 @@ int tsl2561_set_gain (uint8_t gain);
  *         - 0x10: 16x gain
  */
 uint8_t tsl2561_get_gain (void);
+
+/**
+ * Sets the upper and lower interrupt thresholds
+ *
+ * @param rate    Sets the rate of interrupts to the host processor:
+ *                - 0   Every ADC cycle generates interrupt
+ *                - 1   Any value outside of threshold range
+ *                - 2   2 integration time periods out of range
+ *                - 3   3 integration time periods out of range
+ *                - 4   4 integration time periods out of range
+ *                - 5   5 integration time periods out of range
+ *                - 6   6 integration time periods out of range
+ *                - 7   7 integration time periods out of range
+ *                - 8   8 integration time periods out of range
+ *                - 9   9 integration time periods out of range
+ *                - 10  10 integration time periods out of range
+ *                - 11  11 integration time periods out of range
+ *                - 12  12 integration time periods out of range
+ *                - 13  13 integration time periods out of range
+ *                - 14  14 integration time periods out of range
+ *                - 15  15 integration time periods out of range
+ * @param lower   The lower threshold
+ * @param upper   The upper threshold
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper);
+ /*                           ^ ??? Should this use a struct ??? ^ */
+
+/**
+ * Enables or disables the HW interrupt on the device
+ *
+ * @param enable  0 to disable the interrupt, 1 to enablee it
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_enable_interrupt (uint8_t enable);
+
+/**
+ * Clears and asserted interrupt on the device
+ *
+ * @return 0 on success, and non-zero error code on failure
+ */
+int tsl2561_clear_interrupt (void);
 
 #ifdef __cplusplus
 }
