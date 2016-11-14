@@ -81,7 +81,7 @@ STATS_SECT_DECL(tsl2561_stat_section) g_tsl2561stats;
 #endif
 
 #if MYNEWT_VAL(TSL2561_LOG)
-#define LOG_MODULE_TSL2561  2561
+#define LOG_MODULE_TSL2561    2561
 #define TSL2561_INFO(...)     LOG_INFO(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
 #define TSL2561_ERR(...)      LOG_ERROR(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
 static struct log _log;
