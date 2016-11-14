@@ -73,6 +73,7 @@ extern "C" {
 
 /* tsl2561.c */
 int tsl2561_write8 (uint8_t reg, uint32_t value);
+int tsl2561_write16 (uint8_t reg, uint16_t value);
 int tsl2561_read8 (uint8_t reg, uint8_t *value);
 int tsl2561_read16 (uint8_t reg, uint16_t *value);
 

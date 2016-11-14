@@ -51,7 +51,7 @@
 #endif
 
 /* ToDo: Add timer based polling in bg and data ready callback (os_event?) */
-/* ToDo: Add interrupt handling on the INT pin */
+/* ToDo: Move values to struct incl. address to allow multiple instances */
 
 static uint8_t g_tsl2561_gain;
 static uint8_t g_tsl2561_integration_time;
@@ -67,7 +67,7 @@ STATS_SECT_START(tsl2561_stat_section)
     STATS_SECT_ENTRY(errors)
 STATS_SECT_END
 
-/* Define a few stat names for querying */
+/* Define stat names for querying */
 STATS_NAME_START(tsl2561_stat_section)
     STATS_NAME(tsl2561_stat_section, samples_13ms)
     STATS_NAME(tsl2561_stat_section, samples_101ms)
@@ -103,6 +103,25 @@ tsl2561_write8(uint8_t reg, uint32_t value) {
 
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
+    }
+
+    return rc;
+}
+
+int
+tsl2561_write16(uint8_t reg, uint16_t value) {
+    uint8_t payload[3] = { reg, value & 0xFF, (value >> 8) & 0xFF };
+    struct hal_i2c_master_data data_struct = {
+        .address = MYNEWT_VAL(TSL2561_I2CADDR),
+        .len = 3,
+        .buffer = payload
+    };
+
+    int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+
+    if (rc) {
+        TSL2561_ERR("Failed to write @0x%02X with value 0x%02X 0x%02X\n",
+                    reg, payload[0], payload[1]);
     }
 
     return rc;
@@ -278,13 +297,34 @@ tsl2561_get_gain(void) {
 }
 
 int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper) {
-    /* ToDo */
+    int rc;
+    uint8_t intval;
+
+    /* Set lower threshold */
+    rc = tsl2561_write16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_THRESHHOLDL_LOW,
+                         lower);
+    assert(rc == 0);
+
+    /* Set upper threshold */
+    rc = tsl2561_write16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_THRESHHOLDH_LOW,
+                         upper);
+    assert(rc == 0);
+
+    /* Set rate */
+    rc = tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &intval);
+    assert(rc == 0);
+    /* Maintain the INTR Control Select bits */
+    rate = (intval & 0xF0) | (rate & 0xF);
+    rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT,
+                        rate);
+    assert(rc == 0);
+
     return 0;
 }
 
 int tsl2561_enable_interrupt (uint8_t enable) {
     int rc;
-    uint8_t persist_val = 0;
+    uint8_t persist_val;
 
     if (enable > 1) {
         TSL2561_ERR("Invalid value 0x%02X in tsl2561_enable_interrupt\n",
@@ -293,7 +333,7 @@ int tsl2561_enable_interrupt (uint8_t enable) {
     }
 
     /* Read the current value to maintain PERSIST state */
-    rc = tsl2561_read8(TSL2561_REGISTER_INTERRUPT, &persist_val);
+    rc = tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &persist_val);
     assert(rc == 0);
 
     /* Enable (1) or disable (0)  level interrupts */
@@ -305,7 +345,7 @@ int tsl2561_enable_interrupt (uint8_t enable) {
 }
 
 int tsl2561_clear_interrupt (void) {
-    uint8_t payload = { TSL2561_CLEAR_BIT };
+    uint8_t payload = { TSL2561_COMMAND_BIT | TSL2561_CLEAR_BIT };
     struct hal_i2c_master_data data_struct = {
         .address = MYNEWT_VAL(TSL2561_I2CADDR),
         .len = 1,
@@ -356,10 +396,13 @@ tsl2561_init(void) {
     assert(rc == 0);
 #endif
 
-    tsl2561_set_gain(TSL2561_GAIN_1X);
-    tsl2561_set_integration_time(TSL2561_INTEGRATIONTIME_13MS);
-
     /* Enable the device by default */
     rc = tsl2561_enable(1);
+    SYSINIT_PANIC_ASSERT(rc == 0);
+
+    rc = tsl2561_set_gain(TSL2561_GAIN_1X);
+    SYSINIT_PANIC_ASSERT(rc == 0);
+
+    rc = tsl2561_set_integration_time(TSL2561_INTEGRATIONTIME_13MS);
     SYSINIT_PANIC_ASSERT(rc == 0);
 }
