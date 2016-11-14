@@ -77,7 +77,7 @@ static int
 shell_i2cscan_cmd(int argc, char **argv)
 {
     uint8_t addr;
-    int32_t timeout = OS_TICKS_PER_SEC / 10
+    int32_t timeout = OS_TICKS_PER_SEC / 10;
     uint8_t dev_count = 0;
 
     console_printf("Scanning I2C bus 0\n"
