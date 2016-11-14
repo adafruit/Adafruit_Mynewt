@@ -41,8 +41,7 @@
 #ifndef _TIMEOUT_TTIMER_H_
 #define _TIMEOUT_TTIMER_H_
 
-#include "mcu/cortex_m4.h"
-#include "os/os_time.h"
+#include "os/os.h"
 
 #ifdef __cplusplus
 extern "C" {
