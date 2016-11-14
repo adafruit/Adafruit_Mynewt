@@ -108,9 +108,7 @@ tsl2561_shell_help(void) {
     console_printf("\ttime [13|101|402]\n");
     console_printf("\ten   [0|1]\n");
     console_printf("\tint  pin [p_num(0..255)]\n");
-    console_printf("\tint  on\n");
-    console_printf("\tint  off\n");
-    console_printf("\tint  clr\n");
+    console_printf("\tint  on|off|clr\n");
     console_printf("\tint  set [rate(0..15)] [lower(0..65535)] [upper(0..65535)]\n");
     console_printf("\tdump\n");
 
@@ -338,21 +336,21 @@ tsl2561_shell_cmd_dump(int argc, char **argv) {
 
   /* Dump all the register values for debug purposes */
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL, &val));
-  console_printf("0x%02X (CONTROL): %u\n", TSL2561_REGISTER_CONTROL, val);
+  console_printf("0x%02X (CONTROL): 0x%02X\n", TSL2561_REGISTER_CONTROL, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING, &val));
-  console_printf("0x%02X (TIMING):  %u\n", TSL2561_REGISTER_TIMING, val);
+  console_printf("0x%02X (TIMING):  0x%02X\n", TSL2561_REGISTER_TIMING, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_THRESHHOLDL_LOW, &val));
-  console_printf("0x%02X (THRLL):   %u\n", TSL2561_REGISTER_THRESHHOLDL_LOW, val);
+  console_printf("0x%02X (THRLL):   0x%02X\n", TSL2561_REGISTER_THRESHHOLDL_LOW, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_THRESHHOLDL_HIGH, &val));
-  console_printf("0x%02X (THRLH):   %u\n", TSL2561_REGISTER_THRESHHOLDL_HIGH, val);
+  console_printf("0x%02X (THRLH):   0x%02X\n", TSL2561_REGISTER_THRESHHOLDL_HIGH, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_THRESHHOLDH_LOW, &val));
-  console_printf("0x%02X (THRHL):   %u\n", TSL2561_REGISTER_THRESHHOLDH_LOW, val);
+  console_printf("0x%02X (THRHL):   0x%02X\n", TSL2561_REGISTER_THRESHHOLDH_LOW, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_THRESHHOLDH_HIGH, &val));
-  console_printf("0x%02X (THRHH):   %u\n", TSL2561_REGISTER_THRESHHOLDH_HIGH, val);
+  console_printf("0x%02X (THRHH):   0x%02X\n", TSL2561_REGISTER_THRESHHOLDH_HIGH, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &val));
-  console_printf("0x%02X (INTER):   %u\n", TSL2561_REGISTER_INTERRUPT, val);
+  console_printf("0x%02X (INTER):   0x%02X\n", TSL2561_REGISTER_INTERRUPT, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_ID, &val));
-  console_printf("0x%02X (ID):      %u\n", TSL2561_REGISTER_ID, val);
+  console_printf("0x%02X (ID):      0x%02X\n", TSL2561_REGISTER_ID, val);
 
   return 0;
 }
