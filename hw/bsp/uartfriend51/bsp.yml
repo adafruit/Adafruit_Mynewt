@@ -18,16 +18,16 @@
 #
 
 bsp.arch: cortex_m0
-bsp.compiler: compiler/arm-none-eabi-m0
+bsp.compiler: "@apache-mynewt-core/compiler/arm-none-eabi-m0"
 bsp.linkerscript:
-    - "hw/bsp/nrf51dk/nrf51xxac.ld"
-    - "hw/mcu/nordic/nrf51xxx/nrf51.ld"
+    - "hw/bsp/uartfriend51/nrf51xxac.ld"
+    - "@apache-mynewt-core/hw/mcu/nordic/nrf51xxx/nrf51.ld"
 bsp.linkerscript.BOOT_LOADER.OVERWRITE:
-    - "hw/bsp/nrf51dk/boot-nrf51xxac.ld"
-    - "hw/mcu/nordic/nrf51xxx/nrf51.ld"
-bsp.part2linkerscript: "hw/bsp/nrf51dk/split-nrf51dk.ld"
-bsp.downloadscript: "hw/bsp/nrf51dk/nrf51dk_download.sh"
-bsp.debugscript: "hw/bsp/nrf51dk/nrf51dk_debug.sh"
+    - "hw/bsp/uartfriend51/boot-nrf51xxac.ld"
+    - "@apache-mynewt-core/hw/mcu/nordic/nrf51xxx/nrf51.ld"
+bsp.part2linkerscript: "hw/bsp/uartfriend51/split-uartfriend51.ld"
+bsp.downloadscript: "hw/bsp/uartfriend51/uartfriend51_download.sh"
+bsp.debugscript: "hw/bsp/uartfriend51/uartfriend51_debug.sh"
 
 bsp.flash_map:
     areas:
