@@ -1,3 +1,0 @@
-target.app: "apps/blinky"
-target.bsp: "hw/bsp/blefriend32"
-target.build_profile: "optimized"

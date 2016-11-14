@@ -1,6 +1,0 @@
-pkg.name: "targets/friend32_blinky"
-pkg.type: "target"
-pkg.description: 
-pkg.author: "Adafruit <support@adafruit.com>"
-pkg.homepage: "http://www.adafruit.com"
-
