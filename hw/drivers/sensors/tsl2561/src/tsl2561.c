@@ -246,10 +246,14 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir)
     *broadband = *ir = 0;
     rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW,
                         broadband);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
     rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW,
                         ir);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
 #if MYNEWT_VAL(TSL2561_STATS)
     switch (g_tsl2561_integration_time) {
@@ -266,6 +270,7 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir)
     }
 #endif
 
+error:
     return rc;
 }
 
@@ -276,9 +281,13 @@ tsl2561_set_integration_time(uint8_t int_time)
 
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
                         g_tsl2561_integration_time | g_tsl2561_gain);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
+
     g_tsl2561_integration_time = int_time;
 
+error:
     return rc;
 }
 
@@ -299,9 +308,13 @@ tsl2561_set_gain(uint8_t gain)
 
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
                         g_tsl2561_integration_time | gain);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
+
     g_tsl2561_gain = gain;
 
+error:
     return rc;
 }
 
@@ -319,23 +332,32 @@ int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper)
     /* Set lower threshold */
     rc = tsl2561_write16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_THRESHHOLDL_LOW,
                          lower);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
     /* Set upper threshold */
     rc = tsl2561_write16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_THRESHHOLDH_LOW,
                          upper);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
     /* Set rate */
     rc = tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &intval);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
     /* Maintain the INTR Control Select bits */
     rate = (intval & 0xF0) | (rate & 0xF);
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT,
                         rate);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
-    return 0;
+error:
+    return rc;
 }
 
 int tsl2561_enable_interrupt (uint8_t enable)
@@ -351,14 +373,19 @@ int tsl2561_enable_interrupt (uint8_t enable)
 
     /* Read the current value to maintain PERSIST state */
     rc = tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &persist_val);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
     /* Enable (1) or disable (0)  level interrupts */
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT,
                         ((enable & 0x01) << 4) | (persist_val & 0x0F) );
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
-    return 0;
+error:
+    return rc;
 }
 
 int tsl2561_clear_interrupt (void)
@@ -411,10 +438,10 @@ tsl2561_init(void)
         STATS_HDR(g_tsl2561stats),
         STATS_SIZE_INIT_PARMS(g_tsl2561stats, STATS_SIZE_32),
         STATS_NAME_INIT_PARMS(tsl2561_stat_section));
-    assert(rc == 0);
+    SYSINIT_PANIC_ASSERT(rc == 0);
     /* Register the entry with the stats registry */
     rc = stats_register("tsl2561", STATS_HDR(g_tsl2561stats));
-    assert(rc == 0);
+    SYSINIT_PANIC_ASSERT(rc == 0);
 #endif
 
     /* Enable the device by default */
