@@ -1,3 +1,4 @@
-target.app: "@apache-mynewt-core/apps/boot"
+#target.app: "@apache-mynewt-core/apps/boot"
+target.app: "apps/singleboot"
 target.bsp: "hw/bsp/uartfriend51"
 target.build_profile: "optimized"

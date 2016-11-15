@@ -32,6 +32,7 @@
 #include "hal/hal_flash.h"
 #include "hal/hal_spi.h"
 #include "hal/hal_i2c.h"
+#include "hal/hal_gpio.h"
 #if MYNEWT_VAL(SPI_0_MASTER)
 #include "nrf_drv_spi.h"
 #endif
@@ -201,4 +202,7 @@ hal_bsp_init(void)
     assert(rc == 0);
 #endif
 
+    /* LED */
+    hal_gpio_init_out(LED_BLINK_PIN, 1);
+    hal_gpio_init_out(LED_2, 1);
 }
