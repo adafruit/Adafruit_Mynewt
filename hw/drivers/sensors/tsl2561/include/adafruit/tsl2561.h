@@ -62,7 +62,7 @@ struct tsl2561_dev {
 */
 
 /**
- * Initialize the tls2561. This function is normally called by sysinit.
+ * Initialize the tsl2561. This function is normally called by sysinit.
  *
  * @param dev  Pointer to the tsl2561_dev device descriptor
  */
