@@ -81,7 +81,7 @@ STATS_SECT_DECL(tsl2561_stat_section) g_tsl2561stats;
 #endif
 
 #if MYNEWT_VAL(TSL2561_LOG)
-#define LOG_MODULE_TSL2561  2561
+#define LOG_MODULE_TSL2561    (2561)
 #define TSL2561_INFO(...)     LOG_INFO(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
 #define TSL2561_ERR(...)      LOG_ERROR(&_log, LOG_MODULE_TSL2561, __VA_ARGS__)
 static struct log _log;
@@ -91,15 +91,18 @@ static struct log _log;
 #endif
 
 int
-tsl2561_write8(uint8_t reg, uint32_t value) {
+tsl2561_write8(uint8_t reg, uint32_t value)
+{
+    int rc;
     uint8_t payload[2] = { reg, value & 0xFF };
+
     struct hal_i2c_master_data data_struct = {
         .address = MYNEWT_VAL(TSL2561_I2CADDR),
         .len = 2,
         .buffer = payload
     };
 
-    int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
 
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
@@ -109,15 +112,18 @@ tsl2561_write8(uint8_t reg, uint32_t value) {
 }
 
 int
-tsl2561_write16(uint8_t reg, uint16_t value) {
+tsl2561_write16(uint8_t reg, uint16_t value)
+{
+    int rc;
     uint8_t payload[3] = { reg, value & 0xFF, (value >> 8) & 0xFF };
+
     struct hal_i2c_master_data data_struct = {
         .address = MYNEWT_VAL(TSL2561_I2CADDR),
         .len = 3,
         .buffer = payload
     };
 
-    int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
 
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X 0x%02X\n",
@@ -128,7 +134,8 @@ tsl2561_write16(uint8_t reg, uint16_t value) {
 }
 
 int
-tsl2561_read8(uint8_t reg, uint8_t *value) {
+tsl2561_read8(uint8_t reg, uint8_t *value)
+{
     int rc;
     uint8_t payload;
 
@@ -159,7 +166,8 @@ tsl2561_read8(uint8_t reg, uint8_t *value) {
 }
 
 int
-tsl2561_read16(uint8_t reg, uint16_t *value) {
+tsl2561_read16(uint8_t reg, uint16_t *value)
+{
     int rc;
     uint8_t payload[2] = { reg, 0 };
 
@@ -193,7 +201,8 @@ tsl2561_read16(uint8_t reg, uint16_t *value) {
 }
 
 int
-tsl2561_enable(uint8_t state) {
+tsl2561_enable(uint8_t state)
+{
     int rc;
 
     /* Enable the device by setting the control bit to 0x03 */
@@ -208,12 +217,14 @@ tsl2561_enable(uint8_t state) {
 }
 
 uint8_t
-tsl2561_get_enable (void) {
+tsl2561_get_enable (void)
+{
     return g_tsl2561_enabled;
 }
 
 int
-tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
+tsl2561_get_data(uint16_t *broadband, uint16_t *ir)
+{
     int rc;
     int delay_ticks;
 
@@ -259,7 +270,8 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir) {
 }
 
 int
-tsl2561_set_integration_time(uint8_t int_time) {
+tsl2561_set_integration_time(uint8_t int_time)
+{
     int rc;
 
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
@@ -271,12 +283,14 @@ tsl2561_set_integration_time(uint8_t int_time) {
 }
 
 uint8_t
-tsl2561_get_integration_time(void) {
+tsl2561_get_integration_time(void)
+{
     return g_tsl2561_integration_time;
 }
 
 int
-tsl2561_set_gain(uint8_t gain) {
+tsl2561_set_gain(uint8_t gain)
+{
     int rc;
 
     if ((gain != TSL2561_GAIN_1X) && (gain != TSL2561_GAIN_16X)) {
@@ -292,11 +306,13 @@ tsl2561_set_gain(uint8_t gain) {
 }
 
 uint8_t
-tsl2561_get_gain(void) {
+tsl2561_get_gain(void)
+{
     return g_tsl2561_gain;
 }
 
-int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper) {
+int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper)
+{
     int rc;
     uint8_t intval;
 
@@ -322,7 +338,8 @@ int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper) {
     return 0;
 }
 
-int tsl2561_enable_interrupt (uint8_t enable) {
+int tsl2561_enable_interrupt (uint8_t enable)
+{
     int rc;
     uint8_t persist_val;
 
@@ -344,8 +361,11 @@ int tsl2561_enable_interrupt (uint8_t enable) {
     return 0;
 }
 
-int tsl2561_clear_interrupt (void) {
+int tsl2561_clear_interrupt (void)
+{
+    int rc;
     uint8_t payload = { TSL2561_COMMAND_BIT | TSL2561_CLEAR_BIT };
+
     struct hal_i2c_master_data data_struct = {
         .address = MYNEWT_VAL(TSL2561_I2CADDR),
         .len = 1,
@@ -353,7 +373,7 @@ int tsl2561_clear_interrupt (void) {
     };
 
     /* To clear the interrupt set the CLEAR bit in the COMMAND register */
-    int rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
 
     if (rc) {
         TSL2561_ERR("Failed to send CLEAR command\n");
@@ -368,7 +388,8 @@ int tsl2561_clear_interrupt (void) {
 }
 
 void
-tsl2561_init(void) {
+tsl2561_init(void)
+{
     int rc;
 
 #if !MYNEWT_VAL(TSL2561_TASK)

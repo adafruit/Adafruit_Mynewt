@@ -62,9 +62,12 @@ tsl2561_shell_err_too_few_args(char *cmd_name)
 */
 
 static int
-tsl2561_shell_stol(char *param_val, long min, long max, long *output) {
+tsl2561_shell_stol(char *param_val, long min, long max, long *output)
+{
     char *endptr;
-    long lval = strtol(param_val, &endptr, 10); /* Base 10 */
+    long lval;
+
+    lval = strtol(param_val, &endptr, 10); /* Base 10 */
     if (param_val != '\0' && *endptr == '\0' &&
         lval >= min && lval <= max) {
             *output = lval;
@@ -100,7 +103,8 @@ tsl2561_shell_err_invalid_arg(char *cmd_name)
 }
 
 static int
-tsl2561_shell_help(void) {
+tsl2561_shell_help(void)
+{
     console_printf("%s cmd [flags...]\n", tsl2561_shell_cmd_struct.sc_cmd);
     console_printf("cmd:\n");
     console_printf("\tr    [n_samples]\n");
@@ -116,10 +120,13 @@ tsl2561_shell_help(void) {
 }
 
 static int
-tsl2561_shell_cmd_read(int argc, char **argv) {
+tsl2561_shell_cmd_read(int argc, char **argv)
+{
     uint16_t full;
     uint16_t ir;
     uint16_t samples = 1;
+    long val;
+    int rc;
 
     if (argc > 3) {
         return tsl2561_shell_err_too_many_args(argv[1]);
@@ -127,7 +134,6 @@ tsl2561_shell_cmd_read(int argc, char **argv) {
 
     /* Check if more than one sample requested */
     if (argc == 3) {
-        long val = 0;
         if (tsl2561_shell_stol(argv[2], 1, UINT16_MAX, &val)) {
             return tsl2561_shell_err_invalid_arg(argv[2]);
         }
@@ -135,7 +141,7 @@ tsl2561_shell_cmd_read(int argc, char **argv) {
     }
 
     while(samples--) {
-        int rc = tsl2561_get_data(&full, &ir);
+        rc = tsl2561_get_data(&full, &ir);
         if (rc != 0) {
             console_printf("Read failed: %d\n", rc);
             return rc;
@@ -148,7 +154,10 @@ tsl2561_shell_cmd_read(int argc, char **argv) {
 }
 
 static int
-tsl2561_shell_cmd_gain(int argc, char **argv) {
+tsl2561_shell_cmd_gain(int argc, char **argv)
+{
+    long val;
+
     if (argc > 3) {
         return tsl2561_shell_err_too_many_args(argv[1]);
     }
@@ -161,7 +170,6 @@ tsl2561_shell_cmd_gain(int argc, char **argv) {
 
     /* Update the gain */
     if (argc == 3) {
-        long val = 0;
         if (tsl2561_shell_stol(argv[2], 1, 16, &val)) {
             return tsl2561_shell_err_invalid_arg(argv[2]);
         }
@@ -176,14 +184,18 @@ tsl2561_shell_cmd_gain(int argc, char **argv) {
 }
 
 static int
-tsl2561_shell_cmd_time(int argc, char **argv) {
+tsl2561_shell_cmd_time(int argc, char **argv)
+{
+    uint8_t time;
+    long val;
+
     if (argc > 3) {
         return tsl2561_shell_err_too_many_args(argv[1]);
     }
 
     /* Display the integration time */
     if (argc == 2) {
-        uint8_t time = tsl2561_get_integration_time();
+        time = tsl2561_get_integration_time();
         switch (time) {
             case TSL2561_INTEGRATIONTIME_13MS:
                 console_printf("13\n");
@@ -199,7 +211,6 @@ tsl2561_shell_cmd_time(int argc, char **argv) {
 
     /* Set the integration time */
     if (argc == 3) {
-        long val = 0;
         if (tsl2561_shell_stol(argv[2], 13, 402, &val)) {
             return tsl2561_shell_err_invalid_arg(argv[2]);
         }
@@ -224,8 +235,14 @@ tsl2561_shell_cmd_time(int argc, char **argv) {
 }
 
 static int
-tsl2561_shell_cmd_int(int argc, char **argv) {
-    int rc = 0;
+tsl2561_shell_cmd_int(int argc, char **argv)
+{
+    int rc;
+    int pin;
+    long val;
+    uint8_t rate;
+    uint16_t lower;
+    uint16_t upper;
 
     if (argc > 6) {
         return tsl2561_shell_err_too_many_args(argv[1]);
@@ -253,9 +270,6 @@ tsl2561_shell_cmd_int(int argc, char **argv) {
 
     /* Configure the interrupt on 'set' */
     if (argc == 6 && strcmp(argv[2], "set") == 0) {
-        long val = 0;
-        uint8_t rate;
-        uint16_t lower, upper;
         /* Get rate */
         if (tsl2561_shell_stol(argv[3], 0, 15, &val)) {
             return tsl2561_shell_err_invalid_arg(argv[3]);
@@ -282,8 +296,6 @@ tsl2561_shell_cmd_int(int argc, char **argv) {
 
     /* Setup INT pin on 'pin' */
     if (argc == 4 && strcmp(argv[2], "pin") == 0) {
-        long val = 0;
-        int pin;
         /* Get the pin number */
         if (tsl2561_shell_stol(argv[3], 0, 0xFF, &val)) {
             return tsl2561_shell_err_invalid_arg(argv[3]);
@@ -301,7 +313,11 @@ tsl2561_shell_cmd_int(int argc, char **argv) {
 }
 
 static int
-tsl2561_shell_cmd_en(int argc, char **argv) {
+tsl2561_shell_cmd_en(int argc, char **argv)
+{
+    char *endptr;
+    long lval;
+
     if (argc > 3) {
         return tsl2561_shell_err_too_many_args(argv[1]);
     }
@@ -313,8 +329,7 @@ tsl2561_shell_cmd_en(int argc, char **argv) {
 
     /* Update the enable state */
     if (argc == 3) {
-        char *endptr;
-        long lval = strtol(argv[2], &endptr, 10); /* Base 10 */
+        lval = strtol(argv[2], &endptr, 10); /* Base 10 */
         if (argv[2] != '\0' && *endptr == '\0' &&
             lval >= 0 && lval <= 1) {
                 tsl2561_enable(lval);
@@ -327,14 +342,16 @@ tsl2561_shell_cmd_en(int argc, char **argv) {
 }
 
 static int
-tsl2561_shell_cmd_dump(int argc, char **argv) {
+tsl2561_shell_cmd_dump(int argc, char **argv)
+{
+  uint8_t val;
+
   if (argc > 3) {
       return tsl2561_shell_err_too_many_args(argv[1]);
   }
 
-  uint8_t val = 0;
-
   /* Dump all the register values for debug purposes */
+  val = 0;
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL, &val));
   console_printf("0x%02X (CONTROL): 0x%02X\n", TSL2561_REGISTER_CONTROL, val);
   assert(0 == tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING, &val));
@@ -356,47 +373,51 @@ tsl2561_shell_cmd_dump(int argc, char **argv) {
 }
 
 static int
-tsl2561_shell_cmd(int argc, char **argv) {
+tsl2561_shell_cmd(int argc, char **argv)
+{
     if (argc == 1) {
         return tsl2561_shell_help();
     }
 
     /* Read command (get a new data sample) */
     if (argc > 1 && strcmp(argv[1], "r") == 0) {
-      return tsl2561_shell_cmd_read(argc, argv);
+        return tsl2561_shell_cmd_read(argc, argv);
     }
 
     /* Gain command */
     if (argc > 1 && strcmp(argv[1], "gain") == 0) {
-      return tsl2561_shell_cmd_gain(argc, argv);
+        return tsl2561_shell_cmd_gain(argc, argv);
     }
 
     /* Integration time command */
     if (argc > 1 && strcmp(argv[1], "time") == 0) {
-      return tsl2561_shell_cmd_time(argc, argv);
+        return tsl2561_shell_cmd_time(argc, argv);
     }
 
     /* Enable */
     if (argc > 1 && strcmp(argv[1], "en") == 0) {
-      return tsl2561_shell_cmd_en(argc, argv);
+        return tsl2561_shell_cmd_en(argc, argv);
     }
 
     /* Interrupt */
     if (argc > 1 && strcmp(argv[1], "int") == 0) {
-      return tsl2561_shell_cmd_int(argc, argv);
+        return tsl2561_shell_cmd_int(argc, argv);
     }
 
     /* Debug */
     if (argc > 1 && strcmp(argv[1], "dump") == 0) {
-      return tsl2561_shell_cmd_dump(argc, argv);
+        return tsl2561_shell_cmd_dump(argc, argv);
     }
 
     return tsl2561_shell_err_unknown_arg(argv[1]);
 }
 
 int
-tsl2561_shell_init(void) {
-    int rc = shell_cmd_register(&tsl2561_shell_cmd_struct);
+tsl2561_shell_init(void)
+{
+    int rc;
+
+    rc = shell_cmd_register(&tsl2561_shell_cmd_struct);
     SYSINIT_PANIC_ASSERT(rc == 0);
 
     return rc;

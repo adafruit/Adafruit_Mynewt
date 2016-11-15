@@ -43,10 +43,30 @@
 extern "C" {
 #endif
 
+/*
+struct tsl2561_i2c {
+    uint8_t i2c_num;
+    uint8_t i2c_addr;
+};
+
+struct tsl2561_cfg {
+    uint8_t gain;
+    uint8_t integration_time;
+    uint8_t enabled;
+};
+
+struct tsl2561_dev {
+    struct tsl2561_i2c i2c;
+    struct tsl2561_cfg cfg;
+};
+*/
+
 /**
  * Initialize the tls2561. This function is normally called by sysinit.
+ *
+ * @param dev  Pointer to the tsl2561_dev device descriptor
  */
-void tsl2561_init (void);
+void tsl2561_init(void);
 
 /**
  * Enable or disables the sensor to save power
@@ -55,14 +75,14 @@ void tsl2561_init (void);
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_enable (uint8_t state);
+int tsl2561_enable(uint8_t state);
 
 /**
  * Gets the current 'enabled' state for the IC
  *
  * @return 1 if the IC is enabled, otherwise 0
  */
-uint8_t tsl2561_get_enable (void);
+uint8_t tsl2561_get_enable(void);
 
 /**
  * Gets a new data sample from the light sensor.
@@ -72,7 +92,7 @@ uint8_t tsl2561_get_enable (void);
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_get_data (uint16_t *broadband, uint16_t *ir);
+int tsl2561_get_data(uint16_t *broadband, uint16_t *ir);
 
 /**
  * Sets the integration time used when sampling light values.
@@ -84,7 +104,7 @@ int tsl2561_get_data (uint16_t *broadband, uint16_t *ir);
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_set_integration_time (uint8_t int_time);
+int tsl2561_set_integration_time(uint8_t int_time);
 
 /**
  * Gets the current integration time used when sampling light values.
@@ -94,7 +114,7 @@ int tsl2561_set_integration_time (uint8_t int_time);
  *         - 0x01: 101ms
  *         - 0x02: 402ms
  */
-uint8_t tsl2561_get_integration_time (void);
+uint8_t tsl2561_get_integration_time(void);
 
 /**
  * Sets the gain increment used when sampling light values.
@@ -105,7 +125,7 @@ uint8_t tsl2561_get_integration_time (void);
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_set_gain (uint8_t gain);
+int tsl2561_set_gain(uint8_t gain);
 
 /**
  * Gets the current gain increment used when sampling light values.
@@ -114,7 +134,7 @@ int tsl2561_set_gain (uint8_t gain);
  *         - 0x00: 1x (no gain)
  *         - 0x10: 16x gain
  */
-uint8_t tsl2561_get_gain (void);
+uint8_t tsl2561_get_gain(void);
 
 /**
  * Sets the upper and lower interrupt thresholds
@@ -141,8 +161,7 @@ uint8_t tsl2561_get_gain (void);
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper);
- /*                           ^ ??? Should this use a struct ??? ^ */
+int tsl2561_setup_interrupt(uint8_t rate, uint16_t lower, uint16_t upper);
 
 /**
  * Enables or disables the HW interrupt on the device
@@ -151,14 +170,14 @@ int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper);
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_enable_interrupt (uint8_t enable);
+int tsl2561_enable_interrupt(uint8_t enable);
 
 /**
- * Clears and asserted interrupt on the device
+ * Clear an asserted interrupt on the device
  *
  * @return 0 on success, and non-zero error code on failure
  */
-int tsl2561_clear_interrupt (void);
+int tsl2561_clear_interrupt(void);
 
 #ifdef __cplusplus
 }
