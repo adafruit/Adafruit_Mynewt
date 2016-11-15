@@ -84,7 +84,7 @@ If you are using the **Adafruit Mynewt Feather** this might be:
 $ newt target set mini bsp=hw/bsp/feather52
 ```
 
-For the Nordic nRF52DK this would be:
+For the **Nordic nRF52DK** this would be:
 
 ```
 $ newt target set mini bsp=@apache-mynewt-core/hw/bsp/nrf52dk
