@@ -13,44 +13,25 @@ To enable `BOOT_SERIAL` support in your bootloader project, add the
 `BOOT_SERIAL` flag to your target as follows:
 
 ```
-# clear cflags (just in case)
-$ newt target set bootloader cflags=
-
-# set feature
-$ newt target set bootloader features=BOOT_SERIAL
+$ newt target set bootloader syscfg=BOOT_SERIAL=1
 ```
 
-This adds the following entry to the pkg.yml file for the `bootloader` target:
+This adds the following entry to syscfg.yml in the `bootloader` target:
 
 ```
-pkg.cflags:
-    - "-DBOOT_SERIAL"
+syscfg.vals:
+    BOOT_SERIAL: 1
 ```
 
-#### Update `apps/lib/boot` Dependencies
+#### Update `apps/boot` Dependencies
 
-You also need to make a small modification to the `apps/lib/boot` project's
+You also need to make a small modification to the `apps/boot` project's
 pkg.yml file. The following `pkg.dep` entry needs to be commented out since
 `BOOT_SERIAL` requires `console/full`:
 
 ```
 #    - libs/console/stub
 ```
-
-#### Remove printf from `apps/lib/boot/src/main.c`
-
-On certain versions of the boot lib the following lines need to be removed:
-
-```
-//    console_blocking_mode();
-//    console_printf("\nboot_go = %d\n", rc);
-```
-
-If these lines are left intact, the bootloader won't startup up due to
-the printf to console getting stuck.
-
-This has already been committed to the 0.10.0 dev branch, but should be
-manually update for now in 0.9.0 and the 'master' branch.
 
 #### Add BOOT_SERIAL Macros to BSP
 
