@@ -103,7 +103,6 @@ tsl2561_write8(uint8_t reg, uint32_t value)
     };
 
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
-
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
     }
@@ -124,7 +123,6 @@ tsl2561_write16(uint8_t reg, uint16_t value)
     };
 
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
-
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X 0x%02X\n",
                     reg, payload[0], payload[1]);
@@ -150,18 +148,18 @@ tsl2561_read8(uint8_t reg, uint8_t *value)
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         TSL2561_ERR("Failed to address sensor\n");
-        return rc;
+        goto error;
     }
 
     /* Read one byte back */
     payload = 0;
     rc = hal_i2c_master_read(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     *value = payload;
-
     if (rc) {
         TSL2561_ERR("Failed to read @0x%02X\n", reg);
     }
 
+error:
     return rc;
 }
 
@@ -181,7 +179,7 @@ tsl2561_read16(uint8_t reg, uint16_t *value)
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         TSL2561_ERR("Failed to address sensor\n");
-        return rc;
+        goto error;
     }
 
     /* Read two bytes back */
@@ -189,14 +187,15 @@ tsl2561_read16(uint8_t reg, uint16_t *value)
     data_struct.len = 2;
     rc = hal_i2c_master_read(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
     *value = (uint16_t)payload[0] | ((uint16_t)payload[1] << 8);
-
     if (rc) {
         TSL2561_ERR("Failed to read @0x%02X\n", reg);
+        goto error;
     }
 
     /* ToDo: Log raw reads */
     // console_printf("0x%04X\n", (uint16_t)payload[0] | ((uint16_t)payload[1] << 8));
 
+error:
     return rc;
 }
 
@@ -246,10 +245,14 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir)
     *broadband = *ir = 0;
     rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW,
                         broadband);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
     rc = tsl2561_read16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW,
                         ir);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
 #if MYNEWT_VAL(TSL2561_STATS)
     switch (g_tsl2561_integration_time) {
@@ -266,6 +269,7 @@ tsl2561_get_data(uint16_t *broadband, uint16_t *ir)
     }
 #endif
 
+error:
     return rc;
 }
 
@@ -276,9 +280,13 @@ tsl2561_set_integration_time(uint8_t int_time)
 
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
                         g_tsl2561_integration_time | g_tsl2561_gain);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
+
     g_tsl2561_integration_time = int_time;
 
+error:
     return rc;
 }
 
@@ -294,14 +302,20 @@ tsl2561_set_gain(uint8_t gain)
     int rc;
 
     if ((gain != TSL2561_GAIN_1X) && (gain != TSL2561_GAIN_16X)) {
-        return EINVAL;
+        TSL2561_ERR("Invalid gain value\n");
+        rc = EINVAL;
+        goto error;
     }
 
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING,
                         g_tsl2561_integration_time | gain);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
+
     g_tsl2561_gain = gain;
 
+error:
     return rc;
 }
 
@@ -319,23 +333,32 @@ int tsl2561_setup_interrupt (uint8_t rate, uint16_t lower, uint16_t upper)
     /* Set lower threshold */
     rc = tsl2561_write16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_THRESHHOLDL_LOW,
                          lower);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
     /* Set upper threshold */
     rc = tsl2561_write16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_THRESHHOLDH_LOW,
                          upper);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
     /* Set rate */
     rc = tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &intval);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
     /* Maintain the INTR Control Select bits */
     rate = (intval & 0xF0) | (rate & 0xF);
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT,
                         rate);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
-    return 0;
+error:
+    return rc;
 }
 
 int tsl2561_enable_interrupt (uint8_t enable)
@@ -346,19 +369,25 @@ int tsl2561_enable_interrupt (uint8_t enable)
     if (enable > 1) {
         TSL2561_ERR("Invalid value 0x%02X in tsl2561_enable_interrupt\n",
                     enable);
-        return EINVAL;
+        rc = EINVAL;
+        goto error;
     }
 
     /* Read the current value to maintain PERSIST state */
     rc = tsl2561_read8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT, &persist_val);
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
     /* Enable (1) or disable (0)  level interrupts */
     rc = tsl2561_write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_INTERRUPT,
                         ((enable & 0x01) << 4) | (persist_val & 0x0F) );
-    assert(rc == 0);
+    if (rc) {
+        goto error;
+    }
 
-    return 0;
+error:
+    return rc;
 }
 
 int tsl2561_clear_interrupt (void)
@@ -374,16 +403,15 @@ int tsl2561_clear_interrupt (void)
 
     /* To clear the interrupt set the CLEAR bit in the COMMAND register */
     rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
-
     if (rc) {
-        TSL2561_ERR("Failed to send CLEAR command\n");
-        return rc;
+        goto error;
     }
 
 #if MYNEWT_VAL(TSL2561_STATS)
     STATS_INC(g_tsl2561stats, ints_cleared);
 #endif
 
+error:
     return rc;
 }
 
@@ -396,13 +424,13 @@ tsl2561_init(void)
     return;
 #endif
 
+#if MYNEWT_VAL(TSL2561_LOG)
+    log_register("tsl2561", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
+#endif
+
 #if MYNEWT_VAL(TSL2561_CLI)
     rc = tsl2561_shell_init();
     SYSINIT_PANIC_ASSERT(rc == 0);
-#endif
-
-#if MYNEWT_VAL(TSL2561_LOG)
-    log_register("tsl2561", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 #endif
 
 #if MYNEWT_VAL(TSL2561_STATS)
@@ -411,10 +439,10 @@ tsl2561_init(void)
         STATS_HDR(g_tsl2561stats),
         STATS_SIZE_INIT_PARMS(g_tsl2561stats, STATS_SIZE_32),
         STATS_NAME_INIT_PARMS(tsl2561_stat_section));
-    assert(rc == 0);
+    SYSINIT_PANIC_ASSERT(rc == 0);
     /* Register the entry with the stats registry */
     rc = stats_register("tsl2561", STATS_HDR(g_tsl2561stats));
-    assert(rc == 0);
+    SYSINIT_PANIC_ASSERT(rc == 0);
 #endif
 
     /* Enable the device by default */
