@@ -67,67 +67,7 @@ $ newt target set blink_nordic build_profile=debug
 
 ### Option 2: Create an entirely new application as a target
 
-A mynewt app requires at least a `main()` function and a `pkg.yml` file.
-
-Create the new app structure as follows:
-
-```
-$ mkdir -p apps/ble_app/src
-```
-
-Then create the core `apps/ble_app/pkg.yml` file with the following text (BLE
-dependencies listed below for convenience sake):
-
-```
-pkg.name: apps/ble_app
-pkg.type: app
-
-pkg.deps:
-    - "@apache-mynewt-core/libs/baselibc"
-    - "@apache-mynewt-core/libs/console/full"
-    - "@apache-mynewt-core/libs/os"
-    - "@apache-mynewt-core/net/nimble/controller"
-    - "@apache-mynewt-core/net/nimble/host"
-```
-
-Paste the following code into a new `apps/ble_app/src/main.c` file:
-
-```
-#include <assert.h>
-#include "os/os.h"
-
-int
-main(void)
-{
-    /* Initialize OS */
-    os_init();
-
-    /* Start the OS */
-    os_start();
-
-    /* os_start should never return. If it does, this should be an error */
-    assert(0);
-}
-```
-
-Create the new target with the following command:
-
-```
-$ newt target create ble_app
-```
-
-Point the new target to the appropriate `app`:
-
-```
-$ newt target set ble_app app=apps/ble_app
-```
-
-Set the `bsp` and `build profile` for the new target:
-
-```
-$ newt target set ble_app bsp=@apache-mynewt-core/hw/bsp/nrf52dk
-$ newt target set ble_app build_profile=debug
-```
+For details on how to create a custom app from scratch see apps/00_CreateApp.md
 
 ## Review the target(s)
 
