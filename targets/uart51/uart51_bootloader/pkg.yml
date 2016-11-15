@@ -1,8 +1,6 @@
+### Package: targets/uart51_bootloader
 pkg.name: "targets/uart51_bootloader"
 pkg.type: "target"
-pkg.description: Bootloader for Adafruit UART Friend nrf51 32KB SRAM board
+pkg.description: "Bootloader for Adafruit UART Friend nrf51 32KB SRAM board"
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com"
-
-pkg.features:
-    - "BOOT_SERIAL"

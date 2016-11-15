@@ -1,0 +1,4 @@
+### Package: targets/bootloader
+
+syscfg.vals:
+    BOOT_SERIAL: 0

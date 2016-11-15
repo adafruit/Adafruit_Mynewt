@@ -1,3 +1,5 @@
+### Target: targets/uart51_bootloader
+
 #target.app: "@apache-mynewt-core/apps/boot"
 target.app: "apps/singleboot"
 target.bsp: "hw/bsp/uartfriend51"
