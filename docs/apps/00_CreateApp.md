@@ -65,7 +65,7 @@ command:
 $ newt target create mini
 ```
 
-### Set the Target's 'app' Field
+### Set the Target's `app` Field
 
 Point the new target to the appropriate **app** via:
 
@@ -73,7 +73,7 @@ Point the new target to the appropriate **app** via:
 $ newt target set mini app=apps/mini
 ```
 
-### Set the Target's 'bsp' Field
+### Set the Target's `bsp` Field
 
 Next set the **bsp** for the new target, which indicates the HW that the app
 will be running on.
@@ -90,7 +90,7 @@ For the Nordic nRF52DK this would be:
 $ newt target set mini bsp=@apache-mynewt-core/hw/bsp/nrf52dk
 ```
 
-### Set the `build_profile
+### Set the `build_profile` Field
 
 Finally set the **build profile** for the new target (`debug` or `optimized`):
 
