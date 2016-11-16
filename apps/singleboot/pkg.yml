@@ -28,8 +28,5 @@ pkg.keywords:
 pkg.deps:
     - "@apache-mynewt-core/boot/bootutil"
     - "@apache-mynewt-core/kernel/os"
-    - "@apache-mynewt-core/sys/console/stub"
-
-pkg.deps.BOOT_SERIAL.OVERWRITE:
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/boot/boot_serial"

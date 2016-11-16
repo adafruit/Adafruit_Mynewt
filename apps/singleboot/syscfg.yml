@@ -22,4 +22,4 @@ syscfg.defs:
         value: 1
     BOOT_SERIAL:
         description: 'TBD'
-        value: 0
+        value: 1
