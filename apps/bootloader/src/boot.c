@@ -27,6 +27,8 @@
 #include <hal/hal_bsp.h>
 #include <hal/hal_system.h>
 #include <hal/hal_flash.h>
+#include <os/os_cputime.h>
+
 #if MYNEWT_VAL(BOOT_SERIAL)
 #include <hal/hal_gpio.h>
 #include <boot_serial/boot_serial.h>
@@ -42,6 +44,18 @@
 #if MYNEWT_VAL(BOOT_SERIAL)
 #define BOOT_SER_CONS_INPUT         128
 #endif
+
+#define BLINKY_PERIOD               125000
+
+struct hal_timer _blinky_timer;
+
+void 
+blinky_isr(void *arg)
+{
+  hal_gpio_toggle(LED_BLINK_PIN);
+
+  os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
+}
 
 int
 main(void)
@@ -63,6 +77,11 @@ main(void)
      */
     hal_gpio_init_in(BOOT_SERIAL_DETECT_PIN, BOOT_SERIAL_DETECT_PIN_CFG);
     if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
+
+        /* Set up fast blinky for indicator using hw timer */
+        os_cputime_timer_init(&_blinky_timer, blinky_isr, NULL);
+        os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
+
         boot_serial_start(BOOT_SER_CONS_INPUT);
         assert(0);
     }
