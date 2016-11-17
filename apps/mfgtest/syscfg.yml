@@ -22,3 +22,9 @@ syscfg.vals:
     TSL2561_CLI: 1
     TSL2561_LOG: 1
     TSL2561_STATS: 1
+
+    # ILI9341 display driver
+    ILI9341_TASK: 1
+    ILI9341_CLI: 1
+    ILI9341_LOG: 1
+    ILI9341_STATS: 1
