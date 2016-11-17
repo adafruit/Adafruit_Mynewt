@@ -85,7 +85,7 @@ syscfg.defs:
 
     I2C_0:
         description: 'NRF51 I2C (TWI) interface 0'
-        value:  '0'
+        value:  0
 
 syscfg.vals:
     CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
