@@ -1,0 +1,3 @@
+target.app: "apps/bleuart"
+target.bsp: "hw/bsp/uartfriend51"
+target.build_profile: "debug"
