@@ -67,6 +67,7 @@ start_boot_serial_mode(void)
   os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
 
   boot_serial_start(BOOT_SER_CONS_INPUT);
+  assert(0);
 }
 
 int
@@ -87,7 +88,6 @@ main(void)
     if (BOOTLOADER_MAGIC_LOC ==  BOOTLOADER_RESET_TO_DFU_MAGIC)
     {
         start_boot_serial_mode();
-        assert(0);
     }
 
     /*
@@ -103,7 +103,6 @@ main(void)
 
         if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
             start_boot_serial_mode();
-            assert(0);
         }
     }
 
@@ -142,6 +141,13 @@ main(void)
     rsp.br_flash_id = fa->fa_device_id;
     rsp.br_image_addr = fa->fa_off;
     rsp.br_hdr = &hdr;
+
+    /* If image is not valid, go to DFU mode */
+    uint8_t tempbuf[256];
+    if ( bootutil_img_validate(&hdr, fa, tempbuf, 256, NULL, 0, NULL) )
+    {
+      start_boot_serial_mode();
+    }
 
     hal_system_start((void *)(rsp.br_image_addr + rsp.br_hdr->ih_hdr_size));
 

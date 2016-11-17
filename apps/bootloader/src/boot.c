@@ -68,6 +68,7 @@ start_boot_serial_mode(void)
   os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
 
   boot_serial_start(BOOT_SER_CONS_INPUT);
+  assert(0);
 }
 
 int
@@ -88,7 +89,6 @@ main(void)
     if (BOOTLOADER_MAGIC_LOC ==  BOOTLOADER_RESET_TO_DFU_MAGIC)
     {
         start_boot_serial_mode();
-        assert(0);
     }
 
     /*
@@ -104,7 +104,6 @@ main(void)
 
         if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
             start_boot_serial_mode();
-            assert(0);
         }
     }
 
