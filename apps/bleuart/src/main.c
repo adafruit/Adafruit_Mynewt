@@ -273,7 +273,7 @@ int main(void)
   adacfg_add(cfg_info);
 
   //------------- Task Init -------------//
-  os_task_init(&bleuart_bridge_task, "bleuart_bridge", bleuart_bridge_task_handler, NULL,
+  os_task_init(&bleuart_bridge_task, "busbrdg", bleuart_bridge_task_handler, NULL,
                BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
 
   os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
