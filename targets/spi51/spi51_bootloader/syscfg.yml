@@ -1,4 +1,4 @@
-### Package: targets/uart51_bootloader
+### Package: targets/spi51_bootloader
 
 syscfg.vals:
     BOOT_SERIAL: 1

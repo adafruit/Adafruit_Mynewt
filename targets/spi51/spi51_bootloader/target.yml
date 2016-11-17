@@ -1,6 +1,6 @@
-### Target: targets/uart51_bootloader
+### Target: targets/spi51_bootloader
 
 #target.app: "@apache-mynewt-core/apps/boot"
 target.app: "apps/singleboot"
-target.bsp: "hw/bsp/uartfriend51"
+target.bsp: "hw/bsp/spifriend51"
 target.build_profile: "optimized"

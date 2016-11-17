@@ -1,4 +1,4 @@
-pkg.name: "targets/uart51_mfgtest"
+pkg.name: "targets/spi51_mfgtest"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
