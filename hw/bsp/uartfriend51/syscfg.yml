@@ -33,7 +33,7 @@ syscfg.defs:
     XTAL_32768_SYNTH:
         description: 'TBD'
         value: 1
-    
+
     ADC_0:
         description: 'TBD'
         value: 1
@@ -92,4 +92,5 @@ syscfg.vals:
     REBOOT_LOG_FLASH_AREA: FLASH_AREA_REBOOT_LOG
     NFFS_FLASH_AREA: FLASH_AREA_NFFS
     COREDUMP_FLASH_AREA: FLASH_AREA_IMAGE_1
-    CONSOLE_FLOW_CONTROL: UART_FLOW_CTL_NONE
+    CONSOLE_FLOW_CONTROL: UART_FLOW_CTL_RTS_CTS
+    #CONSOLE_FLOW_CONTROL: UART_FLOW_CTL_NONE
