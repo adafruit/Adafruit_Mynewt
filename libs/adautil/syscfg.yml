@@ -5,3 +5,7 @@ syscfg.defs:
     ADAUTIL_CFG:
         description: 'Enable Adafruit Config util'
         value: 0        
+    ADAUTIL_DFU_CLI:
+        description: 'Request to DFU boot serial mode'
+        value: 1
+        

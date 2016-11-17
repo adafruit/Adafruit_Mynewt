@@ -270,6 +270,6 @@ hal_bsp_init(void)
 #endif
 
     /* LED */
-    hal_gpio_init_out(LED_BLINK_PIN, 0);
-    hal_gpio_init_out(LED_2, 0);
+    hal_gpio_init_out(LED_BLINK_PIN, 1-LED_ON_STATE);
+    hal_gpio_init_out(LED_2, 1-LED_ON_STATE);
 }

@@ -45,6 +45,9 @@
 #define BOOT_SER_CONS_INPUT         128
 #endif
 
+/* Minimal interval in ms that DFU pin must be pressed to go into DFU mode */
+#define BOOTLOADER_BUTTON_HOLDING_INTERVAL 500
+
 #define BLINKY_PERIOD               125000
 
 struct hal_timer _blinky_timer;
@@ -55,6 +58,16 @@ blinky_isr(void *arg)
   hal_gpio_toggle(LED_BLINK_PIN);
 
   os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
+}
+
+void
+start_boot_serial_mode(void)
+{
+  /* Set up fast blinky for indicator using hw timer */
+  os_cputime_timer_init(&_blinky_timer, blinky_isr, NULL);
+  os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
+
+  boot_serial_start(BOOT_SER_CONS_INPUT);
 }
 
 int
@@ -71,6 +84,13 @@ main(void)
 #endif
 
 #if MYNEWT_VAL(BOOT_SERIAL)
+    /* Check if Magic number is REST_TO_DFU */
+    if (BOOTLOADER_MAGIC_LOC ==  BOOTLOADER_RESET_TO_DFU_MAGIC)
+    {
+        start_boot_serial_mode();
+        assert(0);
+    }
+
     /*
      * Configure a GPIO as input, and compare it against expected value.
      * If it matches, await for download commands from serial.
@@ -78,15 +98,47 @@ main(void)
     hal_gpio_init_in(BOOT_SERIAL_DETECT_PIN, BOOT_SERIAL_DETECT_PIN_CFG);
     if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
 
-        /* Set up fast blinky for indicator using hw timer */
-        os_cputime_timer_init(&_blinky_timer, blinky_isr, NULL);
-        os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
+        /* Double check the pin value after configured interval,
+         * make sure the DFU pin hold long enough */
+         os_cputime_delay_usecs( 1000*BOOTLOADER_BUTTON_HOLDING_INTERVAL );
 
-        boot_serial_start(BOOT_SER_CONS_INPUT);
+        if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
+            start_boot_serial_mode();
+            assert(0);
+        }
+    }
+
+#if MYNEWT_VAL(BOOT_DOUBLE_RESET_DFU)
+    /* Double Reset  to DFU
+     * - write dfu reset magic to location
+     * - turn on LED
+     * - delay 500ms, A reset happen within this delay will force to DFU
+     * - Turn of led and clear double reset magic
+     * */
+    BOOTLOADER_MAGIC_LOC = BOOTLOADER_RESET_TO_DFU_MAGIC;
+    LED_BLINK_ON();
+
+    os_cputime_delay_usecs(500000);
+
+    LED_BLINK_OFF();
+    BOOTLOADER_MAGIC_LOC = 0;
+#endif
+
+#endif
+
+    /* Go on with normal boot progress */
+    rc = boot_go(&rsp);
+
+#if 0
+    /* No bootable image, go to boot_serial dfu mode
+     * Does not work due to assert() somewhere in boot_go() */
+    if ( rc )
+    {
+        start_boot_serial_mode();
         assert(0);
     }
 #endif
-    rc = boot_go(&rsp);
+
     assert(rc == 0);
 
     hal_system_start((void *)(rsp.br_image_addr + rsp.br_hdr->ih_hdr_size));

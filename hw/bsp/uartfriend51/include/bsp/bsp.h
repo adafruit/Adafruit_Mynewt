@@ -40,6 +40,14 @@ extern uint8_t _ram_start;
 #define LED_BLINK_PIN   (18)
 #define LED_2           (19)
 
+#define LED_ON_STATE     1
+
+#define LED_BLINK_ON()   hal_gpio_write(LED_BLINK_PIN, LED_ON_STATE)
+#define LED_BLINK_OFF()  hal_gpio_write(LED_BLINK_PIN, 1-LED_ON_STATE)
+
+#define LED2_ON()        hal_gpio_write(LED_2, LED_ON_STATE)
+#define LED2_OFF()       hal_gpio_write(LED_2, 1-LED_ON_STATE)
+
 /* UART info */
 #define CONSOLE_UART            "uart0"
 
@@ -49,6 +57,13 @@ extern uint8_t _ram_start;
 #define BOOT_SERIAL_DETECT_PIN      (1)   /* MODE = P0.01, DFU = P0.07 */
 #define BOOT_SERIAL_DETECT_PIN_CFG  (1)   /* 0 = No pullup, 1 = Pull Up, 2 = Pull Down */
 #define BOOT_SERIAL_DETECT_PIN_VAL  (0)   /* GND = Serial DFU */
+
+/* SRAM address to store the DFU magic which retained a reset
+ * If using NRF_POWER->GPREGRET, magic number can only 8-bit max */
+#define BOOTLOADER_MAGIC_LOC                NRF_POWER->GPREGRET
+
+/* Magic number that bootloader will activate boot_serial when detected */
+#define BOOTLOADER_RESET_TO_DFU_MAGIC       0xDF
 
 #ifdef __cplusplus
 }

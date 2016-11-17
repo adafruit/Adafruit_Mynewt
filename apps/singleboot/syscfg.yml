@@ -23,3 +23,7 @@ syscfg.defs:
     BOOT_SERIAL:
         description: 'TBD'
         value: 0
+    BOOT_DOUBLE_RESET_DFU:
+        description: 'TBD'
+        value: 0
+        

@@ -36,3 +36,6 @@ pkg.deps.ADAUTIL_LOG:
 pkg.deps.ADAUTIL_CFG:  
   - "@apache-mynewt-core/sys/config"
   - "@apache-mynewt-core/fs/nffs"
+
+pkg.init_function: adautil_init
+pkg.init_stage: 6
