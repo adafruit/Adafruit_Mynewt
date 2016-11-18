@@ -75,6 +75,24 @@ static struct log _log;
 #define ILI9341_ERR(...)
 #endif
 
+int ili9341_spi_write(uint8_t b)
+{
+    /* ToDo! */
+    return 0;
+}
+
+int ili9341_write_command(uint8_t c)
+{
+    /* ToDo! */
+    return 0;
+}
+
+int ili9341_write_data(uint8_t d)
+{
+    /* ToDo! */
+    return 0;
+}
+
 void
 ili9341_init(void)
 {
