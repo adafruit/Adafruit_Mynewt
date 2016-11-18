@@ -21,6 +21,10 @@ syscfg.defs:
     BSP_NRF51:
         description: 'TBD'
         value: 1
+        
+    BSP_BOARD_NAME:
+        description: 'Name of the board'
+        value: '"SPI Friend nRF51"' 
 
     CLOCK_FREQ:
         description: 'TBD'

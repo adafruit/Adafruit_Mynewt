@@ -65,6 +65,8 @@
 #include "adafruit/bledis.h"
 #include "adafruit/bleuart.h"
 
+#define FIRMWARE_REV  "0.10.0"
+#define SOFTWARE_REV  "0.10.0"
 
 /** Default device name */
 #define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
@@ -336,11 +338,15 @@ int main(void)
   /* Device information service (DIS) settings */
   bledis_cfg_t dis_cfg =
   {
-      .model        = "Feather52"  ,
+      .model        = MYNEWT_VAL(BSP_BOARD_NAME) ,
       .serial       = serialnumber ,
-      .firmware_rev = "0.9.0"      ,
-      .hardware_rev = "nRF52832"   ,
-      .software_rev = "0.9.0"      ,
+      .firmware_rev = FIRMWARE_REV ,
+#ifdef MYNEWT_VAL_BSP_NRF52
+      .hardware_rev = "nRF52832",
+#else
+      .hardware_rev = "nRF51822",
+#endif
+      .software_rev = SOFTWARE_REV ,
       .manufacturer = "Adafruit Industries"
   };
   bledis_init(&dis_cfg);

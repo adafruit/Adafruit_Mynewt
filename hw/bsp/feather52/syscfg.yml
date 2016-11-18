@@ -4,7 +4,11 @@ syscfg.defs:
     BSP_NRF52:
         description: 'TBD'
         value: 1
-
+    
+    BSP_BOARD_NAME:
+        description: 'Name of the board'
+        value: '"Feather nRF52"' 
+        
     CLOCK_FREQ:
         description: 'TBD'
         value:  1000000
