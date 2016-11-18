@@ -20,16 +20,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-syscfg.defs:
-    ILI9341_TASK:
-        description: 'Enable the ILI9341 display driver'
-        value: 0
-    ILI9341_CLI:
-        description: 'Enable shell support for the ILI9341'
-        value: 0
-    ILI9341_LOG:
-        description: 'Enable ILI9341 logging'
-        value: 0
-    ILI9341_STATS:
-        description: 'Enable ILI9341 statistics'
-        value: 0
+pkg.name: hw/drivers/displays/ili9341
+pkg.description: Driver for the ILI9341 display driver
+pkg.author: "Adafruit <support@adafruit.com>"
+pkg.homepage: "http://www.adafruit.com/"
+pkg.keywords:
+    - adafruit
+    - ili9341
+    - spi
+    - tft
+    - display
+
+pkg.deps:
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/hw/hal"
+
+pkg.deps.ILI9341_CLI:
+    - "@apache-mynewt-core/sys/console/full"
+    - "@apache-mynewt-core/sys/shell"
+    - "@apache-mynewt-core/sys/sysinit"
+
+pkg.deps.ILI9341_LOG:
+    - "@apache-mynewt-core/sys/log"
+
+pkg.deps.ILI9341_STATS:
+    - "@apache-mynewt-core/sys/stats"
+
+pkg.init_function: ili9341_init
+pkg.init_stage: 6

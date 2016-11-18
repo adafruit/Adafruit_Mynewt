@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "sysinit/sysinit.h"
+#include "hal/hal_gpio.h"
 #include "hal/hal_spi.h"
 #include "ili9341.h"
 #include "ili9341_priv.h"
@@ -75,6 +76,31 @@ static struct log _log;
 #define ILI9341_ERR(...)
 #endif
 
+struct hal_spi_settings g_ili9341_spi_settings = {
+    .data_mode = HAL_SPI_MODE0,
+    .data_order = HAL_SPI_MSB_FIRST,
+    .word_size = HAL_SPI_WORD_SIZE_8BIT,
+    .baudrate = 8000
+};
+
+int ili9341_spi_write(uint8_t b)
+{
+    /* ToDo! */
+    return 0;
+}
+
+int ili9341_write_command(uint8_t c)
+{
+    /* ToDo! */
+    return 0;
+}
+
+int ili9341_write_data(uint8_t d)
+{
+    /* ToDo! */
+    return 0;
+}
+
 void
 ili9341_init(void)
 {
@@ -104,4 +130,7 @@ ili9341_init(void)
     rc = stats_register("ili9341", STATS_HDR(g_ili9341stats));
     SYSINIT_PANIC_ASSERT(rc == 0);
 #endif
+
+    rc = hal_spi_config(MYNEWT_VAL(ILI9341_SPI_BUS), &g_ili9341_spi_settings);
+    SYSINIT_PANIC_ASSERT(rc == 0);
 }

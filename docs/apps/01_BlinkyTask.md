@@ -99,6 +99,9 @@ int main(void) {
 }
 ```
 
+> Note: Try to keep the public task names ("my_task" above) to **7 characters
+or less** so that they show up concisely in newtmgr and reporting systems.
+
 # Complete Source
 
 You should end up with the following code in your `main.c` file:

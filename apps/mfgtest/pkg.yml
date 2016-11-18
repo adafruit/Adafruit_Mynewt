@@ -29,7 +29,7 @@ pkg.cflags:
 
 pkg.deps:
     - "hw/drivers/sensors/tsl2561"
-    - "hw/drivers/sensors/ili9341"
+    - "hw/drivers/displays/ili9341"
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/hw/hal"
     - "@apache-mynewt-core/sys/sysinit"

@@ -18,7 +18,7 @@ syscfg.vals:
     LOG_NEWTMGR: 1
 
     # TSL2561 driver
-    TSL2561_TASK: 1
+    TSL2561_TASK: 0
     TSL2561_CLI: 1
     TSL2561_LOG: 1
     TSL2561_STATS: 1
