@@ -2,6 +2,37 @@ syscfg.defs:
     BLEDIS_STATS:
         description: 'Enable bledis statictics'
         value: 0
+        
     BLEDIS_ADALOG:
         description: 'Enable bledis logging with adalog'
         value: 1
+        
+    BLEDIS_MODEL_STR:
+        description: 'Model string'
+        value: NULL
+    
+    BLEDIS_SERIAL_STR:
+        description: 'Serial string'
+        value: NULL
+
+    BLEDIS_SERIAL_DYNAMIC:
+         description: 'Generate Serial string dynamically (only applicable to nrf5x)'
+         value: 0 
+
+    BLEDIS_FIRMWARE_REV_STR:
+        description: 'Firmware Rev string'
+        value: NULL
+
+    BLEDIS_HARDWARD_REV_STR:
+        description: 'Hardware Rev string'
+        value: NULL
+
+    BLEDIS_SOFTWARE_REV_STR:
+        description: 'Software revision string'
+        value: NULL
+
+    BLEDIS_MANUFACTURER_STR:
+        description: 'Manufacturer string'
+        value: NULL
+
+        

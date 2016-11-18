@@ -74,7 +74,6 @@
 /*------------------------------------------------------------------*/
 /* Global values
  *------------------------------------------------------------------*/
-static char serialnumber[16 + 1];
 
 /*------------------------------------------------------------------*/
 /* TASK Settings
@@ -286,24 +285,8 @@ int main(void)
 //  ble_hs_cfg.store_read_cb  = ble_store_ram_read;
 //  ble_hs_cfg.store_write_cb = ble_store_ram_write;
 
-  /* Convert MCU Unique Identifier to string as serial number */
-  sprintf(serialnumber, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
-
-  /* Device information service (DIS) settings */
-  bledis_cfg_t dis_cfg =
-  {
-      .model        = MYNEWT_VAL(BSP_BOARD_NAME) ,
-      .serial       = serialnumber ,
-      .firmware_rev = FIRMWARE_REV ,
-#ifdef MYNEWT_VAL_BSP_NRF52
-      .hardware_rev = "nRF52832",
-#else
-      .hardware_rev = "nRF51822",
-#endif
-      .software_rev = SOFTWARE_REV ,
-      .manufacturer = "Adafruit Industries"
-  };
-  bledis_init(&dis_cfg);
+  /* Init BLE Device Information Service */
+  bledis_init();
 
   /* Nordic UART service (NUS) settings */
   bleuart_init();

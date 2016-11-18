@@ -53,7 +53,8 @@ typedef struct
 
 } bledis_cfg_t;
 
-int bledis_init(bledis_cfg_t const * dis_cfg);
+//int bledis_init(bledis_cfg_t const * dis_cfg);
+int bledis_init(void);
 
 #ifdef __cplusplus
  }

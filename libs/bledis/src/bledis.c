@@ -85,11 +85,32 @@ STATS_SECT_DECL(bledis_stat_section) g_bledis_stats;
 //--------------------------------------------------------------------+
 // VARIABLE DECLARATION
 //--------------------------------------------------------------------+
+#if MYNEWT_VAL(BLEDIS_SERIAL_DYNAMIC)
+static char _dis_serial[16 + 1];
+#endif
+
 static union
 {
   bledis_cfg_t named;
   const char * arrptr[BLEDIS_MAX_CHAR];
-}_dis_cfg;
+} const _dis_cfg =
+{
+    .named =
+    {
+        .model        = MYNEWT_VAL(BLEDIS_MODEL_STR),
+
+#if MYNEWT_VAL(BLEDIS_SERIAL_DYNAMIC)
+        .serial       = _dis_serial,
+#else
+        .serial       = MYNEWT_VAL(BLEDIS_SERIAL_STR),
+#endif
+
+        .firmware_rev = MYNEWT_VAL(BLEDIS_FIRMWARE_REV_STR),
+        .hardware_rev = MYNEWT_VAL(BLEDIS_HARDWARD_REV_STR),
+        .software_rev = MYNEWT_VAL(BLEDIS_SOFTWARE_REV_STR),
+        .manufacturer = MYNEWT_VAL(BLEDIS_MANUFACTURER_STR),
+    }
+};
 
 const uint8_t _dis_uuid128[][16] =
 {
@@ -130,13 +151,9 @@ static const struct ble_gatt_svc_def _dis_service[] =
 //--------------------------------------------------------------------+
 static int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
-
-int bledis_init(bledis_cfg_t const * dis_cfg)
+int bledis_init(void)
 {
   _LOG( adalog_init() );
-
-  memclr(_dis_chars, sizeof(_dis_chars));
-  _dis_cfg.named = *dis_cfg;
 
 #if MYNEWT_VAL(BLEDIS_STATS)
   /* Initialise the stats section */
@@ -147,6 +164,11 @@ int bledis_init(bledis_cfg_t const * dis_cfg)
 
   /* Register the stats section */
   stats_register("ble_svc_dis", STATS_HDR(g_bledis_stats));
+#endif
+
+#if MYNEWT_VAL(BLEDIS_SERIAL_DYNAMIC)
+  /* Convert MCU Unique Identifier to string as serial number */
+  sprintf(_dis_serial, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
 #endif
 
   // Include only configured characteristics
@@ -165,9 +187,12 @@ int bledis_init(bledis_cfg_t const * dis_cfg)
     }
   }
 
-  // Register Service
-  ble_gatts_count_cfg(_dis_service);
-  ble_gatts_add_svcs (_dis_service);
+  if ( count )
+  {
+    // Register Service
+    ble_gatts_count_cfg(_dis_service);
+    ble_gatts_add_svcs (_dis_service);
+  }
 
   return 0;
 }

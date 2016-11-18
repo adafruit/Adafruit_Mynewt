@@ -23,12 +23,20 @@ syscfg.vals:
     #CONFIG_NFFS_FILE: '"/cfg/run"'
     #CONFIG_NFFS_MAX_LINES: 32    
     
-    #Adafruit
+    # Adafruit Util
+    ADAUTIL_CFG: 1
+    
+    # Adafruit BLE DIS
+    BLEDIS_STATS: 0
+    BLEDIS_MODEL_STR: MYNEWT_VAL_BSP_BOARD_NAME
+    BLEDIS_SERIAL_DYNAMIC: 1
+    BLEDIS_FIRMWARE_REV_STR: '"0.10.0"'
+    BLEDIS_HARDWARD_REV_STR: '"Rev A"'
+    BLEDIS_SOFTWARE_REV_STR: '"0.10.0"'
+    BLEDIS_MANUFACTURER_STR: '"Adafruit Industries"'
+    
+    # Adafruit BLEUART
     BLEUART_BUFSIZE: 128
     BLEUART_CLI: 1
     BLEUART_STATS: 1
-    
-    BLEDIS_STATS: 0
-    
-    ADAUTIL_CFG: 1
-
+        
