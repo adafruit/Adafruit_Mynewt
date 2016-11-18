@@ -24,6 +24,9 @@ syscfg.defs:
     ILI9341_TASK:
         description: 'Enable the ILI9341 display driver'
         value: 0
+    ILI9341_SPI_BUS:
+        description: 'The SPI bus number to use for the ILI9341'
+        value: 1
     ILI9341_CLI:
         description: 'Enable shell support for the ILI9341'
         value: 0
