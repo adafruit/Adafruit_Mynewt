@@ -19,7 +19,7 @@ peripherals like an SD card or SPI flash memory.
 
 In the case of the **nRF51** and **nRF52**, most pin config takes place in the
 `nrf_drv_config.h` file which should be part of your BSP. For example, the
-following code configures I2C0 to use pins 25 (SDA) and 26 (SCL) at 100kHz:
+following code configures pins 12, 13 and 14 for SPI:
 
 ```
 #define SPI1_CONFIG_SCK_PIN         12
