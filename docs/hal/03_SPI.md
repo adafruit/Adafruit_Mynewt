@@ -1,45 +1,6 @@
 # SPI
 
-## BSP Config
-
-### `syscfg.yml` Settings
-
-In the BSP, target or app's `syscfg.yml` file add:
-
-```
-SPI_1_MASTER:
-    description: 'SPI 1 master'
-    value:  1
-```
-
-> **NOTE**: SPI1 is used here since SPI0 will be reserved for SPI based storage
-peripherals like an SD card or SPI flash memory.
-
-### Pin Settings
-
-In the case of the **nRF51** and **nRF52**, most pin config takes place in the
-`nrf_drv_config.h` file which should be part of your BSP. For example, the
-following code configures pins 12, 13 and 14 for SPI:
-
-```
-#define SPI1_CONFIG_SCK_PIN         12
-#define SPI1_CONFIG_MOSI_PIN        13
-#define SPI1_CONFIG_MISO_PIN        14
-#define SPI1_CONFIG_IRQ_PRIORITY    APP_IRQ_PRIORITY_LOW
-```
-
-## Library/Application Config
-
-### `pkg.yml` Settings
-
-In the `pkg.deps` section of your library or app add the following dependency:
-
-```
-pkg.deps:
-    - "@apache-mynewt-core/hw/hal"
-```
-
-### SPI HAL API
+## HAL API
 
 You can perform read, write an other operations using the following functions:
 
@@ -90,6 +51,45 @@ select an appropriate value:
 | **nRF51xxx**  | 125, 250, 500, 1000, 2000, 4000, 8000 |
 | **nRF52xxx**  | 125, 250, 500, 1000, 2000, 4000, 8000 |
 | **stm32f4xx** | Any (within peripheral range)         |
+
+## BSP Config
+
+### `syscfg.yml` Settings
+
+In the BSP, target or app's `syscfg.yml` file add:
+
+```
+SPI_1_MASTER:
+    description: 'SPI 1 master'
+    value:  1
+```
+
+> **NOTE**: SPI1 is used here since SPI0 will be reserved for SPI based storage
+peripherals like an SD card or SPI flash memory.
+
+### Pin Settings
+
+In the case of the **nRF51** and **nRF52**, most pin config takes place in the
+`nrf_drv_config.h` file which should be part of your BSP. For example, the
+following code configures pins 12, 13 and 14 for SPI:
+
+```
+#define SPI1_CONFIG_SCK_PIN         12
+#define SPI1_CONFIG_MOSI_PIN        13
+#define SPI1_CONFIG_MISO_PIN        14
+#define SPI1_CONFIG_IRQ_PRIORITY    APP_IRQ_PRIORITY_LOW
+```
+
+## Library/Application Config
+
+### `pkg.yml` Settings
+
+In the `pkg.deps` section of your library or app add the following dependency:
+
+```
+pkg.deps:
+    - "@apache-mynewt-core/hw/hal"
+```
 
 ### Source Code
 
