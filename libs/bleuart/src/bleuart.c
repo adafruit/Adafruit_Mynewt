@@ -260,8 +260,8 @@ static int bleuart_rx_exec(int argc, char **argv);
 
 static struct shell_cmd _bleuart_cmd[] =
 {
-    { .sc_cmd = "bustx", .sc_cmd_func = bleuart_tx_exec },
-    { .sc_cmd = "busrx", .sc_cmd_func = bleuart_rx_exec },
+    { .sc_cmd = "nustx", .sc_cmd_func = bleuart_tx_exec },
+    { .sc_cmd = "nusrx", .sc_cmd_func = bleuart_rx_exec },
 };
 
 /**

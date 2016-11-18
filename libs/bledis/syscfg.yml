@@ -23,7 +23,7 @@ syscfg.defs:
         description: 'Firmware Rev string'
         value: NULL
 
-    BLEDIS_HARDWARD_REV_STR:
+    BLEDIS_HARDWARE_REV_STR:
         description: 'Hardware Rev string'
         value: NULL
 

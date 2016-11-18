@@ -106,7 +106,7 @@ static union
 #endif
 
         .firmware_rev = MYNEWT_VAL(BLEDIS_FIRMWARE_REV_STR),
-        .hardware_rev = MYNEWT_VAL(BLEDIS_HARDWARD_REV_STR),
+        .hardware_rev = MYNEWT_VAL(BLEDIS_HARDWARE_REV_STR),
         .software_rev = MYNEWT_VAL(BLEDIS_SOFTWARE_REV_STR),
         .manufacturer = MYNEWT_VAL(BLEDIS_MANUFACTURER_STR),
     }
