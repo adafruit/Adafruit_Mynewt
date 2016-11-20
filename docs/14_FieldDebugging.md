@@ -85,9 +85,9 @@ byte to return only the line of code that caused the crash. You can play
 with the start and stop addresses to provide some context to the error.
 
 ```
-$ arm-none-eabi-objdump -S --start-address=0x00009e54 --stop-address=0x00009e55 bin/throughput/apps/throughput/throughput.elf
+$ arm-none-eabi-objdump -S --start-address=0x00009e54 --stop-address=0x00009e55 bin/targets/throughput/app/apps/throughput/throughput.elf
 
-bin/throughput/apps/throughput/throughput.elf:     file format elf32-littlearm
+bin/targets/throughput/app/apps/throughput/throughput.elf:     file format elf32-littlearm
 
 
 Disassembly of section .text:
