@@ -100,6 +100,9 @@ extern "C" {
 int ili9341_spi_write(uint8_t);
 int ili9341_write_command(uint8_t);
 int ili9341_write_data(uint8_t);
+int ili9341_read_cmd8(uint8_t reg, uint8_t *val);
+int ili9341_disp_init(void);
+int ili9341_set_addr_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
 /* ili9341_shell.c */
 #if MYNEWT_VAL(ILI9341_CLI)

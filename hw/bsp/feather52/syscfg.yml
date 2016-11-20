@@ -4,11 +4,11 @@ syscfg.defs:
     BSP_NRF52:
         description: 'TBD'
         value: 1
-    
+
     BSP_BOARD_NAME:
         description: 'Name of the board'
-        value: '"Feather nRF52"' 
-        
+        value: '"Feather nRF52"'
+
     CLOCK_FREQ:
         description: 'TBD'
         value:  1000000
@@ -93,3 +93,8 @@ syscfg.vals:
     NFFS_FLASH_AREA: FLASH_AREA_NFFS
     COREDUMP_FLASH_AREA: FLASH_AREA_IMAGE_1
     CONSOLE_FLOW_CONTROL: UART_FLOW_CTL_NONE
+
+    # Adafruit 2.4" TFT Wing : http://adafru.it/3315
+    ILI9341_SPI_BUS: 1
+    ILI9341_SS_PIN: 31
+    ILI9341_DC_PIN: 6

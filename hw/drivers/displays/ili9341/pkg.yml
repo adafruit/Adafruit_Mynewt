@@ -23,7 +23,7 @@
 pkg.name: hw/drivers/displays/ili9341
 pkg.description: Driver for the ILI9341 display driver
 pkg.author: "Adafruit <support@adafruit.com>"
-pkg.homepage: "http://www.adafruit.com/"
+pkg.homepage: "http://adafru.it/3315"
 pkg.keywords:
     - adafruit
     - ili9341

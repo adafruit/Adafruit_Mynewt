@@ -47,6 +47,10 @@ extern "C" {
  * Initialize the ili9341. This function is normally called by sysinit.
  */
 void ili9341_init(void);
+int ili9341_draw_pixel(uint16_t x, uint16_t y, uint16_t color);
+int ili9341_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
+                      uint16_t color);
+int ili9341_fill_screen(uint16_t color);
 
 #ifdef __cplusplus
 }
