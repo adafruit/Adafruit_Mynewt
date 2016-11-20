@@ -340,6 +340,9 @@ ili9341_draw_pixel(uint16_t x, uint16_t y, uint16_t color)
         return EIO;
     }
 
+    /* Set drawing position */
+    rc = ili9341_set_addr_window(x, y, x, y);
+
     hal_gpio_write(MYNEWT_VAL(ILI9341_DC_PIN), 1);
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 0);
     rc = hal_spi_txrx(MYNEWT_VAL(ILI9341_SPI_BUS), txbuf, rxbuf, 2);

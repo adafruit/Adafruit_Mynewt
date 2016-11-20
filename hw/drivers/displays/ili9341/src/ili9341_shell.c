@@ -160,16 +160,10 @@ ili9341_shell_cmd_init(int argc, char **argv)
     }
 
     /* Clear screen */
-    rc = ili9341_fill_screen(0xFFFF);
+    rc = ili9341_fill_screen(0x0000);
     if (!rc == 0) {
         goto error;
     }
-
-    ili9341_draw_pixel(60, 60, 0x0000);
-    ili9341_draw_pixel(62, 62, 0x0000);
-    ili9341_draw_pixel(64, 64, 0x0000);
-    ili9341_draw_pixel(66, 66, 0x0000);
-    ili9341_draw_pixel(68, 68, 0x0000);
 
     /* Disable the SPI bus to save power */
     rc = hal_spi_disable(MYNEWT_VAL(ILI9341_SPI_BUS));
