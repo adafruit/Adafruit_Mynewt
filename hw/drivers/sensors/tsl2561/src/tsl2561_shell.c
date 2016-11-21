@@ -83,7 +83,7 @@ tsl2561_shell_err_too_many_args(char *cmd_name)
 {
     console_printf("Error: too many arguments for command \"%s\"\n",
                    cmd_name);
-    return -1;
+    return EINVAL;
 }
 
 static int
@@ -91,7 +91,7 @@ tsl2561_shell_err_unknown_arg(char *cmd_name)
 {
     console_printf("Error: unknown argument \"%s\"\n",
                    cmd_name);
-    return -1;
+    return EINVAL;
 }
 
 static int
@@ -99,7 +99,7 @@ tsl2561_shell_err_invalid_arg(char *cmd_name)
 {
     console_printf("Error: invalid argument \"%s\"\n",
                    cmd_name);
-    return -1;
+    return EINVAL;
 }
 
 static int
