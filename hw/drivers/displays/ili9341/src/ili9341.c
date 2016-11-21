@@ -85,6 +85,7 @@ struct hal_spi_settings g_ili9341_spi_settings = {
 
 uint8_t g_ili9341_initialised = 0;
 
+/* ToDo: Convert to a macro to preserve line number? */
 static int
 ili9341_log_errno(int rc)
 {
