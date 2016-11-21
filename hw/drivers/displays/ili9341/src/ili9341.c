@@ -100,6 +100,15 @@ ili9341_write_command(uint8_t c)
     /* Set CS HIGH */
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
+#if MYNEWT_VAL(ILI9341_LOG)
+    if (!rc == 0) {
+        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
+#if MYNEWT_VAL(ILI9341_STATS)
+        STATS_INC(g_ili9341stats, errors);
+#endif
+    }
+#endif
+
     return rc;
 }
 
@@ -117,6 +126,15 @@ ili9341_write_data(uint8_t d)
     rc = hal_spi_txrx(MYNEWT_VAL(ILI9341_SPI_BUS), txbuf, rxbuf, 1);
     /* Set CS HIGH */
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
+
+#if MYNEWT_VAL(ILI9341_LOG)
+    if (!rc == 0) {
+        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
+#if MYNEWT_VAL(ILI9341_STATS)
+        STATS_INC(g_ili9341stats, errors);
+#endif
+    }
+#endif
 
     return rc;
 }
@@ -161,6 +179,14 @@ ili9341_read_cmd8(uint8_t reg, uint8_t *val)
     memcpy(val, rxbuf, 1);
 
 error:
+#if MYNEWT_VAL(ILI9341_LOG)
+    if (!rc == 0) {
+        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
+#if MYNEWT_VAL(ILI9341_STATS)
+        STATS_INC(g_ili9341stats, errors);
+#endif
+    }
+#endif
     return rc;
 }
 
@@ -168,6 +194,10 @@ int
 ili9341_disp_init(void)
 {
     int rc;
+
+#if MYNEWT_VAL(ILI9341_LOG)
+    ILI9341_INFO("Initialising ILI9341\n");
+#endif
 
     rc = ili9341_write_command(0xEF);
     /* Normally if SPI will fail, it should happen in the first command */
@@ -291,6 +321,9 @@ ili9341_disp_init(void)
     g_ili9341_initialised = 1;
 
 error:
+#if MYNEWT_VAL(ILI9341_LOG)
+    ILI9341_INFO("Exiting ILI9341 initilisation\n");
+#endif
     return rc;
 }
 
@@ -348,6 +381,15 @@ ili9341_draw_pixel(uint16_t x, uint16_t y, uint16_t color)
     rc = hal_spi_txrx(MYNEWT_VAL(ILI9341_SPI_BUS), txbuf, rxbuf, 2);
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
+#if MYNEWT_VAL(ILI9341_LOG)
+    if (!rc == 0) {
+        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
+#if MYNEWT_VAL(ILI9341_STATS)
+        STATS_INC(g_ili9341stats, errors);
+#endif
+    }
+#endif
+
     return rc;
 }
 
@@ -393,6 +435,14 @@ ili9341_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
 error:
+#if MYNEWT_VAL(ILI9341_LOG)
+    if (!rc == 0) {
+        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
+#if MYNEWT_VAL(ILI9341_STATS)
+        STATS_INC(g_ili9341stats, errors);
+#endif
+    }
+#endif
     return rc;
 }
 
