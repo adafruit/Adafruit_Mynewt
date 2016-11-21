@@ -85,6 +85,22 @@ struct hal_spi_settings g_ili9341_spi_settings = {
 
 uint8_t g_ili9341_initialised = 0;
 
+static int
+ili9341_log_errno(int rc)
+{
+#if MYNEWT_VAL(ILI9341_STATS)
+    if (!rc == 0) {
+        STATS_INC(g_ili9341stats, errors);
+    }
+#endif
+#if MYNEWT_VAL(ILI9341_LOG)
+    if (!rc == 0) {
+        ILI9341_ERR("Error: RC = 0x%04X (%i)\n", rc, rc);
+    }
+#endif
+    return rc;
+}
+
 int
 ili9341_write_command(uint8_t c)
 {
@@ -100,12 +116,9 @@ ili9341_write_command(uint8_t c)
     /* Set CS HIGH */
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
-#if MYNEWT_VAL(ILI9341_LOG)
+#if MYNEWT_VAL(ILI9341_LOG) || MYNEWT_VAL(ILI9341_STATS)
     if (!rc == 0) {
-        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
-#if MYNEWT_VAL(ILI9341_STATS)
-        STATS_INC(g_ili9341stats, errors);
-#endif
+        ili9341_log_errno(rc);
     }
 #endif
 
@@ -127,12 +140,9 @@ ili9341_write_data(uint8_t d)
     /* Set CS HIGH */
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
-#if MYNEWT_VAL(ILI9341_LOG)
+#if MYNEWT_VAL(ILI9341_LOG) || MYNEWT_VAL(ILI9341_STATS)
     if (!rc == 0) {
-        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
-#if MYNEWT_VAL(ILI9341_STATS)
-        STATS_INC(g_ili9341stats, errors);
-#endif
+        ili9341_log_errno(rc);
     }
 #endif
 
@@ -179,12 +189,9 @@ ili9341_read_cmd8(uint8_t reg, uint8_t *val)
     memcpy(val, rxbuf, 1);
 
 error:
-#if MYNEWT_VAL(ILI9341_LOG)
+#if MYNEWT_VAL(ILI9341_LOG) || MYNEWT_VAL(ILI9341_STATS)
     if (!rc == 0) {
-        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
-#if MYNEWT_VAL(ILI9341_STATS)
-        STATS_INC(g_ili9341stats, errors);
-#endif
+        ili9341_log_errno(rc);
     }
 #endif
     return rc;
@@ -366,10 +373,12 @@ ili9341_draw_pixel(uint16_t x, uint16_t y, uint16_t color)
 
     if((x < 0) || (x >= ILI9341_TFTWIDTH ) ||
        (y < 0) || (y >= ILI9341_TFTHEIGHT )) {
+        ili9341_log_errno(EINVAL);
         return EINVAL;
     }
 
     if (!g_ili9341_initialised) {
+        ili9341_log_errno(EIO);
         return EIO;
     }
 
@@ -381,12 +390,9 @@ ili9341_draw_pixel(uint16_t x, uint16_t y, uint16_t color)
     rc = hal_spi_txrx(MYNEWT_VAL(ILI9341_SPI_BUS), txbuf, rxbuf, 2);
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
-#if MYNEWT_VAL(ILI9341_LOG)
+#if MYNEWT_VAL(ILI9341_LOG) || MYNEWT_VAL(ILI9341_STATS)
     if (!rc == 0) {
-        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
-#if MYNEWT_VAL(ILI9341_STATS)
-        STATS_INC(g_ili9341stats, errors);
-#endif
+        ili9341_log_errno(rc);
     }
 #endif
 
@@ -435,12 +441,9 @@ ili9341_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
     hal_gpio_write(MYNEWT_VAL(ILI9341_SS_PIN), 1);
 
 error:
-#if MYNEWT_VAL(ILI9341_LOG)
+#if MYNEWT_VAL(ILI9341_LOG) || MYNEWT_VAL(ILI9341_STATS)
     if (!rc == 0) {
-        ILI9341_ERR("Error: RC = 0x%04d (%u)\n", rc, rc);
-#if MYNEWT_VAL(ILI9341_STATS)
-        STATS_INC(g_ili9341stats, errors);
-#endif
+        ili9341_log_errno(rc);
     }
 #endif
     return rc;
