@@ -39,7 +39,7 @@
 #include <errno.h>
 #include "sysinit/sysinit.h"
 #include "hal/hal_i2c.h"
-#include "adafruit/tsl2561.h"
+#include "tsl2561.h"
 #include "tsl2561_priv.h"
 
 #if MYNEWT_VAL(TSL2561_LOG)
