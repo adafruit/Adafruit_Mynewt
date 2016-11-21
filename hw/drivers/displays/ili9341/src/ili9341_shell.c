@@ -113,6 +113,7 @@ ili9341_shell_help(void)
     console_printf("  init\n");
     console_printf("  debug [verbose]\n");
     console_printf("  fill <color:0xFFFF>\n");
+    console_printf("  p <x> <y> <color:0xFFFF>\n");
 
     return 0;
 }
@@ -401,6 +402,57 @@ error:
 }
 
 static int
+ili9341_shell_cmd_pixel(int argc, char **argv)
+{
+    int rc;
+    long val;
+    uint16_t x, y, color;
+
+    if (argc < 5) {
+        return ili9341_shell_err_too_few_args(argv[1]);
+    }
+
+    if (argc > 5) {
+        return ili9341_shell_err_too_many_args(argv[1]);
+    }
+
+    if (ili9341_shell_stol(argv[2], 0, ILI9341_TFTWIDTH-1, &val, 10)) {
+        return ili9341_shell_err_invalid_arg(argv[2]);
+    }
+    x = (uint16_t)val;
+
+    if (ili9341_shell_stol(argv[3], 0, ILI9341_TFTHEIGHT-1, &val, 10)) {
+        return ili9341_shell_err_invalid_arg(argv[2]);
+    }
+    y = (uint16_t)val;
+
+    if (ili9341_shell_stol(argv[4], 0, UINT16_MAX, &val, 16)) {
+        return ili9341_shell_err_invalid_arg(argv[2]);
+    }
+    color = (uint16_t)val;
+
+    /* Enable the SPI bus */
+    rc = hal_spi_enable(MYNEWT_VAL(ILI9341_SPI_BUS));
+    if (!rc == 0) {
+        goto error;
+    }
+
+    rc = ili9341_draw_pixel(x, y, color);
+    if (!rc == 0) {
+        goto error;
+    }
+
+    /* Disable the SPI bus */
+    rc = hal_spi_disable(MYNEWT_VAL(ILI9341_SPI_BUS));
+    if (!rc == 0) {
+        goto error;
+    }
+
+error:
+    return rc;
+}
+
+static int
 ili9341_shell_cmd(int argc, char **argv)
 {
     int rc;
@@ -417,6 +469,8 @@ ili9341_shell_cmd(int argc, char **argv)
         rc = ili9341_shell_cmd_debug(argc, argv);
     } else if (argc > 1 && strcmp(argv[1], "fill") == 0) {
         rc = ili9341_shell_cmd_fill(argc, argv);
+    } else if (argc > 1 && strcmp(argv[1], "p") == 0) {
+        rc = ili9341_shell_cmd_pixel(argc, argv);
     } else {
         return ili9341_shell_err_unknown_arg(argv[1]);
     }
