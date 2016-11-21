@@ -111,7 +111,7 @@ ili9341_shell_help(void)
     console_printf("%s cmd [flags...]\n", ili9341_shell_cmd_struct.sc_cmd);
     console_printf("cmd:\n");
     console_printf("  init\n");
-    console_printf("  dbg [verbose]\n");
+    console_printf("  debug [verbose]\n");
     console_printf("  fill <color:0xFFFF>\n");
 
     return 0;
@@ -187,8 +187,7 @@ ili9341_shell_cmd_debug(int argc, char **argv)
     /* Check if we want verbose output or not */
     if (argc == 3 && strcmp(argv[2], "verbose") == 0) {
         verbose = 1;
-    }
-    else if (argc == 3) {
+    } else if (argc == 3) {
         return ili9341_shell_err_invalid_arg(argv[2]);
     } else {
         verbose = 0;
@@ -265,16 +264,16 @@ ili9341_shell_cmd_debug(int argc, char **argv)
     if (verbose) {
         console_printf("\t%s\n", x & 0x80 ? "Vert: bottom to top" :
                                             "Vert: top to bottom");
-        console_printf("\t%s\n", x & 0x40 ? "Hor: right to left" :
-                                            "Hor: left to right");
+        console_printf("\t%s\n", x & 0x40 ? "Horz: right to left" :
+                                            "Horz: left to right");
         console_printf("\t%s\n", x & 0x20 ? "Reverse mode" :
                                             "Normal mode");
         console_printf("\t%s\n", x & 0x10 ? "Vert refresh: bottom to top" :
                                             "Vert refresh: top to bottom");
         console_printf("\t%s\n", x & 0x08 ? "Component order: BGR" :
                                             "Component order: RGB");
-        console_printf("\t%s\n", x & 0x04 ? "Hor refresh: right to left" :
-                                            "Hor refresh: left to right");
+        console_printf("\t%s\n", x & 0x04 ? "Horz refresh: right to left" :
+                                            "Horz refresh: left to right");
     }
 
     /* DISPLAY PIXEL FORMAT (0x0C)                          DEFAULT VAL: -- */
@@ -414,7 +413,7 @@ ili9341_shell_cmd(int argc, char **argv)
     rc = 0;
     if (argc > 1 && strcmp(argv[1], "init") == 0) {
         rc = ili9341_shell_cmd_init(argc, argv);
-    } else if (argc > 1 && strcmp(argv[1], "dbg") == 0) {
+    } else if (argc > 1 && strcmp(argv[1], "debug") == 0) {
         rc = ili9341_shell_cmd_debug(argc, argv);
     } else if (argc > 1 && strcmp(argv[1], "fill") == 0) {
         rc = ili9341_shell_cmd_fill(argc, argv);
