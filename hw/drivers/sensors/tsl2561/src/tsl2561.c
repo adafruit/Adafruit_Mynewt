@@ -39,7 +39,7 @@
 #include <errno.h>
 #include "sysinit/sysinit.h"
 #include "hal/hal_i2c.h"
-#include "tsl2561.h"
+#include "tsl2561/tsl2561.h"
 #include "tsl2561_priv.h"
 
 #if MYNEWT_VAL(TSL2561_LOG)
@@ -102,7 +102,8 @@ tsl2561_write8(uint8_t reg, uint32_t value)
         .buffer = payload
     };
 
-    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                              OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X\n", reg, value);
     }
@@ -122,7 +123,8 @@ tsl2561_write16(uint8_t reg, uint16_t value)
         .buffer = payload
     };
 
-    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                              OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         TSL2561_ERR("Failed to write @0x%02X with value 0x%02X 0x%02X\n",
                     reg, payload[0], payload[1]);
@@ -145,7 +147,8 @@ tsl2561_read8(uint8_t reg, uint8_t *value)
 
     /* Register write */
     payload = reg;
-    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                              OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         TSL2561_ERR("Failed to address sensor\n");
         goto error;
@@ -153,7 +156,8 @@ tsl2561_read8(uint8_t reg, uint8_t *value)
 
     /* Read one byte back */
     payload = 0;
-    rc = hal_i2c_master_read(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_read(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                             OS_TICKS_PER_SEC / 10, 1);
     *value = payload;
     if (rc) {
         TSL2561_ERR("Failed to read @0x%02X\n", reg);
@@ -176,7 +180,8 @@ tsl2561_read16(uint8_t reg, uint16_t *value)
     };
 
     /* Register write */
-    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                              OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         TSL2561_ERR("Failed to address sensor\n");
         goto error;
@@ -185,7 +190,8 @@ tsl2561_read16(uint8_t reg, uint16_t *value)
     /* Read two bytes back */
     memset(payload, 0, 2);
     data_struct.len = 2;
-    rc = hal_i2c_master_read(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_read(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                             OS_TICKS_PER_SEC / 10, 1);
     *value = (uint16_t)payload[0] | ((uint16_t)payload[1] << 8);
     if (rc) {
         TSL2561_ERR("Failed to read @0x%02X\n", reg);
@@ -402,7 +408,8 @@ int tsl2561_clear_interrupt (void)
     };
 
     /* To clear the interrupt set the CLEAR bit in the COMMAND register */
-    rc = hal_i2c_master_write(0, &data_struct, OS_TICKS_PER_SEC / 10, 1);
+    rc = hal_i2c_master_write(MYNEWT_VAL(TSL2561_I2CBUS), &data_struct,
+                              OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         goto error;
     }

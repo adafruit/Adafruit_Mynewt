@@ -40,7 +40,7 @@
 #include "console/console.h"
 #include "shell/shell.h"
 #include "hal/hal_gpio.h"
-#include "tsl2561.h"
+#include "tsl2561/tsl2561.h"
 #include "tsl2561_priv.h"
 
 #if MYNEWT_VAL(TSL2561_CLI)

@@ -94,6 +94,9 @@ syscfg.vals:
     COREDUMP_FLASH_AREA: FLASH_AREA_IMAGE_1
     CONSOLE_FLOW_CONTROL: UART_FLOW_CTL_NONE
 
+    # Adafruit TSL2561 : http://adafru.it/439
+    TSL2561_I2CBUS: 0
+
     # Adafruit 2.4" TFT Wing : http://adafru.it/3315
     ILI9341_SPI_BUS: 1
     ILI9341_SS_PIN: 31
