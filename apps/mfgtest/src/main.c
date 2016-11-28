@@ -30,7 +30,7 @@
 #include "console/console.h"
 #include "shell/shell.h"
 
-#include "adafruit/tsl2561.h"
+#include "tsl2561/tsl2561.h"
 
 /* Init all tasks */
 int init_tasks(void);
