@@ -33,10 +33,10 @@ syscfg.defs:
         value:  1
     UART_0_PIN_TX:
         description: 'TBD'
-        value:  16
+        value:  6
     UART_0_PIN_RX:
         description: 'TBD'
-        value:  15
+        value:  8
     UART_0_PIN_RTS:
         description: 'TBD'
         value:  0
@@ -50,7 +50,7 @@ syscfg.defs:
 
     SPI_0_MASTER:
         description: 'SPI 0 master'
-        value:  0
+        value:  1
         restrictions:
             - "!SPI_0_SLAVE"
     SPI_0_MASTER_SS_PIN:
@@ -58,7 +58,7 @@ syscfg.defs:
         value:  22
     SPI_1_MASTER:
         description: 'SPI 1 master'
-        value:  1
+        value:  0
         restrictions:
             - "!SPI_1_SLAVE"
     SPI_1_MASTER_SS_PIN:
@@ -106,6 +106,6 @@ syscfg.vals:
     TSL2561_I2CBUS: 0
 
     # Adafruit 2.4" TFT Wing : http://adafru.it/3315
-    ILI9341_SPI_BUS: 1
-    ILI9341_SS_PIN: 31
-    ILI9341_DC_PIN: 6
+    ILI9341_SPI_BUS: 0
+    ILI9341_SS_PIN: 29
+    ILI9341_DC_PIN: 30
