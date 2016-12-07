@@ -63,7 +63,7 @@ static struct nrf52_adc_dev_cfg os_bsp_adc0_config = {
 };
 #endif
 
-#if MYNEWT_VAL(SPI_0_MASTER)
+#if MYNEWT_VAL(SPI_0_MASTER) && 0
 /*
  * NOTE: Our HAL expects that the SS pin, if used, is treated as a gpio line
  * and is handled outside the SPI routines.
