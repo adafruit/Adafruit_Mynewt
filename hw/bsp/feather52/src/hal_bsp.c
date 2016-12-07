@@ -69,9 +69,9 @@ static struct nrf52_adc_dev_cfg os_bsp_adc0_config = {
  * and is handled outside the SPI routines.
  */
 static const struct nrf52_hal_spi_cfg os_bsp_spi0m_cfg = {
-    .sck_pin      = 23,
-    .mosi_pin     = 24,
-    .miso_pin     = 25,
+    .sck_pin      = 12,
+    .mosi_pin     = 13,
+    .miso_pin     = 14,
 };
 #endif
 
@@ -86,8 +86,8 @@ static const struct nrf52_hal_spi_cfg os_bsp_spi0s_cfg = {
 
 #if MYNEWT_VAL(I2C_0)
 static const struct nrf52_hal_i2c_cfg hal_i2c_cfg = {
-    .scl_pin = 27,
-    .sda_pin = 26,
+    .scl_pin = 26,
+    .sda_pin = 25,
     .i2c_frequency = 100    /* 100 kHz */
 };
 #endif
@@ -233,7 +233,7 @@ hal_bsp_init(void)
     assert(rc == 0);
 #endif
 
-    /* LED */
+    /* Turn off LEDs */
     hal_gpio_init_out(LED_BLINK_PIN, 1-LED_ON_STATE);
     hal_gpio_init_out(LED_2, 1-LED_ON_STATE);
 }
