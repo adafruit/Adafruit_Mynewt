@@ -74,12 +74,14 @@ init_tasks(void)
 
     pstack = malloc(sizeof(os_stack_t)*SYSEVQ_STACK_SIZE);
     assert(pstack);
-
     os_task_init(&task_sysevq, "sysevq", sysevq_handler, NULL,
             SYSEVQ_PRIO, OS_WAIT_FOREVER, pstack, SYSEVQ_STACK_SIZE);
 
     /* Set the default eventq for packages that lack a dedicated task. */
     os_eventq_dflt_set(&sys_evq);
+
+    /* Init shell support */
+    shell_init();
 }
 ```
 

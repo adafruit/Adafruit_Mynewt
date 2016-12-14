@@ -25,7 +25,7 @@ App successfully built: /Users/ktown/Dropbox/microBuilder/code/nRF52/Mynewt/blet
 
 ### Running the native binary
 
-Depending on the output `.elf` file generated about, you can then run the simulation binary locally via:
+Depending on the output `.elf` file generated above, you can then run the simulation binary locally via:
 
 ```
 $ /Users/ktown/Dropbox/microBuilder/code/nRF52/Mynewt/bletest/bin/bleuart/apps/bleuart/bleuart.elf
