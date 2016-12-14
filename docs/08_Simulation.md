@@ -31,6 +31,15 @@ Depending on the output `.elf` file generated above, you can then run the simula
 $ /Users/ktown/Dropbox/microBuilder/code/nRF52/Mynewt/bletest/bin/bleuart/apps/bleuart/bleuart.elf
 ```
 
+Note the following command line options that are available for the sim:
+
+```
+Usage: %s [-f flash_file] [-u uart_log_file]
+     -f flash_file tells where binary flash file is located. It gets
+        created if it doesn't already exist.
+     -u uart_log_file puts all UART data exchanges into a logfile.
+```
+
 ### Connect to UART via minicom
 
 If you have Console or Shell supported included, you will see the TTY port to connect to, such as:
