@@ -22,8 +22,10 @@ syscfg.defs:
         value: 1
     BOOT_SERIAL:
         description: 'TBD'
-        value: 0
+        value: 1
     BOOT_DOUBLE_RESET_DFU:
-        description: 'TBD'
+        description: 'does not work with nrf52'
         value: 0
         
+syscfg.vals:
+    SYSINIT_CONSTRAIN_INIT: 0
