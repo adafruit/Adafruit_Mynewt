@@ -28,7 +28,8 @@ project.repositories:
 
 repository.apache-mynewt-core:
     type: github
-    vers: 0.0.1
+    #vers: 0.0.1
+    vers: 0.0.0
     user: apache
     repo: incubator-mynewt-core
 
