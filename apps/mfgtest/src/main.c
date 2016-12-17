@@ -32,6 +32,11 @@
 
 #include "tsl2561/tsl2561.h"
 
+#include <sensor/sensor.h>
+#include "lsm303dlhc/lsm303dlhc.h"
+
+struct lsm303dlhc lsm303dlhc_sensor;
+
 /* Init all tasks */
 int init_tasks(void);
 
@@ -150,6 +155,33 @@ init_tasks(void)
     return 0;
 }
 
+static int
+lsm303dlhc_drvr_init(struct os_dev *dev, void *arg)
+{
+    struct lsm303dlhc_cfg cfg;
+    int rc;
+
+    rc = lsm303dlhc_init(dev, arg);
+    if (rc != 0) {
+        goto err;
+    }
+
+    cfg.nr_samples = 1;
+    cfg.accel_range = LSM303DLHC_ACCEL_RANGE_4;
+    cfg.accel_rate = LSM303DLHC_ACCEL_RATE_100;
+    cfg.sample_itvl = OS_TICKS_PER_SEC;
+
+    rc = lsm303dlhc_config((struct lsm303dlhc *) dev, &cfg);
+    if (rc != 0) {
+        goto err;
+    }
+
+    return (0);
+err:
+    return (rc);
+
+}
+
 /**
  * main
  *
@@ -176,6 +208,11 @@ main(int argc, char **argv)
 #endif
 
     rc = init_tasks();
+
+    sensor_pkg_init();
+
+    os_dev_create((struct os_dev *) &lsm303dlhc_sensor, "lsm303dlhc",
+            OS_DEV_INIT_KERNEL, OS_DEV_INIT_PRIMARY, lsm303dlhc_drvr_init, NULL);
 
     os_start();
 

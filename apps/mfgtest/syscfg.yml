@@ -28,3 +28,7 @@ syscfg.vals:
     ILI9341_CLI: 1
     ILI9341_LOG: 1
     ILI9341_STATS: 1
+
+    # LSM303DLHC accel/mag driver
+    LSM303DLHC_I2CBUS: 0
+    LSM303DLHC_LOG: 1
