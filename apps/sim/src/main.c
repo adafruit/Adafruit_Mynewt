@@ -28,6 +28,9 @@
 #include "console/console.h"
 #include "shell/shell.h"
 
+#include <sensor/sensor.h>
+#include <sim/sim_accel.h>
+
 /* Init all tasks */
 int init_tasks(void);
 
@@ -39,26 +42,7 @@ static struct os_task task_sysevq;
 /* Event queue for events handled by the system (shell, etc.) */
 static struct os_eventq sys_evq;
 
-/* Task 1 */
-#define BLINKY_TASK_PRIO     (1)
-#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
-
-struct os_task blinky_task;
-os_stack_t blinky_stack[BLINKY_STACK_SIZE];
-
-void
-blinky_task_handler(void *arg)
-{
-    hal_gpio_init_out(LED_BLINK_PIN, 1);
-
-    while (1) {
-        /* Wait one second */
-        os_time_delay(OS_TICKS_PER_SEC * 1);
-
-        /* Toggle the LED */
-        hal_gpio_toggle(LED_BLINK_PIN);
-    }
-}
+struct sim_accel sim_accel_sensor;
 
 /**
  * This task serves as a container for the shell and newtmgr packages.  These
@@ -100,15 +84,35 @@ init_tasks(void)
     /* Set the default eventq for packages that lack a dedicated task. */
     os_eventq_dflt_set(&sys_evq);
 
-    /* Init shell support */
-    shell_init();
-
-    /* Init blinky task */
-    os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
-            BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
-
     return 0;
 }
+
+static int
+accel_init(struct os_dev *dev, void *arg)
+{
+    struct sim_accel_cfg cfg;
+    int rc;
+
+    rc = sim_accel_init(dev, arg);
+    if (rc != 0) {
+        goto err;
+    }
+
+    cfg.sac_nr_samples = 10;
+    cfg.sac_nr_axises = 3;
+    /* read once per sec.  API should take this value in ms. */
+    cfg.sac_sample_itvl = OS_TICKS_PER_SEC;
+
+    rc = sim_accel_config((struct sim_accel *) dev, &cfg);
+    if (rc != 0) {
+        goto err;
+    }
+
+    return (0);
+err:
+    return (rc);
+}
+
 
 /**
  * main
@@ -128,9 +132,15 @@ main(int argc, char **argv)
     mcu_sim_parse_args(argc, argv);
 #endif
 
-    os_init();
+    sysinit();
 
     rc = init_tasks();
+
+    sensor_pkg_init();
+
+    os_dev_create((struct os_dev *) &sim_accel_sensor, "accel",
+            OS_DEV_INIT_KERNEL, OS_DEV_INIT_PRIMARY, accel_init, NULL);
+
     os_start();
 
     /* os start should never return. If it does, this should be an error */

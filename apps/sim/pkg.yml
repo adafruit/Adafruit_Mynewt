@@ -24,9 +24,16 @@ pkg.author: "Apache Mynewt <dev@mynewt.incubator.apache.org>"
 pkg.homepage: "http://mynewt.apache.org/"
 pkg.keywords:
 
+pkg.cflags:
+    - "-std=gnu99"
+    #- "-Wno-error=unused-function"
+    #- "-Wno-error=unused-variable"
+
 pkg.deps:
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/hw/hal"
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/sysinit"
+    - "@apache-mynewt-core/hw/sensor" 
+    - "@apache-mynewt-core/hw/drivers/sensors/sim"
