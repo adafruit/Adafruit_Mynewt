@@ -144,9 +144,9 @@ int
 lsm303dlhc_init(struct os_dev *dev, void *arg)
 {
     struct lsm303dlhc *lsm;
+    struct lsm303dlhc_cfg dflt_cfg;
     struct sensor *sensor;
     int rc;
-    uint8_t reg;
 
     lsm = (struct lsm303dlhc *) dev;
 
@@ -154,21 +154,17 @@ lsm303dlhc_init(struct os_dev *dev, void *arg)
     log_register("lsm303dlhc", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 #endif
 
-    /* Enable the accelerometer (100Hz) */
-    rc = lsm303dlhc_write8(LSM303DLHC_ADDR_ACCEL,
-        LSM303DLHC_REGISTER_ACCEL_CTRL_REG1_A, 0x57);
+    /* Set the default conf (accel = 4g @ 100Hz) */
+    dflt_cfg.nr_samples = 1;
+    dflt_cfg.accel_range = LSM303DLHC_ACCEL_RANGE_4;
+    dflt_cfg.accel_rate = LSM303DLHC_ACCEL_RATE_100;
+    dflt_cfg.sample_itvl = OS_TICKS_PER_SEC / 100;
+    rc = lsm303dlhc_config(lsm, &dflt_cfg);
     if (rc != 0) {
-        goto err;
-    }
-
-    /* LSM303DLHC has no WHOAMI register so read CTRL_REG1_A back to check */
-    /* if we are connected or not */
-    rc = lsm303dlhc_read8(LSM303DLHC_ADDR_ACCEL,
-        LSM303DLHC_REGISTER_ACCEL_CTRL_REG1_A, &reg);
-    if ((rc != 0) || (reg != 0x57)) {
+        /* And error here likely means no sensor was found on the ISC bus */
         LSM303DLHC_ERR("No LSM303DLHC detected on I2C bus %d at addr 0x%02X\n",
             MYNEWT_VAL(LSM303DLHC_I2CBUS), LSM303DLHC_ADDR_ACCEL);
-        return false;
+        goto err;
     }
 
     sensor = &lsm->sensor;
@@ -197,10 +193,29 @@ err:
 int
 lsm303dlhc_config(struct lsm303dlhc *lsm, struct lsm303dlhc_cfg *cfg)
 {
+    int rc;
+
     /* Overwrite the configuration associated with this generic accelleromter. */
     memcpy(&lsm->cfg, cfg, sizeof(*cfg));
 
-    return (0);
+    /* Set scale */
+    rc = lsm303dlhc_write8(LSM303DLHC_ADDR_ACCEL,
+        LSM303DLHC_REGISTER_ACCEL_CTRL_REG4_A,
+        lsm->cfg.accel_range);
+    if (rc != 0) {
+        goto err;
+    }
+
+    /* Set data rate (or power down) and enable XYZ output */
+    rc = lsm303dlhc_write8(LSM303DLHC_ADDR_ACCEL,
+        LSM303DLHC_REGISTER_ACCEL_CTRL_REG1_A,
+        lsm->cfg.accel_rate | 0x07);
+    if (rc != 0) {
+        goto err;
+    }
+
+err:
+    return (rc);
 }
 
 static void *

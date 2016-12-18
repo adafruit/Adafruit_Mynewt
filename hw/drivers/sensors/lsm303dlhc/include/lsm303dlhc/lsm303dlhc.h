@@ -71,8 +71,6 @@ struct lsm303dlhc_cfg {
     uint8_t nr_samples;
     enum lsm303dlhc_accel_range accel_range;
     enum lsm303dlhc_accel_rate accel_rate;
-    enum lsm303dlhc_mag_gain mag_gain;
-    enum lsm303dlhc_mag_rate mag_rate;
     uint16_t sample_itvl;
 };
 
