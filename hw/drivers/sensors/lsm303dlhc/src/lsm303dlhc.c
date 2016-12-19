@@ -144,7 +144,6 @@ int
 lsm303dlhc_init(struct os_dev *dev, void *arg)
 {
     struct lsm303dlhc *lsm;
-    struct lsm303dlhc_cfg dflt_cfg;
     struct sensor *sensor;
     int rc;
 
@@ -153,19 +152,6 @@ lsm303dlhc_init(struct os_dev *dev, void *arg)
 #if MYNEWT_VAL(LSM303DLHC_LOG)
     log_register("lsm303dlhc", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 #endif
-
-    /* Set the default conf (accel = 4g @ 100Hz) */
-    dflt_cfg.nr_samples = 1;
-    dflt_cfg.accel_range = LSM303DLHC_ACCEL_RANGE_4;
-    dflt_cfg.accel_rate = LSM303DLHC_ACCEL_RATE_100;
-    dflt_cfg.sample_itvl = OS_TICKS_PER_SEC / 100;
-    rc = lsm303dlhc_config(lsm, &dflt_cfg);
-    if (rc != 0) {
-        /* And error here likely means no sensor was found on the ISC bus */
-        LSM303DLHC_ERR("No LSM303DLHC detected on I2C bus %d at addr 0x%02X\n",
-            MYNEWT_VAL(LSM303DLHC_I2CBUS), LSM303DLHC_ADDR_ACCEL);
-        goto err;
-    }
 
     sensor = &lsm->sensor;
 
@@ -257,9 +243,9 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
      * if number of axises is configured, up to 3-axises of data can be
      * returned.
      */
-    sad.sad_x = 0;
-    sad.sad_y = 0;
-    sad.sad_z = 0;
+    sad.sad_x = 0.0F;
+    sad.sad_y = 0.0F;
+    sad.sad_z = 0.0F;
 
     /* Call data function for each of the generated readings. */
     for (i = 0; i < num_samples; i++) {
@@ -285,7 +271,7 @@ lsm303dlhc_sensor_get_config(struct sensor *sensor, sensor_type_t type,
         goto err;
     }
 
-    cfg->sc_valtype = SENSOR_VALUE_TYPE_MS2_TRIPLET;
+    cfg->sc_valtype = SENSOR_VALUE_TYPE_FLOAT_TRIPLET;
 
     return (0);
 err:
