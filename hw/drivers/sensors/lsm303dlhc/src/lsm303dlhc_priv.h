@@ -20,8 +20,8 @@
 #ifndef __LSM303DLHC_PRIV_H__
 #define __LSM303DLHC_PRIV_H__
 
-#define LSM303DLHC_ADDR_ACCEL                     (0x32 >> 1) /* 0011001x */
-#define LSM303DLHC_ADDR_MAG                       (0x3C >> 1) /* 0011110x */
+#define LSM303DLHC_ADDR_ACCEL                     (0x19) /* 0011001 */
+#define LSM303DLHC_ADDR_MAG                       (0x1E) /* 0011110 */
 
 #ifdef __cplusplus
 extern "C" {
