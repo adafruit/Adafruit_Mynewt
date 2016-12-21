@@ -167,9 +167,9 @@ lsm303dlhc_drvr_init(struct os_dev *dev, void *arg)
     }
 
     cfg.nr_samples = 1;
-    cfg.accel_range = LSM303DLHC_ACCEL_RANGE_4;
-    cfg.accel_rate = LSM303DLHC_ACCEL_RATE_100;
-    cfg.sample_itvl = OS_TICKS_PER_SEC / 100;
+    cfg.accel_range = LSM303DLHC_ACCEL_RANGE_2;
+    cfg.accel_rate = LSM303DLHC_ACCEL_RATE_400;
+    cfg.sample_itvl = OS_TICKS_PER_SEC / 200;
 
     rc = lsm303dlhc_config((struct lsm303dlhc *) dev, &cfg);
     if (rc != 0) {
