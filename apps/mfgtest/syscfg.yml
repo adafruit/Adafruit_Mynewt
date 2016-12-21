@@ -32,3 +32,4 @@ syscfg.vals:
     # LSM303DLHC accel/mag driver
     LSM303DLHC_I2CBUS: 0
     LSM303DLHC_LOG: 1
+    LSM303DLHC_STATS: 1
