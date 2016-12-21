@@ -41,19 +41,19 @@
 #if MYNEWT_VAL(LSM303DLHC_STATS)
 /* Define the stats section and records */
 STATS_SECT_START(lsm303dlhc_stat_section)
-    STATS_SECT_ENTRY(samples_2g)
-    STATS_SECT_ENTRY(samples_4g)
-    STATS_SECT_ENTRY(samples_8g)
-    STATS_SECT_ENTRY(samples_16g)
+    STATS_SECT_ENTRY(samples_acc_2g)
+    STATS_SECT_ENTRY(samples_acc_4g)
+    STATS_SECT_ENTRY(samples_acc_8g)
+    STATS_SECT_ENTRY(samples_acc_16g)
     STATS_SECT_ENTRY(errors)
 STATS_SECT_END
 
 /* Define stat names for querying */
 STATS_NAME_START(lsm303dlhc_stat_section)
-    STATS_NAME(lsm303dlhc_stat_section, samples_2g)
-    STATS_NAME(lsm303dlhc_stat_section, samples_4g)
-    STATS_NAME(lsm303dlhc_stat_section, samples_8g)
-    STATS_NAME(lsm303dlhc_stat_section, samples_16g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_acc_2g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_acc_4g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_acc_8g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_acc_16g)
     STATS_NAME(lsm303dlhc_stat_section, errors)
 STATS_NAME_END(lsm303dlhc_stat_section)
 
@@ -111,9 +111,9 @@ lsm303dlhc_write8(uint8_t addr, uint8_t reg, uint32_t value)
     if (rc) {
         LSM303DLHC_ERR("Failed to write @0x%02X with value 0x%02X\n",
                        reg, value);
-#if MYNEWT_VAL(LSM303DLHC_STATS)
+        #if MYNEWT_VAL(LSM303DLHC_STATS)
         STATS_INC(g_lsm303dlhcstats, errors);
-#endif
+        #endif
     }
 
     return rc;
@@ -146,9 +146,9 @@ lsm303dlhc_read8(uint8_t addr, uint8_t reg, uint8_t *value)
                               OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         LSM303DLHC_ERR("Failed to address sensor\n");
-#if MYNEWT_VAL(LSM303DLHC_STATS)
+        #if MYNEWT_VAL(LSM303DLHC_STATS)
         STATS_INC(g_lsm303dlhcstats, errors);
-#endif
+        #endif
         goto error;
     }
 
@@ -159,9 +159,9 @@ lsm303dlhc_read8(uint8_t addr, uint8_t reg, uint8_t *value)
     *value = payload;
     if (rc) {
         LSM303DLHC_ERR("Failed to read @0x%02X\n", reg);
-#if MYNEWT_VAL(LSM303DLHC_STATS)
+        #if MYNEWT_VAL(LSM303DLHC_STATS)
         STATS_INC(g_lsm303dlhcstats, errors);
-#endif
+        #endif
     }
 
 error:
@@ -185,9 +185,9 @@ lsm303dlhc_read48(uint8_t addr, uint8_t reg, int16_t *x, int16_t*y, int16_t *z)
                               OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         LSM303DLHC_ERR("Failed to address sensor\n");
-#if MYNEWT_VAL(LSM303DLHC_STATS)
+        #if MYNEWT_VAL(LSM303DLHC_STATS)
         STATS_INC(g_lsm303dlhcstats, errors);
-#endif
+        #endif
         goto error;
     }
 
@@ -204,9 +204,9 @@ lsm303dlhc_read48(uint8_t addr, uint8_t reg, int16_t *x, int16_t*y, int16_t *z)
 
     if (rc) {
         LSM303DLHC_ERR("Failed to read @0x%02X\n", reg);
-#if MYNEWT_VAL(LSM303DLHC_STATS)
+        #if MYNEWT_VAL(LSM303DLHC_STATS)
         STATS_INC(g_lsm303dlhcstats, errors);
-#endif
+        #endif
         goto error;
     }
 
@@ -234,13 +234,13 @@ lsm303dlhc_init(struct os_dev *dev, void *arg)
 
     lsm = (struct lsm303dlhc *) dev;
 
-#if MYNEWT_VAL(LSM303DLHC_LOG)
+    #if MYNEWT_VAL(LSM303DLHC_LOG)
     log_register("lsm303dlhc", &_log, &log_console_handler, NULL, LOG_SYSLEVEL);
-#endif
+    #endif
 
     sensor = &lsm->sensor;
 
-#if MYNEWT_VAL(LSM303DLHC_STATS)
+    #if MYNEWT_VAL(LSM303DLHC_STATS)
     /* Initialise the stats entry */
     rc = stats_init(
         STATS_HDR(g_lsm303dlhcstats),
@@ -250,7 +250,7 @@ lsm303dlhc_init(struct os_dev *dev, void *arg)
     /* Register the entry with the stats registry */
     rc = stats_register("lsm303dlhc", STATS_HDR(g_lsm303dlhcstats));
     SYSINIT_PANIC_ASSERT(rc == 0);
-#endif
+    #endif
 
     rc = sensor_init(sensor, dev);
     if (rc != 0) {
@@ -313,9 +313,6 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
 {
     struct lsm303dlhc *lsm;
     struct sensor_accel_data sad;
-    os_time_t now;
-    uint32_t num_samples;
-    int i;
     int rc;
     int16_t x, y, z;
     float mg_lsb;
@@ -328,45 +325,35 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
 
     lsm = (struct lsm303dlhc *) SENSOR_GET_DEVICE(sensor);
 
-    /* When a sensor is "read", we get the last 'n' samples from the device
-     * and pass them to the sensor data function.  Based on the sample
-     * interval provided to lsm303dlhc_config() and the last time this function
-     * was called, 'n' samples are generated.
-     */
-    now = os_time_get();
-
-    num_samples = (now - lsm->last_read_time) / lsm->cfg.sample_itvl;
-    num_samples = min(num_samples, lsm->cfg.nr_samples);
-
-     x = y = z = 0;
-     lsm303dlhc_read48(LSM303DLHC_ADDR_ACCEL,
-                       LSM303DLHC_REGISTER_ACCEL_OUT_X_L_A,
-                       &x, &y, &z);
+    x = y = z = 0;
+    lsm303dlhc_read48(LSM303DLHC_ADDR_ACCEL,
+                      LSM303DLHC_REGISTER_ACCEL_OUT_X_L_A,
+                      &x, &y, &z);
 
     /* Determine mg per lsb based on range */
     switch(lsm->cfg.accel_range) {
         case LSM303DLHC_ACCEL_RANGE_4:
-#if MYNEWT_VAL(LSM303DLHC_STATS)
-            STATS_INC(g_lsm303dlhcstats, samples_4g);
-#endif
+            #if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_acc_4g);
+            #endif
             mg_lsb = 0.002F;
             break;
         case LSM303DLHC_ACCEL_RANGE_8:
-#if MYNEWT_VAL(LSM303DLHC_STATS)
-            STATS_INC(g_lsm303dlhcstats, samples_8g);
-#endif
+            #if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_acc_8g);
+            #endif
             mg_lsb = 0.004F;
             break;
         case LSM303DLHC_ACCEL_RANGE_16:
-#if MYNEWT_VAL(LSM303DLHC_STATS)
-            STATS_INC(g_lsm303dlhcstats, samples_16g);
-#endif
+            #if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_acc_16g);
+            #endif
             mg_lsb = 0.012F;
             break;
         case LSM303DLHC_ACCEL_RANGE_2:
-#if MYNEWT_VAL(LSM303DLHC_STATS)
-            STATS_INC(g_lsm303dlhcstats, samples_2g);
-#endif
+            #if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_acc_2g);
+            #endif
             mg_lsb = 0.001F;
             break;
         default:
@@ -381,12 +368,10 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
     sad.sad_y = (float)y * mg_lsb * 9.80665F;
     sad.sad_z = (float)z * mg_lsb * 9.80665F;
 
-    /* Call data function for each of the generated readings. */
-    for (i = 0; i < num_samples; i++) {
-        rc = data_func(sensor, data_arg, &sad);
-        if (rc != 0) {
-            goto err;
-        }
+    /* Call data function */
+    rc = data_func(sensor, data_arg, &sad);
+    if (rc != 0) {
+        goto err;
     }
 
     return (0);
