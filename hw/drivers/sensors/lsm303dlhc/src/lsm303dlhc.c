@@ -264,6 +264,7 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
     int i;
     int rc;
     int16_t x, y, z;
+    float mg_lsb;
 
     /* If the read isn't looking for accel data, then don't do anything. */
     if (!(type & SENSOR_TYPE_ACCELEROMETER)) {
@@ -283,18 +284,36 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
     num_samples = (now - lsm->last_read_time) / lsm->cfg.sample_itvl;
     num_samples = min(num_samples, lsm->cfg.nr_samples);
 
-    /* By default only readings are provided for 1-axis (x), however,
-     * if number of axises is configured, up to 3-axises of data can be
-     * returned.
-     */
      x = y = z = 0;
      lsm303dlhc_read48(LSM303DLHC_ADDR_ACCEL,
                        LSM303DLHC_REGISTER_ACCEL_OUT_X_L_A,
                        &x, &y, &z);
-    /* XXX: Take into account range, currently set to 4G (0.002LSB/mg) */
-    sad.sad_x = (float)x * 0.002F * 9.80665F;
-    sad.sad_y = (float)y * 0.002F * 9.80665F;
-    sad.sad_z = (float)z * 0.002F * 9.80665F;
+
+    /* Determine mg per lsb based on range */
+    switch(lsm->cfg.accel_range) {
+        case LSM303DLHC_ACCEL_RANGE_4:
+            mg_lsb = 0.002F;
+            break;
+        case LSM303DLHC_ACCEL_RANGE_8:
+            mg_lsb = 0.004F;
+            break;
+        case LSM303DLHC_ACCEL_RANGE_16:
+            mg_lsb = 0.012F;
+            break;
+        case LSM303DLHC_ACCEL_RANGE_2:
+            mg_lsb = 0.001F;
+            break;
+        default:
+            LSM303DLHC_ERR("Unknown accel range: 0x%02X. Assuming +/-2G.\n",
+                lsm->cfg.accel_range);
+            mg_lsb = 0.001F;
+            break;
+    }
+
+    /* Convert from mg to Earth gravity in m/s^2 */
+    sad.sad_x = (float)x * mg_lsb * 9.80665F;
+    sad.sad_y = (float)y * mg_lsb * 9.80665F;
+    sad.sad_z = (float)z * mg_lsb * 9.80665F;
 
     /* Call data function for each of the generated readings. */
     for (i = 0; i < num_samples; i++) {
