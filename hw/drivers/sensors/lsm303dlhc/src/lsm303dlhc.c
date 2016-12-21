@@ -34,6 +34,33 @@
 #include "log/log.h"
 #endif
 
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+#include "stats/stats.h"
+#endif
+
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+/* Define the stats section and records */
+STATS_SECT_START(lsm303dlhc_stat_section)
+    STATS_SECT_ENTRY(samples_2g)
+    STATS_SECT_ENTRY(samples_4g)
+    STATS_SECT_ENTRY(samples_8g)
+    STATS_SECT_ENTRY(samples_16g)
+    STATS_SECT_ENTRY(errors)
+STATS_SECT_END
+
+/* Define stat names for querying */
+STATS_NAME_START(lsm303dlhc_stat_section)
+    STATS_NAME(lsm303dlhc_stat_section, samples_2g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_4g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_8g)
+    STATS_NAME(lsm303dlhc_stat_section, samples_16g)
+    STATS_NAME(lsm303dlhc_stat_section, errors)
+STATS_NAME_END(lsm303dlhc_stat_section)
+
+/* Global variable used to hold stats data */
+STATS_SECT_DECL(lsm303dlhc_stat_section) g_lsm303dlhcstats;
+#endif
+
 #if MYNEWT_VAL(LSM303DLHC_LOG)
 #define LOG_MODULE_LSM303DLHC (303)
 #define LSM303DLHC_INFO(...)  LOG_INFO(&_log, LOG_MODULE_LSM303DLHC, __VA_ARGS__)
@@ -84,6 +111,9 @@ lsm303dlhc_write8(uint8_t addr, uint8_t reg, uint32_t value)
     if (rc) {
         LSM303DLHC_ERR("Failed to write @0x%02X with value 0x%02X\n",
                        reg, value);
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+        STATS_INC(g_lsm303dlhcstats, errors);
+#endif
     }
 
     return rc;
@@ -116,6 +146,9 @@ lsm303dlhc_read8(uint8_t addr, uint8_t reg, uint8_t *value)
                               OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         LSM303DLHC_ERR("Failed to address sensor\n");
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+        STATS_INC(g_lsm303dlhcstats, errors);
+#endif
         goto error;
     }
 
@@ -126,6 +159,9 @@ lsm303dlhc_read8(uint8_t addr, uint8_t reg, uint8_t *value)
     *value = payload;
     if (rc) {
         LSM303DLHC_ERR("Failed to read @0x%02X\n", reg);
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+        STATS_INC(g_lsm303dlhcstats, errors);
+#endif
     }
 
 error:
@@ -149,6 +185,9 @@ lsm303dlhc_read48(uint8_t addr, uint8_t reg, int16_t *x, int16_t*y, int16_t *z)
                               OS_TICKS_PER_SEC / 10, 1);
     if (rc) {
         LSM303DLHC_ERR("Failed to address sensor\n");
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+        STATS_INC(g_lsm303dlhcstats, errors);
+#endif
         goto error;
     }
 
@@ -165,6 +204,9 @@ lsm303dlhc_read48(uint8_t addr, uint8_t reg, int16_t *x, int16_t*y, int16_t *z)
 
     if (rc) {
         LSM303DLHC_ERR("Failed to read @0x%02X\n", reg);
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+        STATS_INC(g_lsm303dlhcstats, errors);
+#endif
         goto error;
     }
 
@@ -197,6 +239,18 @@ lsm303dlhc_init(struct os_dev *dev, void *arg)
 #endif
 
     sensor = &lsm->sensor;
+
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+    /* Initialise the stats entry */
+    rc = stats_init(
+        STATS_HDR(g_lsm303dlhcstats),
+        STATS_SIZE_INIT_PARMS(g_lsm303dlhcstats, STATS_SIZE_32),
+        STATS_NAME_INIT_PARMS(lsm303dlhc_stat_section));
+    SYSINIT_PANIC_ASSERT(rc == 0);
+    /* Register the entry with the stats registry */
+    rc = stats_register("lsm303dlhc", STATS_HDR(g_lsm303dlhcstats));
+    SYSINIT_PANIC_ASSERT(rc == 0);
+#endif
 
     rc = sensor_init(sensor, dev);
     if (rc != 0) {
@@ -292,15 +346,27 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
     /* Determine mg per lsb based on range */
     switch(lsm->cfg.accel_range) {
         case LSM303DLHC_ACCEL_RANGE_4:
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_4g);
+#endif
             mg_lsb = 0.002F;
             break;
         case LSM303DLHC_ACCEL_RANGE_8:
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_8g);
+#endif
             mg_lsb = 0.004F;
             break;
         case LSM303DLHC_ACCEL_RANGE_16:
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_16g);
+#endif
             mg_lsb = 0.012F;
             break;
         case LSM303DLHC_ACCEL_RANGE_2:
+#if MYNEWT_VAL(LSM303DLHC_STATS)
+            STATS_INC(g_lsm303dlhcstats, samples_2g);
+#endif
             mg_lsb = 0.001F;
             break;
         default:

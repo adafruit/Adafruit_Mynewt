@@ -27,3 +27,6 @@ syscfg.defs:
     LSM303DLHC_LOG:
         description: 'Enable LSM303DLHC logging'
         value: 0
+    LSM303DLHC_STATS:
+        description: 'Enable LSM303DLHC statistics'
+        value: 0
