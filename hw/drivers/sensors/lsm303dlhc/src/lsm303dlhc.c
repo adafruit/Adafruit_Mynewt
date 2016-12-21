@@ -132,6 +132,49 @@ error:
     return rc;
 }
 
+int
+lsm303dlhc_read48(uint8_t addr, uint8_t reg, int16_t *x, int16_t*y, int16_t *z)
+{
+    int rc;
+    uint8_t payload[7] = { reg | 0x80, 0, 0, 0, 0, 0, 0 };
+
+    struct hal_i2c_master_data data_struct = {
+        .address = addr,
+        .len = 1,
+        .buffer = payload
+    };
+
+    /* Register write */
+    rc = hal_i2c_master_write(MYNEWT_VAL(LSM303DLHC_I2CBUS), &data_struct,
+                              OS_TICKS_PER_SEC / 10, 1);
+    if (rc) {
+        LSM303DLHC_ERR("Failed to address sensor\n");
+        goto error;
+    }
+
+    /* Read six bytes back */
+    memset(payload, 0, sizeof(payload));
+    data_struct.len = 6;
+    rc = hal_i2c_master_read(MYNEWT_VAL(LSM303DLHC_I2CBUS), &data_struct,
+                             OS_TICKS_PER_SEC / 10, 1);
+
+    /* Shift 12-bit left-aligned accel values into 16-bit int */
+    *x = ((int16_t)(payload[0] | (payload[1] << 8))) >> 4;
+    *y = ((int16_t)(payload[2] | (payload[3] << 8))) >> 4;
+    *z = ((int16_t)(payload[4] | (payload[5] << 8))) >> 4;
+
+    if (rc) {
+        LSM303DLHC_ERR("Failed to read @0x%02X\n", reg);
+        goto error;
+    }
+
+    /* ToDo: Log raw reads */
+    // console_printf("0x%04X\n", (uint16_t)payload[0] | ((uint16_t)payload[1] << 8));
+
+error:
+    return rc;
+}
+
 /**
  * Expects to be called back through os_dev_create().
  *
@@ -184,18 +227,18 @@ lsm303dlhc_config(struct lsm303dlhc *lsm, struct lsm303dlhc_cfg *cfg)
     /* Overwrite the configuration associated with this generic accelleromter. */
     memcpy(&lsm->cfg, cfg, sizeof(*cfg));
 
-    /* Set scale */
-    rc = lsm303dlhc_write8(LSM303DLHC_ADDR_ACCEL,
-        LSM303DLHC_REGISTER_ACCEL_CTRL_REG4_A,
-        lsm->cfg.accel_range);
-    if (rc != 0) {
-        goto err;
-    }
-
     /* Set data rate (or power down) and enable XYZ output */
     rc = lsm303dlhc_write8(LSM303DLHC_ADDR_ACCEL,
         LSM303DLHC_REGISTER_ACCEL_CTRL_REG1_A,
         lsm->cfg.accel_rate | 0x07);
+    if (rc != 0) {
+        goto err;
+    }
+
+    /* Set scale */
+    rc = lsm303dlhc_write8(LSM303DLHC_ADDR_ACCEL,
+        LSM303DLHC_REGISTER_ACCEL_CTRL_REG4_A,
+        lsm->cfg.accel_range);
     if (rc != 0) {
         goto err;
     }
@@ -220,6 +263,7 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
     uint32_t num_samples;
     int i;
     int rc;
+    int16_t x, y, z;
 
     /* If the read isn't looking for accel data, then don't do anything. */
     if (!(type & SENSOR_TYPE_ACCELEROMETER)) {
@@ -243,9 +287,14 @@ lsm303dlhc_sensor_read(struct sensor *sensor, sensor_type_t type,
      * if number of axises is configured, up to 3-axises of data can be
      * returned.
      */
-    sad.sad_x = 0.0F;
-    sad.sad_y = 0.0F;
-    sad.sad_z = 0.0F;
+     x = y = z = 0;
+     lsm303dlhc_read48(LSM303DLHC_ADDR_ACCEL,
+                       LSM303DLHC_REGISTER_ACCEL_OUT_X_L_A,
+                       &x, &y, &z);
+    /* XXX: Take into account range, currently set to 4G (0.002LSB/mg) */
+    sad.sad_x = (float)x * 0.002F * 9.80665F;
+    sad.sad_y = (float)y * 0.002F * 9.80665F;
+    sad.sad_z = (float)z * 0.002F * 9.80665F;
 
     /* Call data function for each of the generated readings. */
     for (i = 0; i < num_samples; i++) {
