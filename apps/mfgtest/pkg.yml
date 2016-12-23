@@ -38,4 +38,4 @@ pkg.deps:
     - "@apache-mynewt-core/mgmt/newtmgr"
     - "@apache-mynewt-core/mgmt/newtmgr/transport/nmgr_shell"
     - "@apache-mynewt-core/hw/sensor"
-    - "hw/drivers/sensors/lsm303dlhc"
+    - "@apache-mynewt-core/hw/drivers/sensors/lsm303dlhc"
