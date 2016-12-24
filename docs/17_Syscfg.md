@@ -9,7 +9,7 @@ You can set syscfg values from the command line with the following command:
 
 ```
 # Increase mbuf count to 16 for the specified target
-$ newt target syscfg set <target-name> syscfg=MSYS_1_BLOCK_COUNT=16
+$ newt target set <target-name> syscfg=MSYS_1_BLOCK_COUNT=16
 ```
 
 ## See all current syscfg settings for target
