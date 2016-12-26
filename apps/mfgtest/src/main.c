@@ -85,7 +85,7 @@ shell_i2cscan_cmd(int argc, char **argv)
 
     console_printf("Scanning I2C bus 0\n"
                    "     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n"
-                   "00:          ");
+                   "00:                         ");
 
     /* Scan all valid I2C addresses (0x03..0x77) */
     for (addr = 0x08; addr < 0x78; addr++) {
