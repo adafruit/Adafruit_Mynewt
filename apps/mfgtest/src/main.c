@@ -88,7 +88,7 @@ shell_i2cscan_cmd(int argc, char **argv)
                    "00:          ");
 
     /* Scan all valid I2C addresses (0x03..0x77) */
-    for (addr = 0x03; addr < 0x78; addr++) {
+    for (addr = 0x08; addr < 0x78; addr++) {
         int rc = hal_i2c_master_probe(0, addr, timeout);
         /* Print addr header every 16 bytes */
         if (!(addr % 16)) {
