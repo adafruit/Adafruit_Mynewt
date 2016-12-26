@@ -5,6 +5,7 @@ ToDo!
 ## Basic Examples
 
 ### Input (`hal_gpio_read`)
+
 ```
 /* Initialise pin as an input, pullup enabled */
 hal_gpio_init_in(MY_PIN, HAL_GPIO_PULL_UP);
@@ -17,7 +18,13 @@ while(1) {
 
 ### Output
 
-ToDo!
+```
+/* Initialise pin as an output, set HIGH (1) */
+hal_gpio_init_out(MY_PIN, 1);
+
+/* Set the pin LOW (0) */
+hal_gpio_write(MY_PIN, 0);
+```
 
 ### Toggle (`hal_gpio_toggle`)
 
