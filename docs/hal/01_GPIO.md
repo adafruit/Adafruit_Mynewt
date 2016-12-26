@@ -46,8 +46,9 @@ To enable HW interrupts, first declare an interrupt handler ...
 #define IRQ_PIN (20)
 
 static void
-my_irq_handler(void *arg) {
-    /* Do something ... */
+my_irq_handler(void *arg)
+{
+    /* Add item to event queue for processing later, etc. ... */
 
     /* Optionally disable the interrupt (won't affect internal resistor) */
     // hal_gpio_irq_release(IRQ_PIN);
