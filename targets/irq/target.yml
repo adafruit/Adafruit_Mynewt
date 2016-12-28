@@ -1,0 +1,4 @@
+### Target: targets/irq
+target.app: "apps/irq"
+target.bsp: "hw/bsp/feather52"
+target.build_profile: "debug"
