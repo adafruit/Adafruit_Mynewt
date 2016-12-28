@@ -50,7 +50,9 @@ sysevq_handler(void *arg)
 }
 ```
 
-In the `init_tasks` function (or in main if you prefer) add:
+In the `init_tasks` function (or in main if you prefer) add the following code
+(note that `shell_init()` will be called automatically in the background by
+mynewt):
 
 ```
 /**
@@ -79,9 +81,6 @@ init_tasks(void)
 
     /* Set the default eventq for packages that lack a dedicated task. */
     os_eventq_dflt_set(&sys_evq);
-
-    /* Init shell support */
-    shell_init();
 }
 ```
 
