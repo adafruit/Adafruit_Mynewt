@@ -39,6 +39,10 @@ my_task_func(void *arg)
 
 ToDo!
 
+### Mutexes
+
+ToDo!
+
 ### Events
 
 See [03_EventQueues.md](03_EventQueues.md) for details on using events and
