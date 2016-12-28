@@ -29,16 +29,35 @@
 #define EVENT_TASK_PRIO     (1)
 #define EVENT_STACK_SIZE    OS_STACK_ALIGN(128)
 
-struct os_task event_task;
 os_stack_t event_stack[EVENT_STACK_SIZE];
-static struct os_eventq irq_evq;
 
+/* Advance function prototypes */
 static int init_tasks(void);
 static void gpio_task_irq_deferred_handler(struct os_event *);
 
+/* Default event queue */
+static struct os_eventq irq_evq;
+
+/* Callout example */
+static struct os_callout blinky_timer;
+
+/* Event queue example */
+struct os_task event_task;
 static struct os_event gpio_irq_handle_event = {
     .ev_cb = gpio_task_irq_deferred_handler,
 };
+
+static void
+blinky_timer_cb(struct os_event *ev)
+{
+    int32_t timeout = OS_TICKS_PER_SEC;
+
+    /* Toggle the blinky LED */
+    hal_gpio_toggle(LED_BLINK_PIN);
+
+    /* Reset the timeout so that it fires again */
+    os_callout_reset(&blinky_timer, timeout);
+}
 
 /**
  * This function will be called when the gpio_irq_handle_event is pulled
@@ -103,6 +122,10 @@ init_tasks(void)
 
     os_eventq_init(&irq_evq);
     os_eventq_dflt_set(&irq_evq);
+
+    /* Create a callout (timer).  This callout is used to generate blinky */
+    os_callout_init(&blinky_timer, &irq_evq, blinky_timer_cb, NULL);
+    os_callout_reset(&blinky_timer, OS_TICKS_PER_SEC);
 
     return 0;
 }
