@@ -27,9 +27,13 @@ pkg.keywords:
 pkg.cflags:
     - "-DSTATS_NAME_ENABLE"
 
+pkg.lflags:
+    - "-lm"
+
 pkg.deps:
     - "hw/drivers/sensors/tsl2561"
     - "hw/drivers/displays/ili9341"
+    - "libs/orientation"
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/hw/hal"
     - "@apache-mynewt-core/sys/sysinit"
