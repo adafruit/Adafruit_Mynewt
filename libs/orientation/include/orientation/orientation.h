@@ -37,6 +37,10 @@
 #ifndef __ORIENTATION_H__
 #define __ORIENTATION_H__
 
+#include "sensor/sensor.h"
+#include "sensor/accel.h"
+#include "sensor/mag.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif

@@ -34,9 +34,6 @@
 */
 /*****************************************************************************/
 #include <math.h>
-#include "sensor/sensor.h"
-#include "sensor/accel.h"
-#include "sensor/mag.h"
 #include "orientation/orientation.h"
 
 /**
