@@ -21,13 +21,16 @@
 #include "hal/hal_gpio.h"
 #include <assert.h>
 #include <string.h>
+#include "sysinit/sysinit.h"
+#include "console/console.h"
+#include "shell/shell.h"
 #ifdef ARCH_sim
 #include <mcu/mcu_sim.h>
 #endif
 
 #define IRQ_PIN             (20)
-#define EVENT_TASK_PRIO     (1)
-#define EVENT_STACK_SIZE    OS_STACK_ALIGN(128)
+#define EVENT_TASK_PRIO     (10)
+#define EVENT_STACK_SIZE    OS_STACK_ALIGN(256)
 
 os_stack_t event_stack[EVENT_STACK_SIZE];
 
@@ -148,9 +151,10 @@ main(int argc, char **argv)
     mcu_sim_parse_args(argc, argv);
 #endif
 
-    os_init();
+    sysinit();
 
     rc = init_tasks();
+
     os_start();
 
     /* os start should never return. If it does, this should be an error */
