@@ -17,18 +17,16 @@ externally defined event queues to send or receive events.
 
 ### Input Events
 
-If a dedicated event queue is used, describe it here along with any optional
-`arg` parameters used by it.
+If the task uses an event queue for incoming events, describe it here.
 
 #### g_internal_event_queue_name
 
-##### Event Signature
-```
-enum mytask_event_code {
-    MYTASK_EVENT1 = 0,
-    MYTASK_EVENT2,
-};
+##### Input Event Arg
 
+If the event queue is defined here and accepts a standard `arg` parameter
+describe it here:
+
+```
 struct mytask_event_arg {
     enum mytask_event_code code;
     union {
@@ -39,12 +37,19 @@ struct mytask_event_arg {
 };
 ```
 
-##### Possible Events
+##### Input Event List
 
 List all events that can be used as inputs by the task handler.
 
-- `TASK_RSSI_CHANGED_EVT`: Description of the input event.
-- `TASK_CONN_STAT_CHANGED_EVT`: Description of the input event.
+```
+enum mytask_event_code {
+    MYTASK_EVENT1 = 0,
+    MYTASK_EVENT2,
+};
+```
+
+- `MYTASK_EVENT1`: Description of the event.
+- `MYTASK_EVENT2`: Description of the event.
 
 ### Output Events
 
