@@ -10,6 +10,16 @@ Short description of the task.
 
 Longer overview of exactly what this task does, a summary of code flow, etc.
 
+## Dependencies
+
+### Related Tasks
+
+List of related tasks handlers.
+
+### Related Packages
+
+List of packages used by this task.
+
 ## Events
 
 ### Input Event Queues
@@ -66,16 +76,6 @@ passed in when calling it:
 ## Semaphores and Mutexes
 
 Any semaphores or mutexes used by this task.
-
-## Dependencies
-
-### Related Tasks
-
-List of related tasks.
-
-### Related Packages
-
-List of related packages used by this task.
 
 ## Notes
 
