@@ -24,12 +24,13 @@ List of packages used by this task.
 
 ### Input Event Queues
 
-The following event queues are executed as inputs in this task's context:
+The following event queues are executed in this task's context, and can be used
+to pass events into the task handler:
 
 #### g_internal_event_queue_name
 
 Short description of what this event queue is used for, followed by a list of
-all implemented callback event handlers.
+all implemented event handler callbacks.
 
 ##### int_event_callback_handler
 
