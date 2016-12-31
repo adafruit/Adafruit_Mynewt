@@ -70,9 +70,14 @@ place, such as the RSSI level changing, the battery level being updated, etc.
 struct display_status_update_event_arg {
     enum display_status_update_ev_code code;
     union {
-        int i;
+        int32_t i;
+        int16_t i1;
+        int16_t i2;
+        uint32_t u;
+        uint16_t u1;
+        uint16_t u2;
         float f;
-        uint8_t[4] a;
+        uint8_t a[4];
     };
 };
 ```
@@ -93,20 +98,23 @@ The `code` values accepted by this event handler have the following meaning:
 
 - `DISPLAY_STATUS_UPDATE_RSSI`: Indicates an update to the RSSI level between
   this device and the device on the other end of the connection. This event
-  uses the **int** value (`i`) to receive the integer RSSI level.
+  uses the `u1` and `i2` values to receive the integer RSSI level, where `u1`
+  indicates the connection number, and `i2` contains the RSSI level.
 - `DISPLAY_STATUS_UPDATE_BATTERY_LEVEL`: Indicates that the battery level has
-  changed. This events uses the **int** value (`i`) to receive the battery
-  level in millivolts.
+  changed. This events uses the `u` value to receive the battery level in
+  millivolts.
 - `DISPLAY_STATUS_UPDATE_CONNECTED`: Indicates that the connection state of
-  the device has changed. This event uses the **int** value (`i`) to receive
-  the current connection state, where 0 meanin no connection and a positive
-  value indicate the number of currently connected devices.
+  the device has changed. This event uses the `u` value to receive the current
+  connection state, where 0 means no connection and a positive value indicate
+  the number of currently connected devices.
 - `DISPLAY_STATUS_UPDATE_TX`: Indicates that some TX activity has taken place
-  on the device. This even uses the **int** value (`i`) to receive the number
-  of bytes that were transmitted from this device.
+  on the device. This event uses the `u1` and `i2` values to receive the
+  number of bytes transmitted, where `u1` indicates the connection number, and
+  `i2` contains the number of bytes transmitted.
 - `DISPLAY_STATUS_UPDATE_RX`: Indicates that some RX activity has taken place
-  on the device. This even uses the **int** value (`i`) to receive the number
-  of bytes that were transmitted from this device.
+  on the device. This event uses the `u1` and `i2` values to receive the
+  number of bytes received, where `u1` indicates the connection number, and
+  `i2` contains the number of bytes received.
 
 ## Semaphores and Mutexes
 
