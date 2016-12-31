@@ -42,7 +42,7 @@ struct mytask_event_arg {
     union {
         int i;
         float f;
-        uint8_t[4] a;
+        uint8_t a[4];
     };
 };
 ```
