@@ -123,6 +123,14 @@ $ newt build nrf52_boot
 $ newt build blink_nordic
 ```
 
+You can optionally speed the build process up by using multiple threads via
+the `-j` argument, as shown below:
+
+```
+$ newt -j 5 build nrf52_boot
+$ newt -j 5 build blink_nordic
+```
+
 ### Sign the Build
 
 You then need to **sign the build** for any app(s) so that we have some basic
