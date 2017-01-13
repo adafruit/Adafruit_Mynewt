@@ -101,3 +101,27 @@ Disassembly of section .text:
         val3 = val1 / val2;
     9e54:	fb93 f3f2 	sdiv	r3, r3, r2
 ```
+
+### Debugging Repeatable Crashes
+
+If you can repeat the crash scenario, you can find out the cause with the
+following sequence of events and two terminal windows:
+
+Run GDB with the following command:
+
+```
+$ newt run <target-name> 0
+```
+
+When GDB comes up type `c` and press `enter`.
+
+In a different shell, proceed to do whatever is required to cause the device to
+crash (such as sending a shell command, newtmgr cmd, etc..
+
+If the device crashes, GDB should indicate such. You can then type the
+following commands in GDB to find out where is crashed:
+
+```
+(gdb) bt
+(gdb) p *g_current_task
+```
