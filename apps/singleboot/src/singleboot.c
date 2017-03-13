@@ -105,23 +105,6 @@ main(void)
             start_boot_serial_mode();
         }
     }
-
-#if MYNEWT_VAL(BOOT_DOUBLE_RESET_DFU)
-    /* Double Reset  to DFU
-     * - write dfu reset magic to location
-     * - turn on LED
-     * - delay 500ms, A reset happen within this delay will force to DFU
-     * - Turn of led and clear double reset magic
-     * */
-    BOOTLOADER_MAGIC_LOC = BOOTLOADER_RESET_TO_DFU_MAGIC;
-    LED_BLINK_ON();
-
-    os_cputime_delay_usecs(500000);
-
-    LED_BLINK_OFF();
-    BOOTLOADER_MAGIC_LOC = 0;
-#endif
-
 #endif
 
     /* single boot just boot from the first image slot */
