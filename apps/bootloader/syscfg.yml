@@ -24,7 +24,10 @@ syscfg.defs:
         value: 1
     BOOT_SERIAL:
         description: 'Support image upgrade over serial within bootloader'
-        value: 1    
+        value: 1 
+    BOOT_RESET_TO_DFU_MAGIC:
+        description: 'Value written to GPREGRET register to request to enter Boot Serial (DFU) Mode'
+        value: 0xDF
 
 syscfg.vals:
     SYSINIT_CONSTRAIN_INIT: 0

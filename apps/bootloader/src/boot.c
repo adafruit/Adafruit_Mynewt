@@ -37,8 +37,13 @@
 #define BOOT_AREA_DESC_MAX  (256)
 #define AREA_DESC_MAX       (BOOT_AREA_DESC_MAX)
 
-int
-main(void)
+void start_boot_serial_mode(void)
+{
+  const int BOOT_SERIAL_INPUT_MAX = 128;
+  boot_serial_start(BOOT_SERIAL_INPUT_MAX);
+}
+
+int main(void)
 {
     struct boot_rsp rsp;
     int rc;
@@ -46,13 +51,12 @@ main(void)
     hal_bsp_init();
     sysinit();
 
-#if 0
     /* Check if Magic number is REST_TO_DFU */
-    if (BOOTLOADER_MAGIC_LOC ==  BOOTLOADER_RESET_TO_DFU_MAGIC)
+    if (NRF_POWER->GPREGRET == MYNEWT_VAL(BOOT_RESET_TO_DFU_MAGIC))
     {
-        start_boot_serial_mode();
+      NRF_POWER->GPREGRET = 0;
+      start_boot_serial_mode();
     }
-#endif
 
     /* Go on with normal boot progress */
     rc = boot_go(&rsp);
@@ -61,9 +65,7 @@ main(void)
      * Does not work due to assert() somewhere in boot_go() */
     if ( rc )
     {
-        const int BOOT_SERIAL_INPUT_MAX = 128;
-        boot_serial_start(BOOT_SERIAL_INPUT_MAX);
-        assert(0);
+      start_boot_serial_mode();
     }
 
     assert(rc == 0);
