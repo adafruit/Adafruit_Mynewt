@@ -54,7 +54,6 @@ void adalog_init(void)
 {
   if (_initalized) return;
 
-  log_init();
   log_register("adalog", &adalog, &log_console_handler, NULL, LOG_SYSLEVEL);
 
   _initalized = true;
