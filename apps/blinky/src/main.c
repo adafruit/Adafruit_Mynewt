@@ -16,55 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 #include "os/os.h"
 #include "bsp/bsp.h"
 #include "hal/hal_gpio.h"
 #include <assert.h>
 #include <string.h>
-#ifdef ARCH_sim
-#include <mcu/mcu_sim.h>
-#endif
-
-/* Init all tasks */
-int init_tasks(void);
-
-/* Task 1 */
-#define BLINKY_TASK_PRIO     (1)
-#define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
-
-struct os_task blinky_task;
-os_stack_t blinky_stack[BLINKY_STACK_SIZE];
-
-void
-blinky_task_handler(void *arg)
-{
-    hal_gpio_init_out(LED_BLINK_PIN, 1);
-
-    while (1) {
-        /* Wait one second */
-        os_time_delay(OS_TICKS_PER_SEC * 1);
-
-        /* Toggle the LED */
-        hal_gpio_toggle(LED_BLINK_PIN);
-    }
-}
-
-/**
- * init_tasks
- *
- * Called by main.c after os_init(). This function performs initializations
- * that are required before tasks are running.
- *
- * @return int 0 success; error otherwise.
- */
-int
-init_tasks(void)
-{
-    os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
-            BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
-
-    return 0;
-}
+#include "sysinit/sysinit.h"
 
 /**
  * main
@@ -80,17 +38,17 @@ main(int argc, char **argv)
 {
     int rc;
 
-#ifdef ARCH_sim
-    mcu_sim_parse_args(argc, argv);
-#endif
+    sysinit();
 
-    os_init();
+    hal_gpio_init_out(LED_BLINK_PIN, 1);
 
-    rc = init_tasks();
-    os_start();
+    while (1) {
+        /* Wait one second */
+        os_time_delay(OS_TICKS_PER_SEC / 2 );
 
-    /* os start should never return. If it does, this should be an error */
-    assert(0);
+        /* Toggle the LED */
+        hal_gpio_toggle(LED_BLINK_PIN);
+    }
 
     return rc;
 }
