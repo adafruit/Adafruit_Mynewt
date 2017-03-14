@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -6,7 +5,7 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #  http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing,
@@ -17,16 +16,17 @@
 # under the License.
 #
 
-pkg.name: apps/singleboot
-pkg.type: app
-pkg.description: Boot loader application.
-pkg.author: "Apache Mynewt <dev@mynewt.incubator.apache.org>"
-pkg.homepage: "http://mynewt.apache.org/"
-pkg.keywords:
-    - loader
+# Package: apps/boot
 
-pkg.deps:
-    - "@apache-mynewt-core/boot/bootutil"
-    - "@apache-mynewt-core/kernel/os"
-    - "@apache-mynewt-core/sys/console/full"
-    - "@apache-mynewt-core/boot/boot_serial"
+syscfg.defs:
+    BOOT_LOADER:
+        description: 'Set to indicate that this app is a bootloader.'
+        value: 1
+    BOOT_SERIAL:
+        description: 'Support image upgrade over serial within bootloader'
+        value: 1    
+
+syscfg.vals:
+    SYSINIT_CONSTRAIN_INIT: 0
+    OS_SCHEDULING: 0
+    MSYS_1_BLOCK_COUNT: 0
