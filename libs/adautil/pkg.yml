@@ -31,7 +31,7 @@ pkg.keywords:
 pkg.deps:
 
 pkg.deps.ADAUTIL_LOG:
-  - "@apache-mynewt-core/sys/log"
+  - "@apache-mynewt-core/sys/log/full"
 
 pkg.deps.ADAUTIL_CFG:  
   - "@apache-mynewt-core/sys/config"

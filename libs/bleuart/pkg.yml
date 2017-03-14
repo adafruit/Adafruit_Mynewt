@@ -37,4 +37,4 @@ pkg.deps:
 pkg.deps.BLEUART_CLI:  
   - "@apache-mynewt-core/sys/console/full"
   - "@apache-mynewt-core/sys/shell"
-  - "@apache-mynewt-core/sys/stats"
+  - "@apache-mynewt-core/sys/stats/full"

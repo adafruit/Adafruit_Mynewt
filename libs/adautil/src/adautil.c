@@ -42,6 +42,9 @@
 /*------------------------------------------------------------------*/
 /* MACRO TYPEDEF CONSTANT ENUM
  *------------------------------------------------------------------*/
+/* Magic number that bootloader will activate boot_serial when detected
+ * Must match BOOT_RESET_TO_DFU_MAGIC in syscfg.yml of Bootloader */
+#define BOOTLOADER_RESET_TO_DFU_MAGIC   0xDF
 
 /*------------------------------------------------------------------*/
 /* VARIABLE DECLARATION
@@ -50,8 +53,8 @@
 
 static int _adautil_enter_dfu(int argc, char **argv)
 {
-  BOOTLOADER_MAGIC_LOC = BOOTLOADER_RESET_TO_DFU_MAGIC;
-  hal_system_reset();
+  NRF_POWER->GPREGRET = BOOTLOADER_RESET_TO_DFU_MAGIC;
+  NVIC_SystemReset();
 }
 
 static struct shell_cmd _adautil_cmd[] =
