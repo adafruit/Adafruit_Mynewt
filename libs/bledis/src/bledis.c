@@ -112,16 +112,6 @@ static union
     }
 };
 
-const uint8_t _dis_uuid128[][16] =
-{
-    BLE_UUID16_ARR(UUID16_CHR_MODEL_NUMBER_STRING),
-    BLE_UUID16_ARR(UUID16_CHR_SERIAL_NUMBER_STRING),
-    BLE_UUID16_ARR(UUID16_CHR_FIRMWARE_REVISION_STRING),
-    BLE_UUID16_ARR(UUID16_CHR_HARDWARE_REVISION_STRING),
-    BLE_UUID16_ARR(UUID16_CHR_SOFTWARE_REVISION_STRING),
-    BLE_UUID16_ARR(UUID16_CHR_MANUFACTURER_NAME_STRING)
-};
-
 const char * _dis_chr_text[] =
 {
     "Model Number",
@@ -137,8 +127,8 @@ static struct ble_gatt_chr_def _dis_chars[BLEDIS_MAX_CHAR+1];
 static const struct ble_gatt_svc_def _dis_service[] =
 {
   {
-      .type    = BLE_GATT_SVC_TYPE_PRIMARY,
-      .uuid128 = BLE_UUID16(UUID16_SVC_DEVICE_INFORMATION),
+      .type = BLE_GATT_SVC_TYPE_PRIMARY,
+      .uuid = BLE_UUID16_DECLARE(UUID16_SVC_DEVICE_INFORMATION),
       .characteristics = _dis_chars
   }
 
@@ -179,7 +169,7 @@ int bledis_init(void)
     {
       _LOG( ADALOG_INFO("[BLEDIS] %s added\n", _dis_chr_text[i]) );
 
-      _dis_chars[count].uuid128   = _dis_uuid128[i];
+      _dis_chars[count].uuid      = BLE_UUID16_DECLARE(UUID16_CHR_MODEL_NUMBER_STRING+i);
       _dis_chars[count].access_cb = bledis_access_cb;
       _dis_chars[count].flags     = BLE_GATT_CHR_F_READ;
 
@@ -202,7 +192,7 @@ int bledis_access_cb(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt
 {
   if (ctxt->op != BLE_GATT_ACCESS_OP_READ_CHR) return (-1);
 
-  uint16_t uuid16 = ble_uuid_128_to_16(ctxt->chr->uuid128);
+  uint16_t uuid16 = ble_uuid_u16(ctxt->chr->uuid);
   if ( !is_within(UUID16_CHR_MODEL_NUMBER_STRING, uuid16, UUID16_CHR_MANUFACTURER_NAME_STRING) ) return (-1);
 
   const char* str = _dis_cfg.arrptr[uuid16 - UUID16_CHR_MODEL_NUMBER_STRING];

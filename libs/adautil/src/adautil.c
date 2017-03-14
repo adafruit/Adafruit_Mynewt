@@ -55,6 +55,7 @@ static int _adautil_enter_dfu(int argc, char **argv)
 {
   NRF_POWER->GPREGRET = BOOTLOADER_RESET_TO_DFU_MAGIC;
   NVIC_SystemReset();
+  return 0;
 }
 
 static struct shell_cmd _adautil_cmd[] =

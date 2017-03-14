@@ -50,9 +50,9 @@
 #include "adafruit/adautil.h"
 #include "host/ble_hs.h"
 
-extern const uint8_t BLEUART_UUID_SERVICE[16];
-extern const uint8_t BLEUART_UUID_CHR_RXD[16];
-extern const uint8_t BLEUART_UUID_CHR_TXD[16];
+extern const ble_uuid128_t BLEUART_UUID_SERVICE;
+extern const ble_uuid128_t BLEUART_UUID_CHR_RXD;
+extern const ble_uuid128_t BLEUART_UUID_CHR_TXD;
 
 int  bleuart_init(void);
 void bleuart_set_conn_handle(uint16_t conn_handle);

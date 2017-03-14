@@ -48,23 +48,17 @@
  * UART TXD    : 6E400003-B5A3-F393-E0A9-E50E24DCCA9E
  */
 
-const uint8_t BLEUART_UUID_SERVICE[] =
-{
-    0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
-    0x93, 0xF3, 0xA3, 0xB5, 0x01, 0x00, 0x40, 0x6E
-};
+const ble_uuid128_t BLEUART_UUID_SERVICE =
+    BLE_UUID128_INIT ( 0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
+                       0x93, 0xF3, 0xA3, 0xB5, 0x01, 0x00, 0x40, 0x6E );
 
-const uint8_t BLEUART_UUID_CHR_RXD[] =
-{
-    0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
-    0x93, 0xF3, 0xA3, 0xB5, 0x02, 0x00, 0x40, 0x6E
-};
+const ble_uuid128_t BLEUART_UUID_CHR_RXD =
+    BLE_UUID128_INIT( 0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
+                      0x93, 0xF3, 0xA3, 0xB5, 0x02, 0x00, 0x40, 0x6E );
 
-const uint8_t BLEUART_UUID_CHR_TXD[] =
-{
-    0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
-    0x93, 0xF3, 0xA3, 0xB5, 0x03, 0x00, 0x40, 0x6E
-};
+const ble_uuid128_t BLEUART_UUID_CHR_TXD =
+    BLE_UUID128_INIT( 0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
+                      0x93, 0xF3, 0xA3, 0xB5, 0x03, 0x00, 0x40, 0x6E );
 
 #define UUID16_RXD  0x0002
 #define UUID16_TXD  0x0003
@@ -110,17 +104,17 @@ static const struct ble_gatt_svc_def _service_bleuart[] =
 {
   {
       .type            = BLE_GATT_SVC_TYPE_PRIMARY,
-      .uuid128         = BLEUART_UUID_SERVICE,
+      .uuid            = &BLEUART_UUID_SERVICE.u,
       .characteristics = (struct ble_gatt_chr_def[])
       {
         { /*** Characteristic: TXD */
-          .uuid128    = BLEUART_UUID_CHR_TXD,
+          .uuid       = &BLEUART_UUID_CHR_TXD.u,
           .val_handle = &_bleuart.txd_hdl,
           .access_cb  = bleuart_char_access,
           .flags      = BLE_GATT_CHR_F_NOTIFY,
         },
         { /*** Characteristic: RXD. */
-          .uuid128    = BLEUART_UUID_CHR_RXD,
+          .uuid       = &BLEUART_UUID_CHR_RXD.u,
           .access_cb  = bleuart_char_access,
           .flags      = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_WRITE_NO_RSP,
         },
@@ -219,31 +213,15 @@ int bleuart_getc(void)
  */
 int bleuart_char_access(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-  uint16_t uuid16 = uuid_extract_128_to_16(ctxt->chr->uuid128);
   struct os_mbuf *om = ctxt->om;
 
-  switch (uuid16)
-  {
-    case UUID16_RXD:
-      if( ctxt->op != BLE_GATT_ACCESS_OP_WRITE_CHR ) return -1;
+  if( ctxt->op != BLE_GATT_ACCESS_OP_WRITE_CHR ) return -1;
 
-      fifo_write_n(bleuart_ffin, om->om_data, om->om_len);
+  fifo_write_n(bleuart_ffin, om->om_data, om->om_len);
 
-      #if MYNEWT_VAL(BLEUART_STATS)
-      STATS_INCN(g_bleuart_stats, rxd_bytes, om->om_len);
-      #endif
-    break;
-
-    case UUID16_TXD:
-//      assert(ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR);
-//      int len = fifo_read_n(bleuart_ffout, bleuart_xact_buf, sizeof(bleuart_xact_buf));
-//
-//      if (len > 0) ctxt->att.read.data = bleuart_xact_buf;
-//      ctxt->att.read.len  = len;
-    break;
-
-    default: return -1;
-  }
+#if MYNEWT_VAL(BLEUART_STATS)
+  STATS_INCN(g_bleuart_stats, rxd_bytes, om->om_len);
+#endif
 
   return 0;
 }

@@ -79,13 +79,6 @@
 /* TASK Settings
  *------------------------------------------------------------------*/
 
-/* BLE peripheral task settings */
-#define BLE_TASK_PRIO                 1
-#define BLE_STACK_SIZE                (OS_STACK_ALIGN(336))
-struct  os_eventq  btle_evq;
-struct  os_task    btle_task;
-bssnz_t os_stack_t btle_stack[BLE_STACK_SIZE];
-
 /* BLEUART to UART bridge task */
 #define BLEUART_BRIDGE_NAME           "bleuart"
 #define BLEUART_BRIDGE_TASK_PRIO      5
@@ -133,10 +126,7 @@ static void btle_advertise(void)
 {
   struct ble_hs_adv_fields fields =
   {
-      /* Indicate that the flags field should be included; specify a value of 0
-       * to instruct the stack to fill the value in for us. */
-      .flags_is_present      = 1,
-      .flags                 = 0,
+      .flags                 = BLE_HS_ADV_F_DISC_GEN | BLE_HS_ADV_F_BREDR_UNSUP,
 
       /* Indicate that the TX power level field should be included; have the
        * stack fill this one automatically as well.  This is done by assiging the
@@ -144,7 +134,7 @@ static void btle_advertise(void)
       .tx_pwr_lvl_is_present = 1,
       .tx_pwr_lvl            = BLE_HS_ADV_TX_PWR_LVL_AUTO,
 
-      .uuids128              = (void*) BLEUART_UUID_SERVICE,
+      .uuids128              = (ble_uuid128_t*) &BLEUART_UUID_SERVICE,
       .num_uuids128          = 1,
       .uuids128_is_complete  = 0,
   };
@@ -166,7 +156,7 @@ static void btle_advertise(void)
   memset(&adv_params, 0, sizeof adv_params);
   adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
   adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
-  VERIFY_STATUS(ble_gap_adv_start(BLE_ADDR_TYPE_PUBLIC, 0, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL),
+  VERIFY_STATUS(ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, NULL, BLE_HS_FOREVER, &adv_params, btle_gap_event, NULL),
                 RETURN_VOID);
 }
 
@@ -210,17 +200,6 @@ static int btle_gap_event(struct ble_gap_event *event, void *arg)
   }
 
   return 0;
-}
-
-/**
- * Event loop for the main btle task.
- */
-static void btle_task_handler (void *unused)
-{
-  while (1)
-  {
-    os_eventq_run(&btle_evq);
-  }
 }
 
 static void btle_on_sync(void)
@@ -267,8 +246,6 @@ int main(void)
   /* Initialize OS */
   sysinit();
 
-  /* Initialize eventq */
-  os_eventq_init(&btle_evq);
 
   /* Init Config & NFFS */
   adacfg_init("adafruit");
@@ -277,9 +254,6 @@ int main(void)
   //------------- Task Init -------------//
   os_task_init(&bleuart_bridge_task, BLEUART_BRIDGE_NAME, bleuart_bridge_task_handler, NULL,
                BLEUART_BRIDGE_TASK_PRIO, OS_WAIT_FOREVER, bleuart_bridge_stack, BLEUART_BRIDGE_STACK_SIZE);
-
-  os_task_init(&btle_task, "bleprph", btle_task_handler, NULL,
-               BLE_TASK_PRIO, OS_WAIT_FOREVER, btle_stack, BLE_STACK_SIZE);
 
   /* Initialize the BLE host. */
   ble_hs_cfg.sync_cb        = btle_on_sync;
@@ -295,14 +269,10 @@ int main(void)
   /* Set the default device name. */
   VERIFY_STATUS( ble_svc_gap_device_name_set(cfgdata.ble_devname) );
 
-  /* Set the default eventq for packages that lack a dedicated task. */
-  os_eventq_dflt_set(&btle_evq);
-
-  /* Start the OS */
-  os_start();
-
-  /* OS start should never return. If it does, this should be an error */
-  assert(0);
+  while (1) {
+    os_eventq_run(os_eventq_dflt_get());
+  }
+    /* Never exit */
 
   return 0;
 }
