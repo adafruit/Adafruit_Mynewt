@@ -44,7 +44,7 @@ main(int argc, char **argv)
 
     while (1) {
         /* Wait one second */
-        os_time_delay(OS_TICKS_PER_SEC / 2 );
+        os_time_delay(OS_TICKS_PER_SEC);
 
         /* Toggle the LED */
         hal_gpio_toggle(LED_BLINK_PIN);

@@ -1,6 +1,10 @@
 ### Package: targets/bootloader
 pkg.name: "targets/bootloader"
 pkg.type: "target"
-pkg.description: "Bootloader for feather52 board"
+pkg.description: "Bootloader for Adafruit Feather52 Board"
 pkg.author: "Adafruit <support@adafruit.com>"
 pkg.homepage: "http://www.adafruit.com"
+
+pkg.cflags:
+    # Enable P0.21 as Reset Pin. You may want to cut Auto-reset trace
+    #- '-DCONFIG_GPIO_AS_PINRESET'
