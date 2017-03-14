@@ -69,7 +69,7 @@
 #define SOFTWARE_REV  "0.10.0"
 
 /** Default device name */
-#define CFG_GAP_DEVICE_NAME     "Adafruit Bluefruit"
+#define CFG_GAP_DEVICE_NAME     "Bluefruit52"
 
 /*------------------------------------------------------------------*/
 /* Global values
@@ -240,11 +240,11 @@ void bleuart_bridge_task_handler(void* arg)
 
 int main(void)
 {
-  /* Set initial BLE device address. */
-  memcpy(g_dev_addr, (uint8_t[6]){0xAD, 0xAF, 0xAD, 0xAF, 0xAD, 0xAF}, 6);
-
   /* Initialize OS */
   sysinit();
+
+  /* Set initial BLE device address. */
+  memcpy(g_dev_addr, (uint8_t[6]){0xAD, 0xAF, 0xAD, 0xAF, 0xAD, 0xAF}, 6);
 
   /* Init Config & NFFS */
   adacfg_init("adafruit");
