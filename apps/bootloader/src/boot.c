@@ -41,70 +41,21 @@
 #define BOOT_AREA_DESC_MAX  (256)
 #define AREA_DESC_MAX       (BOOT_AREA_DESC_MAX)
 
-#if MYNEWT_VAL(BOOT_SERIAL)
-#define BOOT_SER_CONS_INPUT         128
-#endif
-
-/* Minimal interval in ms that DFU pin must be pressed to go into DFU mode */
-#define BOOTLOADER_BUTTON_HOLDING_INTERVAL 500
-
-#define BLINKY_PERIOD               125000
-
-struct hal_timer _blinky_timer;
-
-void 
-blinky_isr(void *arg)
-{
-  hal_gpio_toggle(LED_BLINK_PIN);
-
-  os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
-}
-
-void
-start_boot_serial_mode(void)
-{
-  /* Set up fast blinky for indicator using hw timer */
-  os_cputime_timer_init(&_blinky_timer, blinky_isr, NULL);
-  os_cputime_timer_relative(&_blinky_timer, BLINKY_PERIOD);
-
-  boot_serial_start(BOOT_SER_CONS_INPUT);
-  assert(0);
-}
-
 int
 main(void)
 {
     struct boot_rsp rsp;
     int rc;
 
-#if MYNEWT_VAL(BOOT_SERIAL)
-    sysinit();
-#else
-    flash_map_init();
     hal_bsp_init();
-#endif
 
-#if MYNEWT_VAL(BOOT_SERIAL)
+    sysinit();
+
+#if 0
     /* Check if Magic number is REST_TO_DFU */
     if (BOOTLOADER_MAGIC_LOC ==  BOOTLOADER_RESET_TO_DFU_MAGIC)
     {
         start_boot_serial_mode();
-    }
-
-    /*
-     * Configure a GPIO as input, and compare it against expected value.
-     * If it matches, await for download commands from serial.
-     */
-    hal_gpio_init_in(BOOT_SERIAL_DETECT_PIN, BOOT_SERIAL_DETECT_PIN_CFG);
-    if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
-
-        /* Double check the pin value after configured interval,
-         * make sure the DFU pin hold long enough */
-         os_cputime_delay_usecs( 1000*BOOTLOADER_BUTTON_HOLDING_INTERVAL );
-
-        if (hal_gpio_read(BOOT_SERIAL_DETECT_PIN) == BOOT_SERIAL_DETECT_PIN_VAL) {
-            start_boot_serial_mode();
-        }
     }
 #endif
 
