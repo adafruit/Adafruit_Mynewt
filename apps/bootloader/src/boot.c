@@ -44,7 +44,6 @@ main(void)
     int rc;
 
     hal_bsp_init();
-
     sysinit();
 
 #if 0
