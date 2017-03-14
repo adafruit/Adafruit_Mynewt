@@ -1,3 +1,0 @@
-target.app: "apps/mfgtest"
-target.bsp: "hw/bsp/spifriend51"
-target.build_profile: "debug"

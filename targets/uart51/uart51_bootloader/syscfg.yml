@@ -1,4 +1,0 @@
-### Package: targets/uart51_bootloader
-
-syscfg.vals:
-    BOOT_SERIAL: 1
