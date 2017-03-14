@@ -145,8 +145,8 @@ static void btle_advertise(void)
   const char *name = ble_svc_gap_device_name();
   struct ble_hs_adv_fields rsp_fields =
   {
-      .name = (uint8_t*) name,
-      .name_len = strlen(name),
+      .name             = (uint8_t*) name,
+      .name_len         = strlen(name),
       .name_is_complete = 1
   };
   ble_gap_adv_rsp_set_fields(&rsp_fields);
@@ -246,7 +246,6 @@ int main(void)
   /* Initialize OS */
   sysinit();
 
-
   /* Init Config & NFFS */
   adacfg_init("adafruit");
   adacfg_add(cfg_info);
@@ -272,7 +271,7 @@ int main(void)
   while (1) {
     os_eventq_run(os_eventq_dflt_get());
   }
-    /* Never exit */
+  /* Never exit */
 
   return 0;
 }
