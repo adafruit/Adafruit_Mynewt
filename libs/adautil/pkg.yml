@@ -38,4 +38,4 @@ pkg.deps.ADAUTIL_CFG:
   - "@apache-mynewt-core/fs/nffs"
 
 pkg.init_function: adautil_init
-pkg.init_stage: 600
+pkg.init_stage: 1000

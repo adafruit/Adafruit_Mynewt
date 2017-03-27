@@ -71,6 +71,8 @@
 /*------------------------------------------------------------------*/
 /* Global values
  *------------------------------------------------------------------*/
+#define LED_RED   LED_BLINK_PIN
+#define LED_BLUE  LED_2
 
 /*------------------------------------------------------------------*/
 /* TASK Settings
@@ -87,29 +89,27 @@ os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
 /*------------------------------------------------------------------*/
 /* ADA Config
  *------------------------------------------------------------------*/
-#if 0
 /* Group config Data to one struct */
 struct
 {
-  char ble_devname[32];
+  char devname[32];
 }cfgdata =
 {
-    .ble_devname = CFG_GAP_DEVICE_NAME
+    .devname = CFG_GAP_DEVICE_NAME
 };
 
 /* Note when saving to flash group name will be added as prefix to each variable name
  * e.g
- * - group = "adafruit", variable is "ble/devname"
- * - "adafruit/ble/devname" will be save to flash
+ * - group = "adafruit", variable is "devname"
+ * - "adafruit/devname" will be save to flash
  */
 const adacfg_info_t cfg_info[] =
 {
     /* Name, Type, Size, Buffer */
-    { "ble/devname", CONF_STRING, 32, cfgdata.ble_devname },
+    { "devname", CONF_STRING, 32, cfgdata.devname },
 
     { 0 } /* Zero for null-terminator */
 };
-#endif
 
 /*------------------------------------------------------------------*/
 /* Functions prototypes
@@ -214,6 +214,8 @@ void bleuart_bridge_task_handler(void* arg)
   // Configure timeout = 1000 ms
   timeout_set(&blinky_tm, 1000);
 
+  hal_gpio_init_out(LED_RED, 0);
+
   while(1)
   {
     int ch;
@@ -227,7 +229,7 @@ void bleuart_bridge_task_handler(void* arg)
     // Blink LED if timer expired
     if ( timeout_expired(&blinky_tm) )
     {
-      hal_gpio_toggle(LED_BLINK_PIN);
+      hal_gpio_toggle(LED_RED);
       timeout_periodic_reset(&blinky_tm);
     }
 
@@ -245,11 +247,9 @@ int main(void)
   /* Set initial BLE device address. */
   memcpy(g_dev_addr, (uint8_t[6]){0xAD, 0xAF, 0xAD, 0xAF, 0xAD, 0xAF}, 6);
 
-#if 0
   /* Init Config & NFFS */
   adacfg_init("adafruit");
   adacfg_add(cfg_info);
-#endif
 
   //------------- Task Init -------------//
   os_task_init(&bleuart_bridge_task, BLEUART_BRIDGE_NAME, bleuart_bridge_task_handler, NULL,
@@ -257,8 +257,6 @@ int main(void)
 
   /* Initialize the BLE host. */
   ble_hs_cfg.sync_cb        = btle_on_sync;
-//  ble_hs_cfg.store_read_cb  = ble_store_ram_read;
-//  ble_hs_cfg.store_write_cb = ble_store_ram_write;
 
   /* Init BLE Device Information Service */
   bledis_init();
@@ -267,8 +265,7 @@ int main(void)
   bleuart_init();
 
   /* Set the default device name. */
-//  VERIFY_STATUS( ble_svc_gap_device_name_set(cfgdata.ble_devname) );
-  VERIFY_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
+  VERIFY_STATUS( ble_svc_gap_device_name_set(cfgdata.devname) );
 
   while (1) {
     os_eventq_run(os_eventq_dflt_get());
