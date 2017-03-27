@@ -169,7 +169,11 @@ int bledis_init(void)
     {
       _LOG( ADALOG_INFO("[BLEDIS] %s added\n", _dis_chr_text[i]) );
 
-      _dis_chars[count].uuid      = BLE_UUID16_DECLARE(UUID16_CHR_MODEL_NUMBER_STRING+i);
+      ble_uuid16_t* uuid16 = (ble_uuid16_t*) malloc( sizeof(ble_uuid16_t) );
+      uuid16->u.type = BLE_UUID_TYPE_16;
+      uuid16->value = UUID16_CHR_MODEL_NUMBER_STRING+i;
+
+      _dis_chars[count].uuid      = &uuid16->u;
       _dis_chars[count].access_cb = bledis_access_cb;
       _dis_chars[count].flags     = BLE_GATT_CHR_F_READ;
 

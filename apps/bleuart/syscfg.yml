@@ -28,11 +28,11 @@ syscfg.vals:
     
     # Adafruit BLE DIS
     BLEDIS_STATS: 0
-    BLEDIS_MODEL_STR: '"Bluefruit52"'
+    BLEDIS_MODEL_STR: '"Bluefruit Feather 52"'
     BLEDIS_SERIAL_DYNAMIC: 1
-    BLEDIS_FIRMWARE_REV_STR: '"0.10.0"'
-    BLEDIS_HARDWARE_REV_STR: '"Rev A"'
-    BLEDIS_SOFTWARE_REV_STR: '"0.10.0"'
+    BLEDIS_FIRMWARE_REV_STR: '"1.0.0"'
+    BLEDIS_HARDWARE_REV_STR: NULL
+    BLEDIS_SOFTWARE_REV_STR: NULL
     BLEDIS_MANUFACTURER_STR: '"Adafruit Industries"'
     
     # Adafruit BLEUART

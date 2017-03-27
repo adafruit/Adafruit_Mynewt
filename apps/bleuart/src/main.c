@@ -65,9 +65,6 @@
 #include "adafruit/bledis.h"
 #include "adafruit/bleuart.h"
 
-#define FIRMWARE_REV  "0.10.0"
-#define SOFTWARE_REV  "0.10.0"
-
 /** Default device name */
 #define CFG_GAP_DEVICE_NAME     "Bluefruit52"
 
@@ -90,6 +87,7 @@ os_stack_t bleuart_bridge_stack[BLEUART_BRIDGE_STACK_SIZE];
 /*------------------------------------------------------------------*/
 /* ADA Config
  *------------------------------------------------------------------*/
+#if 0
 /* Group config Data to one struct */
 struct
 {
@@ -111,6 +109,7 @@ const adacfg_info_t cfg_info[] =
 
     { 0 } /* Zero for null-terminator */
 };
+#endif
 
 /*------------------------------------------------------------------*/
 /* Functions prototypes
@@ -246,9 +245,11 @@ int main(void)
   /* Set initial BLE device address. */
   memcpy(g_dev_addr, (uint8_t[6]){0xAD, 0xAF, 0xAD, 0xAF, 0xAD, 0xAF}, 6);
 
+#if 0
   /* Init Config & NFFS */
   adacfg_init("adafruit");
   adacfg_add(cfg_info);
+#endif
 
   //------------- Task Init -------------//
   os_task_init(&bleuart_bridge_task, BLEUART_BRIDGE_NAME, bleuart_bridge_task_handler, NULL,
@@ -266,7 +267,8 @@ int main(void)
   bleuart_init();
 
   /* Set the default device name. */
-  VERIFY_STATUS( ble_svc_gap_device_name_set(cfgdata.ble_devname) );
+//  VERIFY_STATUS( ble_svc_gap_device_name_set(cfgdata.ble_devname) );
+  VERIFY_STATUS( ble_svc_gap_device_name_set(CFG_GAP_DEVICE_NAME) );
 
   while (1) {
     os_eventq_run(os_eventq_dflt_get());
