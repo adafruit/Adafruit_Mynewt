@@ -14,10 +14,10 @@ $ export PATH=/usr/local/go/bin:$PATH
 ```
 
 ## 3. Check the go version (should be 1.8.3 NOT 1.3.3)
+```
 $ go version
 ```
-go version go1.8.3 linux/arm
-```
+> This should give you `go version go1.8.3 linux/arm`
 
 ## 4. Setup a dir for local go workspace
 ```
@@ -48,8 +48,8 @@ $ mkdir bin
 $ sudo cp $HOME/dev/go/bin/newt bin/
 $ sudo cp $HOME/dev/go/bin/newtmgr bin/
 $ bin/newt version
-Apache Newt (incubating) version: 1.0.0-dev
 ```
+> This should give you `Apache Newt (incubating) version: 1.0.0-dev`
 
 ## 8. Copy the firmware binary files to the local directory
 ```
@@ -70,9 +70,12 @@ $ bin/newtmgr conn add serial type=serial connstring=/dev/ttyUSB0
 $ bin/newtmgr conn show
 ```
 
-## 11. Test the serial connection
+## 11. Test the `newtmgr` serial connection
 ```
 $ bin/newtmgr -c serial taskstat
+```
+Which should give you the following task statistics:
+```
       task pri tid  runtime      csw    stksz   stkuse last_checkin next_checkin
     ble_ll   0   2       21     4381       80       58        0        0
    bleuart   5   3        0    12030      256       31        0        0
