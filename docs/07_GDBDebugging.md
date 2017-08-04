@@ -119,6 +119,22 @@ You can display the contents of an array as follows:
 (gdb) print *array@len
 ```
 
+### Running an arnitrary function whel halted at a breakpoint
+
+When halted at a breakpoint, you can run a function via the `call` command. Tip via [Håkon Alseth](https://devzone.nordicsemi.com/question/161648/call-function-from-gdb-at-breakpoint/?answer=161674#post-id-161674).
+
+> Make sure to include the parenthesis after the function name when issuing the `call` command, which will cause the device to go back to the halt state once the function has completed execution.
+
+```
+arm-none-eabi-gdb _build/*.out 
+(gdb) target remote :2331 
+(gdb) load 
+(gdb) mon reset 
+(gdb) c 
+<break somewhere in your code once the 500 ms routine starts, using CTRL+C> 
+(gdb) call test_function()
+```
+
 ### Useful Mynewt/Nimble Structs and Fields
 
 Some useful Mynewt or nimble fields to display can be seen below:
