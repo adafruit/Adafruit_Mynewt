@@ -162,27 +162,6 @@ $16 = {
 }
 ```
 
-## Running an arbitrary function when halted at a breakpoint
-
-When halted at a breakpoint, you can run a function via the `call` command. Tip via [Håkon Alseth](https://devzone.nordicsemi.com/question/161648/call-function-from-gdb-at-breakpoint/?answer=161674#post-id-161674).
-
-> Make sure to include the parenthesis after the function name when issuing the `call` command, which will cause the device to go back to the halt state once the function has completed execution.
-
-Connect to the target using `$ newt debug target_name` or via some variation of the following code:
-```
-arm-none-eabi-gdb _build/*.out 
-(gdb) target remote :2331 
-(gdb) load 
-```
-
-Then run until you hit the BP, and at an appropriate moment execute the `call` command with your target function name:
-```
-(gdb) mon reset 
-(gdb) c 
-<break somewhere in your code, optionally using CTRL+C> 
-(gdb) call test_function()
-```
-
 ## Memory Manipulation
 
 You can display the memory contents of a specific address via the `x` command.
@@ -389,3 +368,23 @@ with a `*` character as shown below:
 50      } else if (!strcmp(how, "ref0")) {
 ```
 
+### Running an arbitrary function when halted at a breakpoint
+
+When halted at a breakpoint, you can run a function via the `call` command. Tip via [Håkon Alseth](https://devzone.nordicsemi.com/question/161648/call-function-from-gdb-at-breakpoint/?answer=161674#post-id-161674).
+
+> Make sure to include the parenthesis after the function name when issuing the `call` command, which will cause the device to go back to the halt state once the function has completed execution.
+
+Connect to the target using `$ newt debug target_name` or via some variation of the following code:
+```
+arm-none-eabi-gdb _build/*.out 
+(gdb) target remote :2331 
+(gdb) load 
+```
+
+Then run until you hit the BP, and at an appropriate moment execute the `call` command with your target function name:
+```
+(gdb) mon reset 
+(gdb) c 
+<break somewhere in your code, optionally using CTRL+C> 
+(gdb) call test_function()
+```
