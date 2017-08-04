@@ -162,7 +162,7 @@ $16 = {
 }
 ```
 
-## Running an arbitrary function whel halted at a breakpoint
+## Running an arbitrary function when halted at a breakpoint
 
 When halted at a breakpoint, you can run a function via the `call` command. Tip via [Håkon Alseth](https://devzone.nordicsemi.com/question/161648/call-function-from-gdb-at-breakpoint/?answer=161674#post-id-161674).
 
