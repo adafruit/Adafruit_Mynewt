@@ -1,4 +1,4 @@
 ### Target: targets/mfgtest
 target.app: "apps/mfgtest"
-target.bsp: "hw/bsp/feather52"
+target.bsp: "@apache-mynewt-core/hw/bsp/ada_feather_nrf52"
 target.build_profile: "debug"

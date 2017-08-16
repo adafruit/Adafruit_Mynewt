@@ -41,10 +41,10 @@ pkg.deps.ILI9341_CLI:
     - "@apache-mynewt-core/sys/sysinit"
 
 pkg.deps.ILI9341_LOG:
-    - "@apache-mynewt-core/sys/log"
+    - "@apache-mynewt-core/sys/log/full"
 
 pkg.deps.ILI9341_STATS:
-    - "@apache-mynewt-core/sys/stats"
+    - "@apache-mynewt-core/sys/stats/full"
 
 pkg.init_function: ili9341_init
 pkg.init_stage: 6

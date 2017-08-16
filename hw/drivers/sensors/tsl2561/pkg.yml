@@ -40,10 +40,10 @@ pkg.deps.TSL2561_CLI:
     - "@apache-mynewt-core/sys/sysinit"
 
 pkg.deps.TSL2561_LOG:
-    - "@apache-mynewt-core/sys/log"
+    - "@apache-mynewt-core/sys/log/full"
 
 pkg.deps.TSL2561_STATS:
-    - "@apache-mynewt-core/sys/stats"
+    - "@apache-mynewt-core/sys/stats/full"
 
 pkg.init_function: tsl2561_init
 pkg.init_stage: 6

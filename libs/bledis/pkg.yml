@@ -31,4 +31,4 @@ pkg.deps:
   - libs/adautil
   
 pkg.deps.BLEDIS_STATS:  
-  - "@apache-mynewt-core/sys/stats"
+  - "@apache-mynewt-core/sys/stats/full"
