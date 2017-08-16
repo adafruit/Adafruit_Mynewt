@@ -48,6 +48,8 @@ pkg.deps:
     - "@apache-mynewt-core/mgmt/newtmgr/transport/ble"
     - "@apache-mynewt-core/mgmt/newtmgr/transport/nmgr_shell"
     - "@apache-mynewt-core/mgmt/imgmgr"
+    - "@apache-mynewt-core/boot/split"
+    - "@apache-mynewt-core/boot/bootutil"    
     - "@apache-mynewt-core/net/nimble/controller"
     - "@apache-mynewt-core/net/nimble/host"
     - "@apache-mynewt-core/net/nimble/host/services/gap"
