@@ -29,23 +29,12 @@
 #endif
 
 #define IRQ_PIN             (20)
-#define EVENT_TASK_PRIO     (10)
-#define EVENT_STACK_SIZE    OS_STACK_ALIGN(256)
-
-os_stack_t event_stack[EVENT_STACK_SIZE];
 
 /* Advance function prototypes */
-static int init_tasks(void);
 static void gpio_task_irq_deferred_handler(struct os_event *);
-
-/* Default event queue */
-static struct os_eventq irq_evq;
 
 /* Callout example */
 static struct os_callout blinky_timer;
-
-/* Event queue example */
-struct os_task event_task;
 static struct os_event gpio_irq_handle_event = {
     .ev_cb = gpio_task_irq_deferred_handler,
 };
@@ -73,18 +62,6 @@ gpio_task_irq_deferred_handler(struct os_event *ev)
 }
 
 /**
- * This task serves as a container for the shell and newtmgr packages.  These
- * packages enqueue timer events when they need this task to do work.
- */
-static void
-event_task_handler(void *arg)
-{
-    while (1) {
-        os_eventq_run(&irq_evq);
-    }
-}
-
-/**
  * This function handles the HW GPIO interrupt and registers an event in
  * the event queue to defer taking action here in the ISR context.
  */
@@ -92,45 +69,7 @@ static void
 gpio_irq_handler(void *arg)
 {
     /* Add item to event queue for processing later, etc. ... */
-    os_eventq_put(&irq_evq, &gpio_irq_handle_event);
-}
-
-/**
- * init_tasks
- *
- * Called by main.c after os_init(). This function performs initializations
- * that are required before tasks are running.
- *
- * @return int 0 success; error otherwise.
- */
-static int
-init_tasks(void)
-{
-    /* Init IRQ pin: falling edge, pullup enabled */
-    hal_gpio_irq_init(IRQ_PIN,
-                      gpio_irq_handler,
-                      NULL,
-                      HAL_GPIO_TRIG_FALLING,
-                      HAL_GPIO_PULL_UP);
-
-    /* Enable the IRQ */
-    hal_gpio_irq_enable(IRQ_PIN);
-
-    /* Setup the LED pins */
-    hal_gpio_init_out(LED_BLINK_PIN, 1);
-    hal_gpio_init_out(LED_2, 0);
-
-    os_task_init(&event_task, "irq", event_task_handler, NULL,
-            EVENT_TASK_PRIO, OS_WAIT_FOREVER, event_stack, EVENT_STACK_SIZE);
-
-    os_eventq_init(&irq_evq);
-    os_eventq_dflt_set(&irq_evq);
-
-    /* Create a callout (timer).  This callout is used to generate blinky */
-    os_callout_init(&blinky_timer, &irq_evq, blinky_timer_cb, NULL);
-    os_callout_reset(&blinky_timer, OS_TICKS_PER_SEC);
-
-    return 0;
+    os_eventq_put(os_eventq_dflt_get(), &gpio_irq_handle_event);
 }
 
 /**
@@ -145,20 +84,33 @@ init_tasks(void)
 int
 main(int argc, char **argv)
 {
-    int rc;
-
 #ifdef ARCH_sim
     mcu_sim_parse_args(argc, argv);
 #endif
 
     sysinit();
 
-    rc = init_tasks();
+    /* Init IRQ pin: falling edge, pullup enabled */
+    hal_gpio_irq_init(IRQ_PIN,
+                      gpio_irq_handler,
+                      NULL,
+                      HAL_GPIO_TRIG_FALLING,
+                      HAL_GPIO_PULL_UP);
 
-    os_start();
+    /* Enable the IRQ */
+    hal_gpio_irq_enable(IRQ_PIN);
 
-    /* os start should never return. If it does, this should be an error */
-    assert(0);
+    /* Setup the LED pins */
+    hal_gpio_init_out(LED_BLINK_PIN, 1);
+    hal_gpio_init_out(LED_2, 0);
 
-    return rc;
+    /* Create a callout (timer).  This callout is used to generate blinky */
+    os_callout_init(&blinky_timer, os_eventq_dflt_get(), blinky_timer_cb, NULL);
+    os_callout_reset(&blinky_timer, OS_TICKS_PER_SEC);
+
+    while (1) {
+      os_eventq_run(os_eventq_dflt_get());
+    }
+
+    return 0;
 }
