@@ -66,7 +66,7 @@
 #include "adafruit/bleuart.h"
 
 /** Default device name */
-#define CFG_GAP_DEVICE_NAME     "Bluefruit52"
+#define CFG_GAP_DEVICE_NAME     "Adafruit Mynewt"
 
 /*------------------------------------------------------------------*/
 /* Global values
