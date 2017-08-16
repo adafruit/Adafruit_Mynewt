@@ -31,61 +31,7 @@
 #include <sensor/sensor.h>
 #include <sim/sim_accel.h>
 
-/* Init all tasks */
-int init_tasks(void);
-
-/* System event queue task handler */
-#define SYSEVQ_PRIO (10)
-#define SYSEVQ_STACK_SIZE    OS_STACK_ALIGN(512)
-static struct os_task task_sysevq;
-
-/* Event queue for events handled by the system (shell, etc.) */
-static struct os_eventq sys_evq;
-
 struct sim_accel sim_accel_sensor;
-
-/**
- * This task serves as a container for the shell and newtmgr packages.  These
- * packages enqueue timer events when they need this task to do work.
- */
-static void
-sysevq_handler(void *arg)
-{
-    while (1) {
-        os_eventq_run(&sys_evq);
-    }
-}
-
-/**
- * init_tasks
- *
- * Called by main.c after os_init(). This function performs initializations
- * that are required before tasks are running.
- *
- * @return int 0 success; error otherwise.
- */
-int
-init_tasks(void)
-{
-    os_stack_t *pstack;
-
-    /* Initialize eventq and designate it as the default.  Packages that need
-     * to schedule work items will piggyback on this eventq.  Example packages
-     * which do this are sys/shell and mgmt/newtmgr.
-     */
-    os_eventq_init(&sys_evq);
-
-    pstack = malloc(sizeof(os_stack_t)*SYSEVQ_STACK_SIZE);
-    assert(pstack);
-
-    os_task_init(&task_sysevq, "sysevq", sysevq_handler, NULL,
-            SYSEVQ_PRIO, OS_WAIT_FOREVER, pstack, SYSEVQ_STACK_SIZE);
-
-    /* Set the default eventq for packages that lack a dedicated task. */
-    os_eventq_dflt_set(&sys_evq);
-
-    return 0;
-}
 
 static int
 accel_init(struct os_dev *dev, void *arg)
@@ -126,25 +72,18 @@ err:
 int
 main(int argc, char **argv)
 {
-    int rc;
-
 #ifdef ARCH_sim
     mcu_sim_parse_args(argc, argv);
 #endif
 
     sysinit();
 
-    rc = init_tasks();
-
-    sensor_pkg_init();
-
     os_dev_create((struct os_dev *) &sim_accel_sensor, "accel",
             OS_DEV_INIT_KERNEL, OS_DEV_INIT_PRIMARY, accel_init, NULL);
 
-    os_start();
+    while (1) {
+      os_eventq_run(os_eventq_dflt_get());
+    }
 
-    /* os start should never return. If it does, this should be an error */
-    assert(0);
-
-    return rc;
+    return 0;
 }

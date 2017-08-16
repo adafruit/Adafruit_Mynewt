@@ -38,22 +38,11 @@
 
 struct lsm303dlhc lsm303dlhc_sensor;
 
-/* Init all tasks */
-int init_tasks(void);
-
 /* Task 1 */
 #define BLINKY_TASK_PRIO     (10)
 #define BLINKY_STACK_SIZE    OS_STACK_ALIGN(128)
 struct os_task blinky_task;
 os_stack_t blinky_stack[BLINKY_STACK_SIZE];
-
-/* System event queue task handler */
-#define SYSEVQ_PRIO          (1)
-#define SYSEVQ_STACK_SIZE    OS_STACK_ALIGN(512)
-static struct os_task task_sysevq;
-
-/* Event queue for events handled by the system (shell, etc.) */
-static struct os_eventq sys_evq;
 
 /* Command handler prototype declaration */
 static int shell_i2cscan_cmd(int argc, char **argv);
@@ -70,18 +59,6 @@ static struct shell_cmd shell_orientation_cmd_struct = {
     .sc_cmd = "orientation",
     .sc_cmd_func = shell_orientation_cmd
 };
-
-/**
- * This task serves as a container for the shell and newtmgr packages.  These
- * packages enqueue timer events when they need this task to do work.
- */
-static void
-sysevq_handler(void *arg)
-{
-    while (1) {
-        os_eventq_run(&sys_evq);
-    }
-}
 
 // i2cscan command handler
 static int
@@ -116,8 +93,10 @@ shell_i2cscan_cmd(int argc, char **argv)
 }
 
 static int
-orientation_listener(struct sensor *sensor, void *arg, void *data)
+orientation_listener(struct sensor *sensor, void *arg, void *data, sensor_type_t type)
 {
+    (void) type;
+
     int rc;
     struct sensor_accel_data *sad;
     struct or_orientation_vec orv;
@@ -183,40 +162,6 @@ blinky_task_handler(void *arg)
     }
 }
 
-/**
- * init_tasks
- *
- * Called by main.c after os_init(). This function performs initializations
- * that are required before tasks are running.
- *
- * @return int 0 success; error otherwise.
- */
-int
-init_tasks(void)
-{
-    os_stack_t *pstack;
-
-    /* Initialize eventq and designate it as the default.  Packages that need
-     * to schedule work items will piggyback on this eventq.  Example packages
-     * which do this are sys/shell and mgmt/newtmgr.
-     */
-    os_eventq_init(&sys_evq);
-
-    pstack = malloc(sizeof(os_stack_t)*SYSEVQ_STACK_SIZE);
-    assert(pstack);
-
-    os_task_init(&task_sysevq, "sysevq", sysevq_handler, NULL,
-            SYSEVQ_PRIO, OS_WAIT_FOREVER, pstack, SYSEVQ_STACK_SIZE);
-
-    os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
-            BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
-
-    /* Set the default eventq for packages that lack a dedicated task. */
-    os_eventq_dflt_set(&sys_evq);
-
-    return 0;
-}
-
 static int
 lsm303dlhc_drvr_init(struct os_dev *dev, void *arg)
 {
@@ -256,8 +201,6 @@ err:
 int
 main(int argc, char **argv)
 {
-    int rc;
-
     /* Initialize OS */
     sysinit();
 
@@ -270,17 +213,18 @@ main(int argc, char **argv)
     shell_cmd_register(&shell_orientation_cmd_struct);
 #endif
 
-    rc = init_tasks();
-
-    sensor_pkg_init();
+    os_task_init(&blinky_task, "blinky", blinky_task_handler, NULL,
+            BLINKY_TASK_PRIO, OS_WAIT_FOREVER, blinky_stack, BLINKY_STACK_SIZE);
 
     os_dev_create((struct os_dev *) &lsm303dlhc_sensor, "lsm303dlhc",
             OS_DEV_INIT_KERNEL, OS_DEV_INIT_PRIMARY, lsm303dlhc_drvr_init, NULL);
 
-    os_start();
+    while (1) {
+      os_eventq_run(os_eventq_dflt_get());
+    }
 
     /* os start should never return. If it does, this should be an error */
     assert(0);
 
-    return rc;
+    return 0;
 }

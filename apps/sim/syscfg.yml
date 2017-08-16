@@ -3,3 +3,4 @@
 syscfg.vals:
     # Enable the shell task.
     SHELL_TASK: 1
+    SENSOR_OIC: 0

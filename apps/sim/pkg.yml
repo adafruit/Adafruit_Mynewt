@@ -35,5 +35,7 @@ pkg.deps:
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/sysinit"
+    - "@apache-mynewt-core/sys/log/full"
+    - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/hw/sensor" 
     - "@apache-mynewt-core/hw/drivers/sensors/sim"

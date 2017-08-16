@@ -3,6 +3,7 @@
 syscfg.vals:
     # Use INFO log level to reduce code size.  DEBUG is too large for nRF51.
     LOG_LEVEL: 1
+    SENSOR_OIC: 0
 
     # Stats
     STATS_NAMES: 1
