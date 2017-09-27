@@ -28,7 +28,6 @@ pkg.keywords:
 pkg.cflags:
     # Enable P0.21 as Reset Pin. You may want to cut Auto-reset trace
     #- '-DCONFIG_GPIO_AS_PINRESET'
-    - '-DBOOTUTIL_VALIDATE_SLOT0'
         
 pkg.deps:
     - "@apache-mynewt-core/boot/bootutil"
