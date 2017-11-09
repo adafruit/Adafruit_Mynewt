@@ -1,7 +1,8 @@
 # Creating a New Project with Newt
 
 To create a new project with the `newt` tool perform the following steps. The
-nRF52 DK is used as a sample platform in this example.
+[Adafruit nRF52 Pro Feather](https://www.adafruit.com/product/3574) is used
+as a sample platform in this example.
 
 ## Create a project skeleton
 
@@ -38,7 +39,7 @@ $ newt target set nrf52_boot app=@apache-mynewt-core/apps/boot
 Import the BSP target for your specific board:
 
 ```
-$ newt target set nrf52_boot bsp=@apache-mynewt-core/hw/bsp/nrf52dk
+$ newt target set nrf52_boot bsp=@apache-mynewt-core/hw/bsp/ada_feather_nrf52
 ```
 
 Set the `build_profile` flag to `optimized` for the bootloader target:
@@ -61,7 +62,7 @@ Import the standard blinky demo as a working example:
 ```
 $ newt target create blink_nordic
 $ newt target set blink_nordic app=apps/blinky
-$ newt target set blink_nordic bsp=@apache-mynewt-core/hw/bsp/nrf52dk
+$ newt target set blink_nordic bsp=@apache-mynewt-core/hw/bsp/ada_feather_nrf52
 $ newt target set blink_nordic build_profile=debug
 ```
 
@@ -84,11 +85,11 @@ This should give you a list resembling the following (assuming option 1 above):
 ```
 targets/blink_nordic
     app=apps/blinky
-    bsp=@apache-mynewt-core/hw/bsp/nrf52dk
+    bsp=@apache-mynewt-core/hw/bsp/ada_feather_nrf52
     build_profile=debug
 targets/nrf52_boot
     app=@apache-mynewt-core/apps/boot
-    bsp=@apache-mynewt-core/hw/bsp/nrf52dk
+    bsp=@apache-mynewt-core/hw/bsp/ada_feather_nrf52
     build_profile=optimized
 ```
 
